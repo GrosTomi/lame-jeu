@@ -810,6 +810,24 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 .threat{display:flex!important;align-items:center;gap:6px;padding:6px 8px!important;margin:6px 0 0!important}
 .threat .tt{flex:1;min-width:0;line-height:1.2}.threat .tt b{font-family:var(--disp);font-weight:400;font-size:14px;display:block}.threat .tt small{font-size:11px;font-weight:800;color:var(--mut)}
 .threat .btn.sm{flex:none}
+
+/* ===== Combat : l'arène s'adapte, la vie et les compétences restent toujours visibles ===== */
+#view-combat #arena{flex:1 1 0!important;min-height:170px;margin-bottom:6px;padding:10px 10px 6px}
+#view-combat .cbar{flex:none;display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+#view-combat .cbar .herobox{border:3px solid #fff;box-shadow:0 3px 0 #1f3b8f55}
+#view-combat .cbar #skills{margin-top:0}
+#view-combat .cbar #bossRow,#view-combat .cbar #modeRow,#view-combat .cbar #evBanner{margin-top:0}
+#view-combat .hpanel{flex:0 1 auto!important;min-height:64px}
+.duel{container-type:size}
+.duel #knight{width:min(96px,70cqh);height:min(108px,79cqh)}
+.duel #enemy{font-size:min(96px,52cqh)}
+.duel #enemy.boss{font-size:min(116px,58cqh)}
+.duel #famrow .fpet{width:min(30px,20cqh);height:min(30px,20cqh)}
+@media (max-height:740px){#view-combat #arena{padding:7px 8px 4px}.duel #knight{width:min(84px,70cqh);height:min(94px,79cqh)}.duel #enemy{font-size:min(84px,50cqh)}}
+
+#view-city .villagewrap{flex:1;min-height:0}
+.threat-c.soon{border-color:var(--red);background:#ffe9e4}
+#tab-city .reschips{margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -859,6 +877,10 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
           <div class="dside dright"><div class="ename" id="ename">—</div><div class="bar ehp"><i id="ehpFill"></i><b id="ehpTxt"></b></div><div id="enemy">👺</div></div>
         </div>
       </div>
+      <div id="floats"></div>
+      <div class="dead" id="dead" style="display:none">💀 Vous êtes tombé<span>Retour à l'étape précédente</span></div>
+    </div>
+    <div class="cbar">
       <div class="herobox">
         <div class="av" id="heroAv">⚔️</div>
         <div style="flex:1;min-width:0">
@@ -870,8 +892,6 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
       <div id="bossRow"><button class="btn red wide" id="btnBoss">👑 Défier le boss</button></div>
       <div id="modeRow"><button class="btn wide sm" id="btnQuit">Abandonner le défi</button></div>
       <button id="evBanner" style="display:none">§dragonnet§ <b>Invasion de dragons !</b> <span id="evTok"></span></button>
-      <div id="floats"></div>
-      <div class="dead" id="dead" style="display:none">💀 Vous êtes tombé<span>Retour à l'étape précédente</span></div>
     </div>
     <div id="goal" class="goal"></div>
     <div id="heroPanel" class="card hpanel" style="display:none"><div class="pager" data-pg="hero"><div class="pgsrc list">
@@ -1984,7 +2004,8 @@ function floatTxt(t, cls, low, hero){
   el.className = "fl "+cls; el.innerHTML = t;
   const fl = $("#floats"), r = fl.getBoundingClientRect();
   el.style.left = (r.width/2 - 36 + (Math.random()*110-55))+"px";
-  el.style.top  = (hero ? r.height-150 : (low? r.height*0.62 : r.height*0.4 + Math.random()*50))+"px";
+  if(hero){ const k=$("#knight"); if(k){ const kb=k.getBoundingClientRect(); el.style.left=(kb.left-r.left+kb.width/2-30+(Math.random()*30-15))+"px"; el.style.top=(kb.top-r.top+10)+"px"; fl.appendChild(el); floatCount++; setTimeout(()=>{ el.remove(); floatCount--; }, 1000); return; } }
+  el.style.top  = (hero ? r.height*0.6 : (low? r.height*0.62 : r.height*0.4 + Math.random()*50))+"px";
   fl.appendChild(el); floatCount++;
   setTimeout(()=>{ el.remove(); floatCount--; }, 1000);
 }
@@ -2806,6 +2827,7 @@ document.addEventListener("click", e=>{
   if(t.dataset.mkt){ mktBuy(t.dataset.mkt); return; }
   if(t.dataset.prem){ premiumBuy(t.dataset.prem); return; }
   if(t.dataset.ptab){ prestTab=t.dataset.ptab; renderPrest(); return; }
+  if(t.dataset.ctab){ cityTab=t.dataset.ctab; renderCity(); return; }
   if(t.dataset.bp){ if(t.dataset.bp==="all") bpClaimAll(); else bpClaim(t.dataset.bp); return; }
   if(t.dataset.skin){ skinBuy(t.dataset.skin); return; }
   if(t.dataset.aura){ if(!S.skins.owned.aura){ if(S.crystals<150) return; S.crystals-=150; S.skins.owned.aura=1; S.skins.aura=true; Sfx.play("buy"); } else S.skins.aura=!S.skins.aura; renderKnight(true); save(); renderShop(); return; }
@@ -3047,28 +3069,37 @@ function bldEffect(id, L){
     case "mur": return `❤️ ${fmt(wallHP(L))} PV max`;
   }
 }
+let cityTab = "village";
 function renderCity(){
   const el=$("#tab-city");
   if(!S.city){
     el.innerHTML = `<div class="card" style="text-align:center"><div class="sheeticon">🏰</div><h2>Fief verrouillé</h2><div class="small">Atteignez l'étape ${CITY_UNLOCK} pour fonder votre fief (record actuel : ${S.best}).</div></div>`;
     return;
   }
-  const c=S.city, f=raidForecast(), mil=cityMil(), maxHP=cityMaxHP(), pop=cityPop();
-  const rep=c.report;
-  el.innerHTML = `
-    <div class="card citytop">
-      <div class="ctrow"><div class="cityhp"><div class="bar hhp"><i style="width:${c.hp/maxHP*100}%"></i><b>❤️ ${fmt(c.hp)} / ${fmt(maxHP)}</b></div></div>
-        <span class="cst" title="Population">👥 ${pop}</span><span class="cst" title="Soldats">🏹 ${Math.floor(c.soldiers)}</span><span class="cst" title="Puissance militaire">⚔️ ${fmt(mil)}</span></div>
-      <div class="reschips" id="cityRes"></div>
-    </div>
-    <div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez un bâtiment pour l'améliorer</div></div>
-    <div class="card threat ${c.pending?"soon":""}">
-      <div class="tt"><b>${c.pending?"⚔️ Des pillards attendent !":`🛡️ Pillards dans ${RAID_EVERY-c.prog} étape${RAID_EVERY-c.prog>1?"s":""}`}</b>
-        <small>Vague ${c.raid} · pertes : <b style="color:${f.win?"var(--grn)":"var(--red)"}">${f.dmg===Infinity?"tout le fief":fmt(f.dmg)+" PV"}</b> ${f.win?"(victoire)":"(défaite probable)"}</small></div>
-      ${c.pending?`<button class="btn red sm" id="defendBtn">Défendre</button>`:""}
-      <button class="btn sm" id="repairBtn" title="Réparer : ${fmt(repairCost())} pierre" ${c.hp>=maxHP-0.5?"disabled":""}>🧱</button>
-      ${rep?`<button class="btn sm blue" id="replayBtn" title="Revoir le dernier assaut">📜</button>`:""}
-    </div>`;
+  const c=S.city, f=raidForecast(), mil=cityMil(), maxHP=cityMaxHP(), pop=cityPop(), rep=c.report;
+  const upN = BLD.filter(b=>affordC(bldCost(b))).length;
+  const seg = `<div class="seg"><button data-ctab="village" class="${cityTab==="village"?"on":""}">🏘️ Village${upN?` <span class="tdot">${upN}</span>`:""}</button><button data-ctab="gestion" class="${cityTab==="gestion"?"on":""}">📜 Gestion${c.pending?` <span class="tdot">!</span>`:""}</button></div>`;
+  if(cityTab==="village"){
+    el.innerHTML = seg + `<div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez un bâtiment pour l'améliorer</div></div>`;
+    return;
+  }
+  const rates={or:prodOf("mine",c.lv.mine), bois:prodOf("scierie",c.lv.scierie), pierre:prodOf("carriere",c.lv.carriere)};
+  const blds = BLD.map(b=>{ const L=c.lv[b.id], ok=affordC(bldCost(b));
+    return `<div class="row"><div class="ic">${b.ic}</div><div class="mid"><div class="t">${b.n}<span class="lv">${L?"niv. "+L:"à construire"}</span></div></div>
+      <button class="btn ${ok?"gold":""} sm" data-shbld="${b.id}">${L?"Améliorer":"Construire"}${ok?" ▲":""}</button></div>`; }).join("");
+  el.innerHTML = seg + `<div class="pager" data-pg="cityg"><div class="pgsrc list">
+    <div class="card threat-c ${c.pending?"soon":""}"><div class="chead"><h2>${c.pending?"⚔️ Des pillards attendent !":`🛡️ Pillards dans ${RAID_EVERY-c.prog} étape${RAID_EVERY-c.prog>1?"s":""}`}</h2></div>
+      <div class="small">Vague n°${c.raid} · pertes estimées : <b style="color:${f.win?"var(--grn)":"var(--red)"}">${f.dmg===Infinity?"tout le fief":fmt(f.dmg)+" PV"}</b> ${f.win?"(victoire)":"(défaite probable)"}</div>
+      ${c.pending?`<div class="small" style="margin-top:4px">Défendez quand vous êtes prêt : rien ne presse, mais pas de nouvel assaut tant que celui-ci n'est pas repoussé.</div>`:""}
+      <div class="btnrow" style="margin-top:8px">${c.pending?`<button class="btn red" id="defendBtn">⚔️ Défendre</button>`:""}${rep?`<button class="btn sm blue" id="replayBtn">📜 Dernier assaut<small>${rep.win?"Victoire":"Défaite"} · n°${rep.n}</small></button>`:""}</div></div>
+    <div class="card"><div class="chead"><h2>🧱 Remparts</h2><button class="btn sm" id="repairBtn" ${c.hp>=maxHP-0.5?"disabled":""}>Réparer<small>🪨 ${fmt(repairCost())}</small></button></div>
+      <div class="cityhp"><div class="bar hhp"><i style="width:${c.hp/maxHP*100}%"></i><b>❤️ ${fmt(c.hp)} / ${fmt(maxHP)}</b></div></div>
+      <div class="small" style="margin-top:4px">Ils se réparent seuls de 3 % par minute.</div></div>
+    <div class="card"><h2>👥 Habitants et armée</h2>
+      <div class="cstats"><div><span>👥</span><b>${pop}</b><small>Population</small></div><div><span>🏹</span><b>${Math.floor(c.soldiers)}/${pop}</b><small>Soldats</small></div><div><span>⚔️</span><b>${fmt(mil)}</b><small>Puissance</small></div></div></div>
+    <div class="card"><h2>📦 Ressources</h2><div class="reschips" id="cityRes"></div><div class="small">Produites en continu, même jeu fermé. Améliorez la mine, la scierie et la carrière pour en produire plus.</div></div>
+    <div class="card"><h2>🏗️ Bâtiments</h2>${blds}</div>
+  </div></div>`;
   renderCityRes();
 }
 function renderCityRes(){
