@@ -840,6 +840,22 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 <script>(function(){ function fit(){ var sa = window.navigator.standalone === true;   /* iPhone, raccourci de l'écran d'accueil */
   if(sa){ var h = Math.max(window.innerHeight, document.documentElement.clientHeight, (screen.height > screen.width ? screen.height : screen.width)); document.documentElement.style.setProperty("--apph", h+"px"); document.documentElement.style.height = h+"px"; document.body.style.height = h+"px"; } }
   fit(); window.addEventListener("resize", fit); window.addEventListener("orientationchange", function(){ setTimeout(fit, 300); }); })();</script>
+<script>
+/* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
+   en contournant le cache du téléphone. */
+var BUILD_ID = "20261120-1535";
+(function(){
+  if(!/^https?:$/.test(location.protocol)) return;
+  function check(){
+    fetch(location.pathname + "?nc=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(t){
+      var m = t && t.match(new RegExp('var BUILD' + '_ID = "([^"]+)"'));
+      if(m && m[1] !== BUILD_ID){ try{ if(typeof save==="function") save(); }catch(e){} location.replace(location.pathname + "?v=" + m[1]); }
+    }).catch(function(){});
+  }
+  window.addEventListener("load", function(){ setTimeout(check, 1500); });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) check(); });
+})();
+</script>
 <div id="app">
 <header>
   <div class="res">
@@ -2394,7 +2410,7 @@ function renderOpts(){
     <button class="btn blue wide sm" id="demoBtn">Charger une partie avancée</button>
     <button class="btn wide sm" id="evForce" style="margin-top:8px">${eventForce?"Arrêter":"Forcer"} l'invasion de dragons</button>
     <button class="btn wide sm" id="tutoReset" style="margin-top:8px">Rejouer le tutoriel</button></div>`:""}
-    <div class="small" style="text-align:center">${fmt(S.stats.kills)} ennemis vaincus · ${S.stats.bosses} boss · record étape ${S.best}</div>`;
+    <div class="small" style="text-align:center">${fmt(S.stats.kills)} ennemis vaincus · ${S.stats.bosses} boss · record étape ${S.best}<br>Version ${typeof BUILD_ID!=="undefined"?BUILD_ID:"?"}</div>`;
 }
 
 /* Décors de combat : une silhouette de paysage par zone, en deux plans */
