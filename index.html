@@ -769,6 +769,47 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 /* transition entre onglets */
 .view.vin{animation:vin .22s ease-out}
 @keyframes vin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ===== Duel : le chevalier à gauche, le monstre à droite, face à face ===== */
+.duel{flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:space-between;gap:4px;padding:0 2px 4px}
+.dside{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.dleft{flex:0 0 44%;flex-direction:row;align-items:flex-end;justify-content:center;gap:0}
+.dright{flex:1;min-width:0}
+.dside::after{content:"";position:absolute;bottom:-2px;left:50%;width:70%;height:12px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(#0006,transparent 70%);z-index:-1}
+.duel #knight{position:relative;left:auto;top:auto;width:min(96px,13vh);height:min(108px,14.6vh);flex:none}
+.duel #famrow{position:relative;left:auto;top:auto;flex-direction:column-reverse;align-self:center;margin-right:-6px}
+.duel .ename{font-size:15px;padding:1px 9px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.duel .bar.ehp{width:100%;max-width:170px;margin:3px 0 4px}
+.duel #enemy{padding:0 8px;font-size:min(96px,12vh)}
+.duel #enemy.boss{font-size:min(116px,14vh)}
+#enemy .sp{transform:perspective(260px) rotateY(-20deg);transform-origin:center}
+/* attaques */
+#knight.atk{animation:katk2 .34s ease-out}
+@keyframes katk2{0%{transform:none}35%{transform:translateX(34px) rotate(6deg)}60%{transform:translateX(30px) rotate(2deg)}100%{transform:none}}
+#knight.atk .ksword{animation:kswing .34s ease-out;transform-origin:47px 42px}
+@keyframes kswing{0%{transform:rotate(-30deg)}40%{transform:rotate(80deg)}100%{transform:none}}
+#knight.hurt{animation:khurt2 .32s ease-out}
+@keyframes khurt2{0%{transform:none}30%{transform:translateX(-12px) rotate(-6deg)}100%{transform:none}}
+#knight.hurt .knsvg{animation:khurt .3s}
+#enemy.eatk{animation:eatk .38s cubic-bezier(.3,1.4,.5,1)}
+@keyframes eatk{0%{transform:none}30%{transform:translateX(10px) scale(.95)}55%{transform:translateX(-58px) scale(1.12) rotate(-6deg)}100%{transform:none}}
+#famrow .fpet.fatk{animation:fatk2 .4s ease-out}
+@keyframes fatk2{40%{transform:translateX(70px) scale(1.25)}}
+.claw{position:absolute;width:70px;height:70px;pointer-events:none;z-index:6;animation:claw .3s ease-out forwards}
+.claw svg{width:100%;height:100%}
+@keyframes claw{0%{opacity:0;transform:scale(.6) translate(10px,-10px)}30%{opacity:1}100%{opacity:0;transform:scale(1.1) translate(-6px,8px)}}
+#enemy.enter{animation:enter2 .4s cubic-bezier(.2,1.4,.4,1)}
+@keyframes enter2{from{transform:translateX(70px) scale(.7);opacity:0}}
+@media (max-height:740px){.duel #knight{width:84px;height:94px}.duel #enemy{font-size:min(84px,12vh)}}
+
+.citytop{padding:6px 8px!important;margin-bottom:6px}
+.ctrow{display:flex;align-items:center;gap:6px}.ctrow .cityhp{flex:1;min-width:0}.ctrow .cityhp .bar{height:20px}.ctrow .cityhp .bar>b{font-size:12px}
+.cst{flex:none;font-family:var(--disp);font-size:13px;background:#fffaf0;border:2px solid #ecd49c;border-radius:9px;padding:1px 6px}.cst .sp{width:15px;height:15px}
+.citytop .reschips{margin:5px 0 0!important;justify-content:space-between}.citytop .rchip{flex:1;justify-content:center;padding:2px 4px;font-size:12.5px}
+#view-city .villagewrap{border-radius:16px;margin-bottom:0}
+.threat{display:flex!important;align-items:center;gap:6px;padding:6px 8px!important;margin:6px 0 0!important}
+.threat .tt{flex:1;min-width:0;line-height:1.2}.threat .tt b{font-family:var(--disp);font-weight:400;font-size:14px;display:block}.threat .tt small{font-size:11px;font-weight:800;color:var(--mut)}
+.threat .btn.sm{flex:none}
 </style>
 </head>
 <body>
@@ -810,12 +851,13 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
           <button class="round" id="btnMusic" aria-label="Musique">🔊</button>
         </div>
       </div>
-      <div id="famrow"></div><div id="knight"></div><div id="arenaBan"></div>
+      <div id="arenaBan"></div>
       <div class="fight"><div id="scene"></div>
         <div class="bar timer" id="timerBar" style="display:none"><i id="timerFill"></i></div>
-        <div class="ename" id="ename">—</div>
-        <div id="enemy">👺</div>
-        <div class="bar ehp"><i id="ehpFill"></i><b id="ehpTxt"></b></div>
+        <div class="duel">
+          <div class="dside dleft"><div id="famrow"></div><div id="knight"></div></div>
+          <div class="dside dright"><div class="ename" id="ename">—</div><div class="bar ehp"><i id="ehpFill"></i><b id="ehpTxt"></b></div><div id="enemy">👺</div></div>
+        </div>
       </div>
       <div class="herobox">
         <div class="av" id="heroAv">⚔️</div>
@@ -1858,6 +1900,17 @@ function renderFamRow(){
   el.innerHTML = S.team.map((id,i)=>`<span class="fpet" style="animation-delay:${(i*0.27).toFixed(2)}s">${petDef(id).ic}</span>`).join("");
 }
 function knightAtk(){ const k=$("#knight"); if(!k || !MOTION) return; k.classList.remove("atk"); void k.offsetWidth; k.classList.add("atk"); }
+function enemyAtk(){
+  if(!MOTION) return; const e=$("#enemy"); if(e){ e.classList.remove("eatk"); void e.offsetWidth; e.classList.add("eatk"); }
+  setTimeout(()=>{ knightHurt(); clawFx(); }, 190);
+}
+function clawFx(){
+  if(!fxOK()) return; const k=$("#knight"), fl=$("#floats"); if(!k||!fl) return;
+  const b=k.getBoundingClientRect(), r=fl.getBoundingClientRect(), c=document.createElement("div"); c.className="claw";
+  c.style.left=(b.left-r.left+b.width/2-30)+"px"; c.style.top=(b.top-r.top+b.height/2-40)+"px";
+  c.innerHTML=`<svg viewBox="0 0 70 70"><g stroke="#ff3b3b" stroke-width="5" stroke-linecap="round" fill="none"><path d="M58 8 Q36 30 16 58"/><path d="M66 18 Q46 38 28 64"/><path d="M48 4 Q28 22 8 48"/></g><g stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".8"><path d="M58 8 Q36 30 16 58"/><path d="M66 18 Q46 38 28 64"/><path d="M48 4 Q28 22 8 48"/></g></svg>`;
+  fl.appendChild(c); setTimeout(()=>c.remove(), 320);
+}
 function knightHurt(){ const k=$("#knight"); if(!k || !MOTION) return; k.classList.remove("hurt"); void k.offsetWidth; k.classList.add("hurt"); }
 function petAtk(){ const pets=document.querySelectorAll("#famrow .fpet"); if(!pets.length || !MOTION) return; const p=pets[famIdx++ % pets.length]; p.classList.remove("fatk"); void p.offsetWidth; p.classList.add("fatk"); }
 /* ---------- Bandeaux de l'arène : nouvelle zone, arrivée d'un boss ---------- */
@@ -1900,7 +1953,7 @@ function step(dt, vis){
     const dmg = shielded() ? 0 : E.atk*E.atk/(E.atk+C.def);
     S.hp -= dmg;
     if(vis && !dmg) floatTxt("Bloqué","fam",false,true);
-    else if(vis){ floatTxt("-"+fmt(dmg),"dmg",false,true); knightHurt(); const hb=$(".herobox"); if(hb && MOTION){ hb.classList.remove("ouch"); void hb.offsetWidth; hb.classList.add("ouch"); } }
+    else if(vis){ floatTxt("-"+fmt(dmg),"dmg",false,true); enemyAtk(); const hb=$(".herobox"); if(hb && MOTION){ hb.classList.remove("ouch"); void hb.offsetWidth; hb.classList.add("ouch"); } }
     if(S.hp<=0){ die(); return; }
   }
   if(E.boss){ E.timer -= dt; if(E.timer<=0){ bossFail(); return; } }
@@ -3004,16 +3057,17 @@ function renderCity(){
   const rep=c.report;
   el.innerHTML = `
     <div class="card citytop">
-      <div class="cityhp"><div class="bar hhp"><i style="width:${c.hp/maxHP*100}%"></i><b>❤️ ${fmt(c.hp)} / ${fmt(maxHP)}</b></div></div>
-      <div class="cstats"><div title="Population"><span>👥</span><b>${pop}</b><small>Population</small></div><div title="Soldats"><span>🏹</span><b>${Math.floor(c.soldiers)}/${pop}</b><small>Soldats</small></div><div title="Puissance"><span>⚔️</span><b>${fmt(mil)}</b><small>Puissance</small></div></div>
+      <div class="ctrow"><div class="cityhp"><div class="bar hhp"><i style="width:${c.hp/maxHP*100}%"></i><b>❤️ ${fmt(c.hp)} / ${fmt(maxHP)}</b></div></div>
+        <span class="cst" title="Population">👥 ${pop}</span><span class="cst" title="Soldats">🏹 ${Math.floor(c.soldiers)}</span><span class="cst" title="Puissance militaire">⚔️ ${fmt(mil)}</span></div>
       <div class="reschips" id="cityRes"></div>
     </div>
     <div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez un bâtiment pour l'améliorer</div></div>
     <div class="card threat ${c.pending?"soon":""}">
-      <h2>${c.pending?"⚔️ Des pillards attendent !":`Prochains pillards dans ${RAID_EVERY-c.prog} étape${RAID_EVERY-c.prog>1?"s":""}`}</h2>
-      <div class="small">Vague n°${c.raid} · pertes estimées : <b style="color:${f.win?"var(--grn)":"var(--red)"}">${f.dmg===Infinity?"tout le fief":fmt(f.dmg)+" PV"}</b> ${f.win?"(victoire)":"(défaite probable)"}${c.pending?" · défendez quand vous voulez":""}</div>
-      <div class="btnrow" style="margin-top:6px">${c.pending?`<button class="btn red" id="defendBtn">⚔️ Défendre</button>`:""}<button class="btn sm" id="repairBtn" ${c.hp>=maxHP-0.5?"disabled":""}>🧱 Réparer<small>🪨 ${fmt(repairCost())}</small></button>
-        ${rep?`<button class="btn sm blue" id="replayBtn">📜 Dernier assaut<small>${rep.win?"Victoire":"Défaite"} · n°${rep.n}</small></button>`:""}</div>
+      <div class="tt"><b>${c.pending?"⚔️ Des pillards attendent !":`🛡️ Pillards dans ${RAID_EVERY-c.prog} étape${RAID_EVERY-c.prog>1?"s":""}`}</b>
+        <small>Vague ${c.raid} · pertes : <b style="color:${f.win?"var(--grn)":"var(--red)"}">${f.dmg===Infinity?"tout le fief":fmt(f.dmg)+" PV"}</b> ${f.win?"(victoire)":"(défaite probable)"}</small></div>
+      ${c.pending?`<button class="btn red sm" id="defendBtn">Défendre</button>`:""}
+      <button class="btn sm" id="repairBtn" title="Réparer : ${fmt(repairCost())} pierre" ${c.hp>=maxHP-0.5?"disabled":""}>🧱</button>
+      ${rep?`<button class="btn sm blue" id="replayBtn" title="Revoir le dernier assaut">📜</button>`:""}
     </div>`;
   renderCityRes();
 }
