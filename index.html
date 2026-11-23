@@ -919,6 +919,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .setsA{margin-top:5px;height:24px;overflow:hidden;display:flex;flex-wrap:nowrap;gap:4px}.setsA>*{margin:0!important}.setsA:empty{display:none}@media (max-height:700px){.setsA{display:none}}
 .btn.green{background:linear-gradient(#5fd37a,#2fae4f);color:#fff;border-color:#1f7a37}
 #heroName{font-weight:900;max-width:52%;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+.seg5 button{min-width:0}.seg5 button small{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -934,7 +935,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1802";
+var BUILD_ID = "20261123-1807";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1650,8 +1651,8 @@ function orbHelp(){
   talk([{t:"Les <b>Orbes d'invocation</b> servent à invoquer des familiers et des compétences. Bonne nouvelle : on en gagne en jouant !", mood:"happy", ic:"🔮"},
         {t:"Chaque <b>boss</b> vaincu donne 1 orbe, et 2 si c'est un nouveau record. Les monstres en lâchent parfois une aussi.", ic:"👑"},
         {t:"Chaque étage de la <b>Tour</b> en donne 1 (3 tous les 5 étages), et les <b>quêtes</b> du jour et de la semaine en donnent aussi.", ic:"🗼"},
-        {t:"Le calendrier, le Titan, la Renaissance et vos gains pendant votre absence en rapportent encore. Gardez vos cristaux pour la Boutique !", ic:"💎"}],
-       {title:"Les orbes", choices:[{t:"Compris !", cls:"gold"}]});
+        {t:"Le calendrier, le Titan, la Renaissance et vos gains pendant votre absence en rapportent encore. Et si vous êtes pressé, la Boutique en vend : 10 💎 l'orbe, ou en euros.", ic:"💎"}],
+       {title:"Les orbes", choices:[{t:"Voir la Boutique", f:()=>{ shopTab="orb"; showView("shop"); }}, {t:"Compris !", cls:"gold"}]});
 }
 function talentBonus(){
   const b={}, lv=S.classes?(S.classes[S.cls]||1):1, ch=(S.talents||{})[S.cls]||{};
@@ -3875,6 +3876,10 @@ const PRODUCTS = [
   {id:"gold_s",   ic:"🪙", n:"Bourse d'or",         d:"Or pour environ 10 min de combat", price:"1,99 €", gold:500},
   {id:"gold_m",   ic:"💰", n:"Coffre d'or",         d:"Or pour environ 30 min de combat", price:"4,99 €", gold:1500, tag:"Populaire"},
   {id:"gold_l",   ic:"🏆", n:"Trésor du roi",       d:"Or pour environ 1 h 30 de combat", price:"9,99 €", gold:5000},
+  {id:"orb_s",    ic:"§boule§", n:"Poignée d'orbes",   d:"10 🔮", price:"0,99 €", orbs:10},
+  {id:"orb_m",    ic:"§boule§", n:"Sac d'orbes",       d:"55 🔮 (+10 % offerts)", price:"4,99 €", orbs:55},
+  {id:"orb_l",    ic:"§boule§", n:"Coffre d'orbes",    d:"120 🔮 (+20 % offerts)", price:"9,99 €", orbs:120, tag:"Populaire"},
+  {id:"orb_xl",   ic:"§boule§", n:"Malle d'orbes",     d:"260 🔮 (+30 % offerts)", price:"19,99 €", orbs:260},
   {id:"speed",    ic:"⚡", n:"Vitesse illimitée",   d:"Vitesse ×2 et ×3 débloquées pour toujours", price:"3,99 €", perm:true},
   {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier du passe de combat pour cette saison", price:"4,99 €", bp:true},
   {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
@@ -3931,6 +3936,7 @@ function grantProduct(id){
     case "gems_xl": S.crystals+=2600; break;
     case "gems_xxl": S.crystals+=7000; break;
     case "gems_max": S.crystals+=15000; break;
+    case "orb_s": case "orb_m": case "orb_l": case "orb_xl": S.orbs += PRODUCTS.find(x=>x.id===id).orbs; dirty.fams=true; break;
     case "gold_s": case "gold_m": case "gold_l": S.gold += goldPack(PRODUCTS.find(x=>x.id===id).gold); break;
     case "speed": S.iap.speed=true; break;
     case "noads": S.iap.noads=true; break;
@@ -4084,6 +4090,10 @@ const PREMIUM = [
   {id:"g100",  cat:"gold", ic:"💰", n:"Sacoche d'or",       d:()=>`+${fmt(goldPack(550))} or`,  cost:100, max:999, give:()=>{ S.gold+=goldPack(550); }},
   {id:"g250",  cat:"gold", ic:"👑", n:"Malle d'or",         d:()=>`+${fmt(goldPack(1500))} or`, cost:250, max:999, give:()=>{ S.gold+=goldPack(1500); }},
   {id:"g600",  cat:"gold", ic:"🏆", n:"Caverne d'or",       d:()=>`+${fmt(goldPack(4000))} or`, cost:600, max:999, give:()=>{ S.gold+=goldPack(4000); }},
+  {id:"orb10",  cat:"orb", ic:"§boule§", n:"10 orbes",  d:()=>"", cost:100,  max:999, give:()=>{ S.orbs+=10;  dirty.fams=true; }},
+  {id:"orb50",  cat:"orb", ic:"§boule§", n:"50 orbes",  d:()=>"", cost:500,  max:999, give:()=>{ S.orbs+=50;  dirty.fams=true; }},
+  {id:"orb100", cat:"orb", ic:"§boule§", n:"100 orbes", d:()=>"", cost:1000, max:999, give:()=>{ S.orbs+=100; dirty.fams=true; }},
+  {id:"orb500", cat:"orb", ic:"§boule§", n:"500 orbes", d:()=>"", cost:5000, max:999, give:()=>{ S.orbs+=500; dirty.fams=true; }},
   {id:"ing50", cat:"ing",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>"", cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
   {id:"ing100", cat:"ing",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
   {id:"ing500", cat:"ing",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
@@ -4135,7 +4145,7 @@ function renderShop(){
   if(shopTab==="real") shopTab="gems"; if(shopTab==="mkt") shopTab="bonus";
   const bpN = bpClaimable();
   const T = (k,t) => `<button data-shoptab="${k}" class="${shopTab===k?"on":""}">${t}</button>`;
-  const seg = `<div class="seg seg5">${T("gems","💎<small>Cristaux</small>")}${T("gold","🪙<small>Or</small>")}${unlocked("loot")?T("ing","§lingot§<small>Lingots</small>"):""}${T("bp",`⚔️<small>Passe</small>${bpN?`<span class="tdot">${bpN}</span>`:""}`)}${T("bonus","✨<small>Bonus</small>")}</div>`;
+  const seg = `<div class="seg seg5">${T("gems","💎<small>Cristaux</small>")}${T("gold","🪙<small>Or</small>")}${T("orb","🔮<small>Orbes</small>")}${unlocked("loot")?T("ing","§lingot§<small>Lingots</small>"):""}${T("bp",`⚔️<small>Passe</small>${bpN?`<span class="tdot">${bpN}</span>`:""}`)}${T("bonus","✨<small>Bonus</small>")}</div>`;
   if(shopTab==="bp"){ el.innerHTML = seg + bpHTML(); bpScrollInit(); guideQueue("pass"); return; }
   // tuile achetée en argent réel
   const rtile = p => { const owned=(p.perm||p.once) && S.iap[p.id], d = p.gold ? `+${fmt(goldPack(p.gold))} or` : p.d, rib = p.best ? "Meilleure offre" : p.tag||"";
@@ -4153,6 +4163,8 @@ function renderShop(){
       + PRODUCTS.filter(p=>p.perm).map(rtile).join("");
   } else if(shopTab==="gold"){
     tiles = PRODUCTS.filter(p=>p.gold).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="gold").map(ctile).join("");
+  } else if(shopTab==="orb"){
+    tiles = PRODUCTS.filter(p=>p.orbs).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="orb").map(ctile).join("");
   } else if(shopTab==="ing"){
     tiles = `<div class="ptile free"><span class="pic">§lingot§</span><b>Vos lingots</b><small>${S.ingots||0} · 1 lingot = 1 objet forgé</small><button class="btn blue sm" data-ingshop="1">À l'Atelier</button></div>`
       + PREMIUM.filter(m=>m.cat==="ing").map(ctile).join("");
@@ -4681,7 +4693,7 @@ function updGoal(){
 /* ---------- Info-bulles des monnaies ---------- */
 const CUR_HELP = {
   gold:   "Or : gagné en battant des monstres (beaucoup plus sur les boss), pendant votre absence et avec les cadeaux. Sert à améliorer votre chevalier à la Forge et au marché du jour (Boutique, Bonus). Des packs d'or sont dans Boutique, Or.",
-  crys:   "Cristaux : boss, nouveaux records, quêtes du jour, succès, Tour, Titan, Renaissance, pubs et Boutique. C'est la monnaie de la Boutique : orbes, clés, scraps, vitesse…",
+  crys:   "Cristaux : boss, nouveaux records, quêtes du jour, succès, Tour, Titan, Renaissance, pubs et Boutique. C'est la monnaie de la Boutique : orbes, or, lingots, clés…",
   orbs:   "Orbes d'invocation : chaque boss (+1, +2 pour un nouveau record), parfois sur les monstres, chaque étage de la Tour, les quêtes du jour et de la semaine, le calendrier, le Titan, la Renaissance et pendant votre absence. Servent à invoquer familiers et compétences.",
   treats: "Friandises : lâchées par les monstres et les boss, la Tour, les quêtes et pendant votre absence. Servent à faire monter de niveau vos familiers.",
   souls:  "Âmes : gagnées en renaissant (à partir de l'étape "+PREST_MIN+"). Plus vous allez loin, plus vous en gagnez. Se dépensent à l'Autel des Âmes.",
