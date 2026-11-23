@@ -934,7 +934,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1756";
+var BUILD_ID = "20261123-1802";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -4661,7 +4661,7 @@ function goalInfo(){
   for(const k of ks) if(!unlocked(k)) return {ic:"cadenas", t:"Prochain déblocage", d:`${GUIDES[k]?GUIDES[k].s:UNLOCK_TXT[k]} à l'étape ${UNLOCK[k]}`, p:S.best/UNLOCK[k]};
   if(S.prestiges===0 && S.maxStage<PREST_MIN) return {ic:"ame", t:"Prochain objectif", d:`Renaissance possible à l'étape ${PREST_MIN}`, p:S.maxStage/PREST_MIN};
   const nm=PMILE.find(m=>m.p>S.prestiges), g=soulGain();
-  if(g>0 && nm) return {ic:"ame", t:"Renaissance prête", d:`+${g} âmes · palier ${nm.p} : ${nm.t}`, p:Math.min(1,(S.prestiges+1)/nm.p)};
+  // « Renaissance prête » n'est plus affiché ici : le point sur l'onglet Âmes suffit
   const nb=Math.ceil((S.stage+1)/10)*10;
   return {ic:"couronne", t:"Prochain boss", d:`Étape ${nb} · record ${S.best}`, p:(S.stage%10)/10};
 }
