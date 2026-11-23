@@ -926,6 +926,18 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .sovtag{display:inline-block;margin:4px 0 6px;padding:3px 10px;border-radius:10px;background:linear-gradient(90deg,#8f5cf6,#f2c94c);color:#fff;font-weight:900;font-size:12.5px;text-shadow:0 1px 0 #0006}
 .bplvbuy{display:flex;gap:5px;flex:none}.bplvbuy .btn{display:flex;flex-direction:column;align-items:center;padding:4px 8px;line-height:1.1;font-size:15px;min-width:54px}.bplvbuy small{font-size:10.5px;white-space:nowrap}
 .bpc:disabled{opacity:1}
+.seg4c button{font-size:12.5px;padding:7px 1px;white-space:nowrap;min-width:0}
+.vtop{display:flex;align-items:center;gap:6px;margin-bottom:6px}.vtop .reschips{flex:1;margin:0;min-width:0}
+[data-compact] {display:flex;flex-wrap:nowrap;gap:4px}[data-compact] .rchip{padding:4px 6px;font-size:12px;white-space:nowrap;flex:0 1 auto;min-width:0}.vtop .btn{flex:none;padding:6px 8px}
+.bub{cursor:pointer;animation:bubfloat 1.8s ease-in-out infinite}.bub.full circle{stroke:#f08c00}.bub.full rect{fill:#f08c00}
+@keyframes bubfloat{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@media (prefers-reduced-motion:reduce){.bub{animation:none}}
+.royrow{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #0001}.royrow:first-child{border-top:0}
+.royic{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff3cf;border:2px solid #e2b85c;border-radius:12px}.royic .sp{width:26px;height:26px}
+.royrow .mid{flex:1;min-width:0}.royrow .t{font-weight:900;line-height:1.15}.royrow .lv{font-size:11.5px;color:var(--mut);font-weight:800}.royrow .d{font-size:12.5px;color:#5b4b33}
+.royup{display:flex;flex-direction:column;align-items:center;line-height:1.1;flex:none;max-width:118px}.royup small{font-size:10px;white-space:normal}
+.roystock{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;font-weight:800}.roystock .btn{padding:3px 10px}
+.expcur.done{box-shadow:inset 0 0 0 3px #2fae4f}
 </style>
 </head>
 <body>
@@ -941,7 +953,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1943";
+var BUILD_ID = "20261123-1955";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1771,7 +1783,9 @@ function calc(){
   if(tb.gold) C.gold*=1+tb.gold/100; if(tb.scrap) C.scrapMult*=1+tb.scrap/100;
   if(tb.fam) C.famDps*=1+tb.fam/100; if(tb.regen) C.regen+=tb.regen/100;
   if(sb.fam) C.famDps*=1+sb.fam/100; if(sb.gold) C.gold*=1+sb.gold/100; if(sb.scrap) C.scrapMult*=1+sb.scrap/100; if(sb.regen) C.regen+=sb.regen/100;
-  C.cdr = tb.cdr||0;
+  let rb={}; try{ rb=royalBonus(); }catch(e){}
+  if(rb.atk){ C.atk*=1+rb.atk/100; } if(rb.hp) C.hp*=1+rb.hp/100; if(rb.gold) C.gold*=1+rb.gold/100; if(rb.fam) C.famDps*=1+rb.fam/100;
+  C.cdr = (tb.cdr||0) + (rb.cdr||0);
   if(S.hp===null || S.hp>C.hp) S.hp = Math.min(S.hp===null?C.hp:S.hp, C.hp);
   return C;
 }
@@ -2763,7 +2777,7 @@ function updateDots(){
   const rc=rewardsCount()+mailUnread(), dd=$("#dot-daily"); dd.classList.toggle("on", rc>0); dd.textContent = rc>0 ? rc : "";
 
   { const dp=$("#dot-pass"); if(dp) dp.classList.toggle("on", bpClaimable()>0); }
-  $("#dot-city").classList.toggle("on", !!S.city && view!=="city" && (S.city.pending || BLD.some(b=>affordC(bldCost(b)))));
+  $("#dot-city").classList.toggle("on", !!S.city && view!=="city" && (S.city.pending || stockReady()>0 || (S.city.exp && Date.now()>=S.city.exp.end) || BLD.some(b=>affordC(bldCost(b))) || ROY.some(b=>royLv(b.id)<ROY_MAX && affordC(royCost(b)))));
 }
 const soulCurve = st => st>80 ? Math.pow((st-80)/7.5,2) : 0;   // 100 → 7, 110 → 16, 130 → 44
 function soulGain(){ if(S.maxStage<prestMin()) return 0; return Math.max(0, Math.floor((soulCurve(S.maxStage)-soulCurve(S.runStart||1))*(hasP(15)?1.25:1))); }
@@ -3244,7 +3258,7 @@ function modal(title, body, acts){
 }
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("button, [data-shbld], [data-tfloor], #goal.raidgo, [data-rkp]"); if(!t) return;
+  const t = e.target.closest("button, [data-collect], [data-shbld], [data-tfloor], #goal.raidgo, [data-rkp]"); if(!t) return;
   if(t.tagName==="BUTTON" && !t.dataset.skill && !t.disabled) Sfx.play(t.closest("nav") || t.dataset.sub || t.dataset.dtab || t.dataset.shoptab || t.dataset.ftab ? "tab" : "ui");
   if(t.dataset.fuse && t.closest("#modal")){ const [sl,ri]=t.dataset.fuse.split("|"); fuse(sl,+ri); if(!$("#summon").classList.contains("on")) openFusions(); else $("#modal").classList.remove("on"); return; }
   if(t.id==="mClose"){ if(sheet) closeSheet(); else $("#modal").classList.remove("on"); return; }
@@ -3312,6 +3326,9 @@ document.addEventListener("click", e=>{
     modal(dism?"Démonter la sélection ?":"Vendre la sélection ?", `${list.length} objet${list.length>1?"s":""} pour <b>${fmt(tot)} ${dism?"🔩":"🪙"}</b>.${hi?`<br><b style="color:var(--red)">Dont ${hi} Épique${hi>1?"s":""} ou mieux.</b>`:""}`, [{t:"Annuler"},{t:dism?"Démonter":"Vendre", cls:"gold", f:()=>{
       const ids=new Set(list.map(i=>i.id)); S.inv=S.inv.filter(it=>!ids.has(it.id)); if(dism) S.scraps+=tot; else S.gold+=tot; invSel=new Set(); Sfx.play("craft"); toast(`${dism?"♻️":"🪙"} ${list.length} objet${list.length>1?"s":""} ${dism?"démonté":"vendu"}${list.length>1?"s":""} : +${fmt(tot)} ${dism?"🔩":"🪙"}`); save(); renderLoot(); }}]); return; }
   if(t.dataset.shpet){ openSheet("pet", t.dataset.shpet); return; }
+  if(t.dataset.collect){ const id=t.dataset.collect, n=collect(id); if(n){ Sfx.play("coin"); vibe(8); const ic=id==="fonderie"?spr("lingot"):id==="menagerie"?spr("boule"):CRES[STOCK_KEYS[id]].ic; toast(`🧺 +${fmt(n)} ${ic}`); if(t.classList.contains("bub")){ t.style.display="none"; renderCityRes(); } else dirty.city=true; save(); } return; }
+  if(t.dataset.roy){ upgradeRoy(t.dataset.roy); return; }
+  if(t.dataset.exp){ expSend(t.dataset.exp); return; }
   if(t.dataset.shbld){ openSheet("bld", t.dataset.shbld); return; }
   if(t.id==="btnDaily"){ rewTab = dailyReady() ? "cal" : (S.quests.list.some(q=>!q.claimed && q.prog>=q.goal) ? "quests" : (ACH.some(achReady) ? "ach" : mailUnread()>0 ? "mail" : "quests")); openSheet("rewards"); return; }
   if(t.dataset.skill){ useSkill(t.dataset.skill); return; }
@@ -3330,6 +3347,9 @@ document.addEventListener("click", e=>{
   switch(t.id){
     case "btnAuto": S.auto=!S.auto; dirty.enemy=true; break;
     case "repairBtn": repairCity(); break;
+    case "collectAll": collectAll(); break;
+    case "expClaim": expClaim(); break;
+    case "expAd": expAd(); break;
     case "evForce": eventForce=!eventForce; dirty.opts=true; break;
     case "pseudoBtn": askPseudo(false); break;
     case "lbDelete": lbDeleteAsk(); break;
@@ -3393,7 +3413,8 @@ $("#enemy").addEventListener("pointerdown", e=>{
 document.addEventListener("contextmenu", e=>e.preventDefault());
 
 /* ================= FIEF (construction de ville) ================= */
-const CITY_UNLOCK = 45, RAID_EVERY = 10, RAID_COOLDOWN = 120;   // assaut toutes les 10 nouvelles étapes, 2 min minimum entre deux
+const CITY_UNLOCK = 45, RAID_EVERY = 20, RAID_COOLDOWN = 120;   // assaut toutes les 20 nouvelles étapes, 2 min minimum entre deux
+const STOCK_H = 8;   // la production s'accumule jusqu'à 8 h dans les bâtiments, à récolter en les touchant
 const CRES = {or:{n:"Or du fief", ic:"💰"}, bois:{n:"Bois", ic:"🌲"}, pierre:{n:"Pierre", ic:"🪨"}};
 const BLD = [
   {id:"mine",     n:"Mine d'or",       ic:"⛏️", cost:[10,30,20], d:"Produit de l'or du fief."},
@@ -3405,9 +3426,86 @@ const BLD = [
   {id:"mur",      n:"Remparts",        ic:"🧱", cost:[30,20,70], d:"Augmente la vie du fief."},
 ];
 const bldDef = id => BLD.find(b=>b.id===id);
+/* Bâtiments royaux : ils rendent le chevalier plus fort ou produisent des monnaies du jeu */
+const ROY_MAX = 25;
+const ROY = [
+  {id:"forge",     n:"Forge royale",  ic:"§forge§",  cost:[300,200,300], d:"+4 % d'attaque par niveau",               fx:L=>({atk:4*L}),  txt:L=>`+${4*L} % d'attaque`},
+  {id:"temple",    n:"Temple",        ic:"§coeur§",  cost:[200,300,300], d:"+4 % de PV par niveau",                    fx:L=>({hp:4*L}),   txt:L=>`+${4*L} % de PV`},
+  {id:"marche",    n:"Marché",        ic:"§piece§",  cost:[150,250,200], d:"+5 % d'or gagné en combat par niveau",     fx:L=>({gold:5*L}), txt:L=>`+${5*L} % d'or`},
+  {id:"biblio",    n:"Bibliothèque",  ic:"§parcho§", cost:[300,350,200], d:"Compétences rechargées 2 % plus vite par niveau", fx:L=>({cdr:2*L}), txt:L=>`−${2*L} % de recharge`},
+  {id:"fonderie",  n:"Fonderie",      ic:"§lingot§", cost:[400,300,400], d:"Produit des lingots (à récolter)",         fx:()=>({}),        txt:L=>`${fmt(ingRate(L))} lingot${ingRate(L)>1?"s":""} / h`},
+  {id:"menagerie", n:"Ménagerie",     ic:"§patte§",  cost:[350,400,300], d:"+4 % de dégâts des familiers par niveau, et des orbes (à récolter)", fx:L=>({fam:4*L}), txt:L=>`+${4*L} % familiers · ${orbRate(L).toFixed(1).replace(".",",")} 🔮 / h`},
+];
+const royDef = id => ROY.find(b=>b.id===id);
+const ingRate = L => L ? 1.5*L : 0;          // lingots par heure
+const orbRate = L => L ? 0.1*L : 0;          // orbes par heure
+function royLv(id){ return (S.city && S.city.roy && S.city.roy[id]) || 0; }
+function royCost(b){ const L=royLv(b.id), g=Math.pow(1.6,L); return {or:Math.ceil(b.cost[0]*g), bois:Math.ceil(b.cost[1]*g), pierre:Math.ceil(b.cost[2]*g)}; }
+function royalBonus(){ const o={}; try{ if(!S.city || !S.city.roy) return o; }catch(e){ return o; } for(const b of ROY){ const L=royLv(b.id); if(!L) continue; const e=b.fx(L); for(const k in e) o[k]=(o[k]||0)+e[k]; } return o; }
+function upgradeRoy(id){
+  const b=royDef(id); if(!b || royLv(id)>=ROY_MAX) return; const c=royCost(b); if(!affordC(c)) return;
+  for(const k in c) S.city.res[k]-=c[k];
+  S.city.roy[id]=royLv(id)+1; track("build"); Sfx.play("up"); vibe(10);
+  if(S.city.roy[id]===1) log(`🏰 ${b.n} construite !`, "good");
+  calc(); dirty.city=dirty.stats=true; save();
+}
+/* Expéditions : on envoie des soldats, ils reviennent avec du butin */
+const EXPS = [
+  {id:"court", n:"Patrouille",       h:1, sol:10, ic:"§carte§"},
+  {id:"moyen", n:"Raid en forêt",    h:4, sol:25, ic:"§chariot§"},
+  {id:"long",  n:"Grande expédition", h:8, sol:50, ic:"§couronne§"},
+];
+function expLoot(e){
+  const c=S.city, m=1+0.1*(c.lv.caserne||0)+0.03*(c.raid||1);
+  const prod=k=>Math.ceil(prodOf({or:"mine",bois:"scierie",pierre:"carriere"}[k], c.lv[{or:"mine",bois:"scierie",pierre:"carriere"}[k]])*60*e.h*0.6);
+  return {ingots:Math.round((e.h===1?6:e.h===4?22:45)*m), orbs:e.h===1?0:Math.round((e.h===4?2:5)*m), runes:e.h===8?Math.round(3*m):0, item:e.h===8,
+          or:prod("or"), bois:prod("bois"), pierre:prod("pierre")};
+}
+const expLootTxt = l => [l.ingots&&`§lingot§ ${l.ingots}`, l.orbs&&`🔮 ${l.orbs}`, l.runes&&`✨ ${l.runes} runes`, l.item&&"🎁 un objet", `💰🌲🪨 ${fmt(l.or)}`].filter(Boolean).join(" · ");
+function expSend(id){
+  const c=S.city, e=EXPS.find(x=>x.id===id); if(!e || c.exp) return;
+  if(c.soldiers<e.sol){ toast(`Il faut ${e.sol} soldats disponibles.`); return; }
+  c.soldiers-=e.sol; c.exp={id, end:Date.now()+e.h*3600e3, sol:e.sol, ad:false};
+  Sfx.play("success"); toast(`${e.n} : départ ! Retour dans ${e.h} h.`); dirty.city=true; save();
+}
+function expClaim(){
+  const c=S.city, x=c.exp; if(!x || Date.now()<x.end) return;
+  const e=EXPS.find(y=>y.id===x.id), l=expLoot(e);
+  S.ingots=(S.ingots||0)+l.ingots; S.orbs+=l.orbs; c.res.or+=l.or; c.res.bois+=l.bois; c.res.pierre+=l.pierre;
+  if(l.runes){ S.runes=S.runes||{}; const ks=Object.keys(RUNES); for(let i=0;i<l.runes;i++){ const k=pick(ks); S.runes[k]=(S.runes[k]||0)+1; } }
+  const cards=[];
+  if(l.item){ const ri = Math.random()<0.15 ? 4 : 3, it=makeItem(Math.max(1,craftLvl()), ri); placeItem(it); dirty.loot=true; cards.push({ic:SLOTS[it.slot].ic, n:it.name, ri, tag:"Butin d'expédition"}); }
+  c.soldiers=Math.min(cityPop(), c.soldiers+x.sol); c.exp=null; track("expedition");
+  Sfx.play("victory"); toast(`🏕️ ${e.n} de retour : ${expLootTxt(l).replace(/§[a-z]+§/g,"")}`);
+  if(cards.length){ lastPull=0; showReveal(cards); }
+  dirty.city=dirty.res=true; save();
+}
+async function expAd(){
+  const x=S.city.exp; if(!x || x.ad || Date.now()>=x.end) return;
+  if(!(await Monet.showRewarded("exp"))) return;
+  x.ad=true; x.end-=30*60e3; dirty.city=true; save(); toast("⏩ Expédition accélérée de 30 min !");
+}
+/* Récolte : la production attend dans les bâtiments */
+const STOCK_KEYS = {mine:"or", scierie:"bois", carriere:"pierre"};
+function stockCap(id){ return id==="fonderie" ? ingRate(royLv("fonderie"))*STOCK_H : id==="menagerie" ? orbRate(royLv("menagerie"))*STOCK_H : prodOf(id, S.city.lv[id])*60*STOCK_H; }
+function collect(id){
+  const c=S.city; if(!c || !c.stock) return 0;
+  const v=c.stock[id]||0; if(v<1) return 0;
+  const n=Math.floor(v); c.stock[id]-=n;
+  if(STOCK_KEYS[id]) c.res[STOCK_KEYS[id]]+=n;
+  else if(id==="fonderie") S.ingots=(S.ingots||0)+n;
+  else if(id==="menagerie") S.orbs+=n;
+  return n;
+}
+function collectAll(){
+  let got=[]; for(const id of ["mine","scierie","carriere","fonderie","menagerie"]){ const n=collect(id); if(n) got.push(`${id==="fonderie"?"§lingot§":id==="menagerie"?"🔮":CRES[STOCK_KEYS[id]].ic} ${fmt(n)}`); }
+  if(got.length){ Sfx.play("coin"); vibe(8); toast("🧺 Récolte : "+got.join("  ")); dirty.city=dirty.res=true; save(); } else toast("Rien à récolter pour l'instant.");
+}
+function stockReady(){ const c=S.city; if(!c||!c.stock) return 0; let n=0; for(const id in c.stock){ const cap=stockCap(id); if(cap>0 && c.stock[id]>=cap*0.5) n++; } return n; }
 function newCity(){
   return {lv:{mine:1,scierie:1,carriere:1,maison:1,caserne:1,tour:0,mur:1}, res:{or:60,bois:60,pierre:60},
-          hp:null, soldiers:6, raid:1, prog:0, pending:false, lastRaid:0, report:null, wins:0};
+          hp:null, soldiers:6, raid:1, prog:0, pending:false, lastRaid:0, report:null, wins:0,
+          roy:{}, stock:{mine:0,scierie:0,carriere:0,fonderie:0,menagerie:0}, exp:null};
 }
 /* Effets d'un bâtiment à un niveau donné */
 function cityPop(L){ L = L ?? S.city.lv.maison; return 5 + Math.floor(6*L*Math.pow(1.1,Math.max(0,L-1))); }
@@ -3440,9 +3538,10 @@ function createCity(){
 function cityTick(sec){
   const c=S.city; if(!c) return;
   const m=sec/60;
-  c.res.or     += prodOf("mine", c.lv.mine)*m;
-  c.res.bois   += prodOf("scierie", c.lv.scierie)*m;
-  c.res.pierre += prodOf("carriere", c.lv.carriere)*m;
+  if(!c.stock) c.stock={mine:0,scierie:0,carriere:0,fonderie:0,menagerie:0}; if(!c.roy) c.roy={};
+  for(const id of ["mine","scierie","carriere"]) c.stock[id] = Math.min(stockCap(id), (c.stock[id]||0) + prodOf(id, c.lv[id])*m);
+  c.stock.fonderie  = Math.min(stockCap("fonderie"),  (c.stock.fonderie||0)  + ingRate(royLv("fonderie"))*sec/3600);
+  c.stock.menagerie = Math.min(stockCap("menagerie"), (c.stock.menagerie||0) + orbRate(royLv("menagerie"))*sec/3600);
   const cap=cityPop();
   if(c.lv.caserne && c.soldiers<cap) c.soldiers = Math.min(cap, c.soldiers + trainRate(c.lv.caserne)*m);
   c.hp = Math.min(cityMaxHP(), c.hp + cityMaxHP()*0.03*m);     // réparation lente : 3 % / min
@@ -3473,10 +3572,10 @@ function launchRaid(){
     c.hp = hp0 - dmg;
     const lost = Math.round(c.soldiers*Math.min(0.5, dmg/rep.maxHP*0.5));
     c.soldiers -= lost;
-    const rw = Math.ceil(25*Math.pow(1.3,n)), cr = 2+Math.floor(n/4);
-    c.res.or+=rw; c.res.bois+=rw; c.res.pierre+=rw; S.crystals+=cr;
+    const rw = Math.ceil(25*Math.pow(1.3,n)), cr = 5+Math.floor(n/2), ig = 8+2*n, ob = 1+Math.floor(n/3);
+    c.res.or+=rw; c.res.bois+=rw; c.res.pierre+=rw; S.crystals+=cr; S.ingots=(S.ingots||0)+ig; S.orbs+=ob;
     c.raid++; c.wins++; track("raidwin");
-    Object.assign(rep, {hp1:c.hp, lost, reward:`${CRES.or.ic} ${fmt(rw)}  ${CRES.bois.ic} ${fmt(rw)}  ${CRES.pierre.ic} ${fmt(rw)}  💎 ${cr}`, eLeft:0});
+    Object.assign(rep, {hp1:c.hp, lost, reward:`💎 ${cr}  ·  ${ig} lingots  ·  🔮 ${ob}  ·  ${CRES.or.ic}${CRES.bois.ic}${CRES.pierre.ic} ${fmt(rw)}`, eLeft:0});
     log(`🛡️ Assaut n°${n} repoussé ! −${fmt(dmg)} PV aux remparts. +${cr} 💎`, "good");
   } else {
     const frac = time===Infinity ? 1 : hp0/dmg;               // part de l'armée ennemie détruite avant la chute
@@ -3486,7 +3585,7 @@ function launchRaid(){
     Object.assign(rep, {hp1:0, lost, reward:`Pillage : −${fmt(lostR.or)} ${CRES.or.ic}  −${fmt(lostR.bois)} ${CRES.bois.ic}  −${fmt(lostR.pierre)} ${CRES.pierre.ic}`, eLeft:1-frac});
     log(`🔥 Le fief est tombé à l'assaut n°${n} ! Ressources pillées.`, "bad");
   }
-  c.report = rep; c.pending=false; c.lastRaid=Date.now();
+  c.report = rep; c.pending=false; c.lastRaid=Date.now(); c.hp = cityMaxHP();   // les remparts sont rebâtis après chaque assaut
   dirty.city = true; save();
   if(S.opts.showRaids!==false) playRaid(rep); else vibe(30);
 }
@@ -3555,9 +3654,38 @@ function renderCity(){
   }
   const c=S.city, f=raidForecast(), mil=cityMil(), maxHP=cityMaxHP(), pop=cityPop(), rep=c.report;
   const upN = BLD.filter(b=>affordC(bldCost(b))).length;
-  const seg = `<div class="seg"><button data-ctab="village" class="${cityTab==="village"?"on":""}">🏘️ Village${upN?` <span class="tdot">${upN}</span>`:""}</button><button data-ctab="gestion" class="${cityTab==="gestion"?"on":""}">📜 Gestion${c.pending?` <span class="tdot">!</span>`:""}</button></div>`;
+  if(!c.roy) c.roy={}; if(!c.stock) c.stock={mine:0,scierie:0,carriere:0,fonderie:0,menagerie:0};
+  const royN = ROY.filter(b=>royLv(b.id)<ROY_MAX && affordC(royCost(b))).length, expDone = c.exp && Date.now()>=c.exp.end;
+  const seg = `<div class="seg seg4c"><button data-ctab="village" class="${cityTab==="village"?"on":""}">🏘️ Village${upN?` <span class="tdot">${upN}</span>`:""}</button><button data-ctab="royaume" class="${cityTab==="royaume"?"on":""}">👑 Royaume${royN?` <span class="tdot">${royN}</span>`:""}</button><button data-ctab="exp" class="${cityTab==="exp"?"on":""}">🏕️ Expé.${expDone||!c.exp?` <span class="tdot">${expDone?"✓":"!"}</span>`:""}</button><button data-ctab="gestion" class="${cityTab==="gestion"?"on":""}">🛡️ Défense${c.pending?` <span class="tdot">!</span>`:""}</button></div>`;
   if(cityTab==="village"){
-    el.innerHTML = seg + `<div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez un bâtiment pour l'améliorer</div></div>`;
+    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 Tout récolter</button></div>
+      <div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez les bulles pour récolter, et un bâtiment pour l'améliorer</div></div>`;
+    renderCityRes(); requestAnimationFrame(updBubbles); return;
+  }
+  if(cityTab==="royaume"){
+    const rows = ROY.map(b=>{ const L=royLv(b.id), mx=L>=ROY_MAX, cst=royCost(b), ok=!mx && affordC(cst);
+      const st = (b.id==="fonderie"||b.id==="menagerie") && L ? `<div class="roystock"><span>${b.id==="fonderie"?"§lingot§":"🔮"} ${Math.floor(c.stock[b.id]||0)} / ${Math.floor(stockCap(b.id))}</span><button class="btn green sm" data-collect="${b.id}" ${(c.stock[b.id]||0)>=1?"":"disabled"}>Récolter</button></div>` : "";
+      return `<div class="royrow"><div class="royic">${b.ic}</div><div class="mid"><div class="t">${b.n}</div><div class="lv">${L?"Niveau "+L+(mx?" (max)":""):"À construire"}</div>
+        <div class="d">${L?`<b>${b.txt(L)}</b>${mx?"":` → ${b.txt(L+1)}`}`:b.d}</div>${st}</div>
+        ${mx?`<span class="badge bup">Max</span>`:`<button class="btn ${ok?"gold":""} sm royup" data-roy="${b.id}" ${ok?"":"disabled"}>${L?"Améliorer":"Construire"}<small>${costTxt(cst)}</small></button>`}</div>`; }).join("");
+    el.innerHTML = seg + `<div class="card" style="flex:none"><div class="small">Les bâtiments royaux rendent votre chevalier plus fort pour toujours (ils restent à la Renaissance). Payez-les avec les ressources de votre village.</div><div class="reschips" id="cityRes" data-compact="1" style="margin-top:6px"></div></div>
+      <div class="card grow"><div class="pager" data-pg="roy"><div class="pgsrc list">${rows}</div></div></div>`;
+    renderCityRes(); return;
+  }
+  if(cityTab==="exp"){
+    const x=c.exp, cur = x && EXPS.find(e=>e.id===x.id);
+    let top;
+    if(x){ const left=Math.max(0,x.end-Date.now()), done=left<=0;
+      top = `<div class="card expcur ${done?"done":""}"><div class="chead"><h2>${cur.ic} ${cur.n}</h2><span class="small">${x.sol} soldats</span></div>
+        <div class="prog"><i id="expBar" style="width:${Math.min(100,(1-left/(cur.h*3600e3))*100)}%"></i></div>
+        <div class="small" id="expLeft" style="margin:4px 0 8px">${done?"De retour avec le butin !":"Retour dans "+fmtLeft(left)}</div>
+        <div class="small">Butin : ${expLootTxt(expLoot(cur))}</div>
+        <div class="btnrow" style="margin-top:8px">${done?`<button class="btn gold" id="expClaim">🎁 Récupérer le butin</button>`:x.ad?"":`<button class="btn blue sm" id="expAd">📺 −30 min</button>`}</div></div>`;
+    } else top = `<div class="card"><div class="small">Envoyez des soldats en mission. Pendant leur absence, ils ne défendent pas le fief. Plus la caserne est haute, plus le butin est gros.</div><div class="small" style="margin-top:4px">Soldats disponibles : <b>${Math.floor(c.soldiers)}</b> / ${cityPop()}</div></div>`;
+    const list = EXPS.map(e=>{ const l=expLoot(e), ok=!x && c.soldiers>=e.sol;
+      return `<div class="row exprow"><div class="ic">${e.ic}</div><div class="mid"><div class="t">${e.n}<span class="lv">${e.h} h · ${e.sol} soldats</span></div><div class="d">${expLootTxt(l)}</div></div>
+        <button class="btn ${ok?"gold":""} sm" data-exp="${e.id}" ${ok?"":"disabled"}>Envoyer</button></div>`; }).join("");
+    el.innerHTML = seg + top + `<div class="card grow"><h2>Missions</h2><div class="pager" data-pg="exp"><div class="pgsrc list">${list}</div></div></div>`;
     return;
   }
   const rates={or:prodOf("mine",c.lv.mine), bois:prodOf("scierie",c.lv.scierie), pierre:prodOf("carriere",c.lv.carriere)};
@@ -3569,20 +3697,26 @@ function renderCity(){
       <div class="small">Vague n°${c.raid} · pertes estimées : <b style="color:${f.win?"var(--grn)":"var(--red)"}">${f.dmg===Infinity?"tout le fief":fmt(f.dmg)+" PV"}</b> ${f.win?"(victoire)":"(défaite probable)"}</div>
       ${c.pending?`<div class="small" style="margin-top:4px">Défendez quand vous êtes prêt : rien ne presse, mais pas de nouvel assaut tant que celui-ci n'est pas repoussé.</div>`:""}
       <div class="btnrow" style="margin-top:8px">${c.pending?`<button class="btn red" id="defendBtn">⚔️ Défendre</button>`:""}${rep?`<button class="btn sm blue" id="replayBtn">📜 Dernier assaut<small>${rep.win?"Victoire":"Défaite"} · n°${rep.n}</small></button>`:""}</div></div>
-    <div class="card"><div class="chead"><h2>🧱 Remparts</h2><button class="btn sm" id="repairBtn" ${c.hp>=maxHP-0.5?"disabled":""}>Réparer<small>🪨 ${fmt(repairCost())}</small></button></div>
+    <div class="card"><div class="chead"><h2>🧱 Remparts</h2></div>
       <div class="cityhp"><div class="bar hhp"><i style="width:${c.hp/maxHP*100}%"></i><b>❤️ ${fmt(c.hp)} / ${fmt(maxHP)}</b></div></div>
-      <div class="small" style="margin-top:4px">Ils se réparent seuls de 3 % par minute.</div></div>
+      <div class="small" style="margin-top:4px">Ils sont rebâtis après chaque assaut. Un assaut repoussé rapporte des cristaux, des lingots et des orbes.</div></div>
     <div class="card"><h2>👥 Habitants et armée</h2>
       <div class="cstats"><div><span>👥</span><b>${pop}</b><small>Population</small></div><div><span>🏹</span><b>${Math.floor(c.soldiers)}/${pop}</b><small>Soldats</small></div><div><span>⚔️</span><b>${fmt(mil)}</b><small>Puissance</small></div></div></div>
-    <div class="card"><h2>📦 Ressources</h2><div class="reschips" id="cityRes"></div><div class="small">Produites en continu, même jeu fermé. Améliorez la mine, la scierie et la carrière pour en produire plus.</div></div>
+    <div class="card"><h2>📦 Ressources</h2><div class="reschips" id="cityRes"></div><div class="small">Produites en continu, même jeu fermé, jusqu'à ${STOCK_H} h de stock : pensez à les récolter dans le Village.</div></div>
     <h2 class="mgrp" style="margin-top:4px">🏗️ Bâtiments</h2>${blds}
   </div></div>`;
   renderCityRes();
 }
+function updBubbles(){
+  if(!S.city || !S.city.stock) return;
+  document.querySelectorAll(".bub[data-collect]").forEach(g=>{ const id=g.dataset.collect, v=S.city.stock[id]||0, show = v >= Math.max(1, prodOf(id,S.city.lv[id])*2);
+    g.style.display = show?"":"none"; if(show){ const t=g.querySelector(".bubn"); const tx=fmt(Math.floor(v)); if(t.textContent!==tx) t.textContent=tx; g.classList.toggle("full", v>=stockCap(id)*0.98); } });
+}
 function renderCityRes(){
   const el=$("#cityRes"); if(!el||!S.city) return;
   const rates={or:prodOf("mine",S.city.lv.mine), bois:prodOf("scierie",S.city.lv.scierie), pierre:prodOf("carriere",S.city.lv.carriere)};
-  el.innerHTML = Object.keys(CRES).map(k=>`<div class="rchip" title="+${fmt(rates[k])} par minute">${CRES[k].ic} ${fmt(S.city.res[k])} <small style="font-family:Nunito;color:var(--grn)">+${fmt(rates[k])}</small></div>`).join("");
+  const cp=el.dataset.compact;
+  el.innerHTML = Object.keys(CRES).map(k=>`<div class="rchip" title="+${fmt(rates[k])} par minute">${CRES[k].ic} ${fmt(S.city.res[k])}${cp?"":` <small style="font-family:Nunito;color:var(--grn)">+${fmt(rates[k])}/min</small>`}</div>`).join("");
 }
 let cityT = 0;
 function updateCity(){
@@ -3591,7 +3725,9 @@ function updateCity(){
   if(!S.city){ if(dirty.city){ renderCity(); dirty.city=false; } return; }
   if(dirty.city && !ptrDown && now-lastPointer>250){ renderCity(); dirty.city=false; cityT=now; return; }
   if(now-cityT>1000){   // rafraîchit chiffres et boutons sans tout reconstruire
-    cityT=now; renderCityRes();
+    cityT=now; renderCityRes(); updBubbles();
+    const eb=$("#expBar"); if(eb && S.city.exp){ const cur=EXPS.find(e=>e.id===S.city.exp.id), left=Math.max(0,S.city.exp.end-Date.now()); eb.style.width=Math.min(100,(1-left/(cur.h*3600e3))*100)+"%"; $("#expLeft").textContent = left?"Retour dans "+fmtLeft(left):"De retour avec le butin !"; if(!left && !$("#expClaim")) dirty.city=true; }
+    document.querySelectorAll("[data-roy]").forEach(b=>{ const d=royDef(b.dataset.roy); b.disabled = royLv(d.id)>=ROY_MAX || !affordC(royCost(d)); b.classList.toggle("gold", !b.disabled); });
     document.querySelectorAll(".bld[data-shbld]").forEach(g=>{ g.classList.toggle("can", affordC(bldCost(bldDef(g.dataset.shbld)))); });
     const hb=$(".cityhp .bar"); if(hb){ hb.querySelector("i").style.width=(S.city.hp/cityMaxHP()*100)+"%"; hb.querySelector("b").textContent=`❤️ ${fmt(S.city.hp)} / ${fmt(cityMaxHP())}`; }
   }
@@ -3877,6 +4013,8 @@ function villageSVG(){
   ${tree(246,222)}${tree(120,224,.9)}${tree(20,262)}${tree(36,250,.8)}${tree(346,258)}${tree(350,346,.9)}${tree(14,360,.9)}${tree(232,388,.8)}
   ${drawKeep(180,204,c.wins)}
   ${["mine","carriere","scierie","caserne","maison","tour","mur"].map(g).join("")}
+  ${["mine","carriere","scierie"].map(id=>{ const P=VPOS[id]; if(!lv[id]) return ""; const bx=P.badge[0]-30, by=P.badge[1]-54;
+    return `<g class="bub" data-collect="${id}" style="display:none" transform="translate(${bx} ${by})"><circle cx="16" cy="16" r="17" fill="#fff" stroke="#2fae4f" stroke-width="3"/><use href="#sp-${ICO_MAP[CRES[STOCK_KEYS[id]].ic]||"piece"}" x="5" y="4" width="22" height="22"/><rect x="-4" y="31" width="40" height="13" rx="6" fill="#2fae4f"/><text class="bubn" x="16" y="41" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">0</text></g>`; }).join("")}
   </svg>`;
 }
 
@@ -4570,10 +4708,10 @@ const GUIDES = {
     ["📦","Vous gardez familiers, cristaux, fief, classes et Âmes. Vous perdez l'or, la Forge, l'équipement et les scraps."],
     ["🎭","À chaque Renaissance, la classe jouée gagne un niveau, une nouvelle classe se débloque au hasard, et vous choisissez celle à jouer jusqu'à la prochaine."]]},
   city:  {ic:"🏰", t:"Votre fief est fondé", s:"Le Fief", go:"city", go_t:"Voir mon fief", l:[
-    ["⛏️","La mine, la scierie et la carrière produisent de l'or, du bois et de la pierre en continu, même quand le jeu est fermé."],
-    ["🏠","Touchez un bâtiment sur la carte pour l'améliorer. Les maisons augmentent la population, la caserne entraîne des soldats."],
-    ["⚠️","Toutes les "+RAID_EVERY+" nouvelles étapes, des pillards viennent menacer le fief. Vous choisissez quand les affronter : touchez « Défendre » quand vous êtes prêt."],
-    ["🛡️","Plus votre armée et vos tours sont fortes, moins vos remparts souffrent. Repousser un assaut rapporte des ressources et des cristaux."]]},
+    ["⛏️","La mine, la scierie et la carrière produisent de l'or, du bois et de la pierre, même jeu fermé. La production attend dans les bâtiments : touchez les bulles pour la récolter (jusqu'à 8 h de stock)."],
+    ["👑","Onglet Royaume : la Forge royale, le Temple, le Marché, la Bibliothèque, la Fonderie et la Ménagerie rendent votre chevalier plus fort pour toujours, et produisent des lingots et des orbes."],
+    ["🏕️","Onglet Expéditions : envoyez vos soldats en mission de 1 h, 4 h ou 8 h. Ils reviennent avec des lingots, des orbes, des runes, et parfois un objet."],
+    ["🛡️","Toutes les "+RAID_EVERY+" nouvelles étapes, des pillards attaquent. Défendez quand vous voulez : une victoire rapporte des cristaux, des lingots et des orbes."]]},
   boss:  {ic:"👑", t:"Premier boss !", s:"Les boss", l:[
     ["👑","Un boss garde la fin de chaque zone, toutes les 10 étapes. Il est bien plus résistant que les monstres normaux."],
     ["⏳","Vous avez 30 secondes pour le battre (barre jaune). Sinon il vous repousse et vous retournez à l'étape d'avant pour gagner de l'or."],
@@ -5941,8 +6079,7 @@ function offline(){
   const el = Math.min((8+2*al("absence"))*3600, (Date.now()-(S.last||Date.now()))/1000);
   if(el<60) return;
   let cityTxt = "";
-  if(S.city){ const r0={...S.city.res}; const pend=S.city.pending; S.city.pending=false; cityTick(el); S.city.pending=pend;
-    cityTxt = `<br><br>🏰 Votre fief a produit ${Object.keys(CRES).map(k=>`${CRES[k].ic} ${fmt(S.city.res[k]-r0[k])}`).join("  ")}.`; }
+  if(S.city){ cityTick(el); if(stockReady()) cityTxt = `<br><br>🏰 Votre fief a de la production à récolter : passez dans le Fief !`; if(S.city.exp && Date.now()>=S.city.exp.end) cityTxt += `<br>🏕️ Votre expédition est rentrée.`; }
   const st = isBoss(S.stage) ? Math.max(1,S.stage-1) : S.stage;
   const en = enemyFor(st);
   const tpk = en.hp/(C.atk/C.interval + C.famDps) + 0.3;
