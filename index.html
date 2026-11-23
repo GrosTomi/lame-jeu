@@ -904,6 +904,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 @media (max-height:740px){.eqrow .tile{height:48px}}
 .selbar .btn{padding:6px 4px;font-size:13px}
 @media (max-height:620px){#tab-loot .teamcard{display:none}}
+.row .d:empty{display:none}
 </style>
 </head>
 <body>
@@ -919,7 +920,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1651";
+var BUILD_ID = "20261123-1654";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -3246,7 +3247,7 @@ document.addEventListener("click", e=>{
   if(t.id==="eqBest"){ equipBestAll(); return; }
   if(t.id==="ingBuy"){ mktReset();
     const P=["ing50","ing100","ing500","ing1000"].map(id=>PREMIUM.find(x=>x.id===id));
-    modal("Acheter des lingots", `Vous avez <b>${S.ingots||0} §lingot§</b> et <b>${S.crystals} 💎</b>.<br><small>1 lingot = 1 objet forgé. Plus le pack est gros, moins le lingot coûte cher.</small>`,
+    modal("Acheter des lingots", `Vous avez <b>${S.ingots||0} §lingot§</b> et <b>${S.crystals} 💎</b>.<br><small>1 lingot = 1 objet forgé.</small>`,
       P.map((m,k)=>({t:`${m.n.replace(/^[^0-9]*/,"").replace(" lingots","")} §lingot§<small>💎 ${fmt(m.cost)}</small>`, cls:k>=2?"violet":"gold", f:()=>{ if(S.crystals<m.cost){ toast("Pas assez de cristaux"); return; } premiumBuy(m.id); renderLoot(); }}))); return; }
   if(t.id==="invBuy"){ const m=PREMIUM.find(x=>x.id==="invx"), c=m.cost; modal("Agrandir l'inventaire", `+10 places (${invMax()} → ${invMax()+10}) pour <b>${c} 💎</b>. Vous avez ${S.crystals} 💎.`, [{t:"Annuler"},{t:`Acheter · ${c} 💎`, cls:"gold", f:()=>{ if(S.crystals<c){ toast("Pas assez de cristaux"); return; } premiumBuy("invx"); dirty.loot=true; renderLoot(); }}]); return; }
   if(t.id==="invSelBtn"){ invSel = invSel ? null : new Set(); renderLoot(); return; }
@@ -4029,10 +4030,10 @@ const PREMIUM = [
   {id:"lpet",   ic:"🐾", n:"Faveur légendaire",        d:()=>"Votre prochaine invocation de familier sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("fams"), give:()=>{ S.favPet=1; }, once:()=>!!S.favPet},
   {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.favSkl=1; }, once:()=>!!S.favSkl},
   {id:"slot",   ic:"➕", n:"Place de familier en plus", d:()=>S.extraSlot ? "Déjà achetée" : "Une place de plus dans l'équipe, pour toujours", cost:500, max:1, ok:()=>unlocked("fams"), once:()=>S.extraSlot>0, give:()=>{ S.extraSlot=1; calc(); dirty.fams=true; }},
-  {id:"ing50",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>`Pour forger 50 objets · vous en avez ${S.ingots||0}`, cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
-  {id:"ing100",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"4,8 💎 le lingot", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
-  {id:"ing500",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"4,4 💎 le lingot", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
-  {id:"ing1000", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"4,2 💎 le lingot, le plus avantageux", cost:4200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
+  {id:"ing50",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>"", cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
+  {id:"ing100",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
+  {id:"ing500",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
+  {id:"ing1000", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"", cost:4200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
   {id:"invx",   ic:"📦", n:"+10 places d'inventaire",   d:()=>`Inventaire : ${invMax()} places${(S.invX||0)>=INV_BUY_MAX?" (maximum)":` · jusqu'à ${INV_BASE+INV_STEP*INV_BUY_MAX}`}`, get cost(){ return 80+40*(S.invX||0); }, max:99, once:()=>(S.invX||0)>=INV_BUY_MAX, give:()=>{ S.invX=(S.invX||0)+1; dirty.loot=true; }},
   {id:"cls",    ic:"🎭", n:"Changer de classe",         d:()=>"Choisissez une autre classe déjà débloquée, sans attendre la Renaissance", cost:100, max:3, ok:()=>Object.keys(S.classes||{}).length>1, give:()=>{ setTimeout(()=>classPicker(null,null), 200); }},
 ];
