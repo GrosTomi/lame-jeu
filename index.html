@@ -919,7 +919,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1643";
+var BUILD_ID = "20261123-1651";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2110,14 +2110,39 @@ function knightSVG(pal, eq){
     <path d="M31 4 Q36 -4 45 0 Q38 2 36 8 Z" fill="${P.cape}"/>
   </svg>`;
 }
+/* Le chevalier porte ses vrais objets : arme, bouclier et casque dessinés, armure et bottes aux couleurs de l'objet. */
+function artInner(slot, set, ri){ return artSVG(slot, set, ri).replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,"").replace(/<circle cx="32" cy="32" r="30"[^>]*\/>/,""); }
+const artPal = it => it ? (it.set && ART_PAL[it.set] ? ART_PAL[it.set] : RAR_PAL[Math.min(5,it.ri)]) : null;
+function knightGear(sk){
+  const E=S.equip, ar=artPal(E.armure), bo=artPal(E.bottes), skin = sk && sk.id!=="classique" ? sk.pal : null;
+  const P = skin || (ar ? {arm:ar[0], trim:ar[1], cape:ar[2]} : {arm:"#c5ccd6", trim:"#5b6b80", cape:"#c92a2a"});
+  const legs = bo ? bo[0] : P.trim, shoes = bo ? bo[1] : "#3b2a1a";
+  const piece = (it, x, y, w, h) => it ? `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 64 64" overflow="visible">${artInner(it.slot, it.set, it.ri)}</svg>` : "";
+  const sword = E.arme ? piece(E.arme, 24, -2, 46, 46)
+    : `<rect x="45" y="10" width="4.5" height="32" rx="1.5" fill="#dfe6ee" stroke="#3d3d48" stroke-width="1.2"/><rect x="40.5" y="40" width="13" height="3.5" rx="1.5" fill="#8a6a48"/>`;
+  const shield = E.bouclier ? piece(E.bouclier, 0, 28, 28, 28)
+    : `<path d="M6 33 h17 v10 q0 11 -8.5 15 q-8.5 -4 -8.5 -15 z" fill="#2f6fdf" stroke="${P.trim}" stroke-width="2"/>`;
+  const helm = E.casque ? piece(E.casque, 14, -2, 34, 34)
+    : `<path d="M20 19 Q20 4 31 4 Q42 4 42 19 L42 27 Q31 31 20 27 Z" fill="${P.arm}" stroke="${P.trim}" stroke-width="2"/><rect x="24" y="15" width="14" height="3.2" rx="1.6" fill="#1d1d2b"/>`;
+  const tal = E.talisman ? piece(E.talisman, 25.5, 30, 11, 11) : `<path d="M31 33 l4 4.5 l-4 4.5 l-4 -4.5 z" fill="${P.cape}"/>`;
+  return `<svg viewBox="0 0 64 72" class="knsvg" aria-hidden="true">
+    <path d="M19 30 Q9 52 13 67 L31 62 Z" fill="${P.cape}"/>
+    <rect x="22" y="52" width="7" height="13" rx="3" fill="${legs}" stroke="#2d2216" stroke-width="1"/><rect x="33" y="52" width="7" height="13" rx="3" fill="${legs}" stroke="#2d2216" stroke-width="1"/>
+    <rect x="20" y="62" width="10" height="6" rx="2.5" fill="${shoes}"/><rect x="32" y="62" width="10" height="6" rx="2.5" fill="${shoes}"/>
+    <path d="M18 30 Q31 24 44 30 L42 54 Q31 58 20 54 Z" fill="${P.arm}" stroke="${P.trim}" stroke-width="2"/>
+    <rect x="20" y="46" width="22" height="4" fill="${P.trim}"/>${tal}
+    <g class="ksword">${sword}</g>
+    <circle cx="46" cy="41" r="4.2" fill="${P.arm}" stroke="${P.trim}" stroke-width="1.5"/>
+    ${shield}
+    ${helm}
+  </svg>`;
+}
 let knightSig = "";
 function renderKnight(force){
   const el=$("#knight"); if(!el) return;
   const sk = SKINS.find(k=>k.id===(S.skins&&S.skins.hero)) || SKINS[0];
-  const col = k => S.equip[k] ? RAR[S.equip[k].ri].c : null;
-  const eq = {helm: sk.pal ? null : col("casque"), weap: col("arme"), shield: col("bouclier")};
-  const sig = sk.id+"|"+eq.helm+"|"+eq.weap+"|"+eq.shield;
-  if(sig!==knightSig || force){ knightSig=sig; el.innerHTML = knightSVG(sk.pal, eq); }
+  const sig = sk.id+"|"+SLOTKEYS.map(k=>{ const it=S.equip[k]; return it ? it.ri+(it.set||"") : "-"; }).join(",");
+  if(sig!==knightSig || force){ knightSig=sig; el.innerHTML = knightGear(sk); }
 }
 let famSig = "", famIdx = 0, famAnimT = 0;
 function renderFamRow(){
@@ -3219,10 +3244,10 @@ document.addEventListener("click", e=>{
   if(t.dataset.shinv){ if(invSel){ const id=t.dataset.shinv; invSel.has(id)?invSel.delete(id):invSel.add(id); renderLoot(); return; } openSheet("inv", t.dataset.shinv); return; }
   if(t.id==="fuseOpen"){ openFusions(); return; }
   if(t.id==="eqBest"){ equipBestAll(); return; }
-  if(t.id==="ingBuy"){ const a=PREMIUM.find(x=>x.id==="ingc"), b2=PREMIUM.find(x=>x.id==="ingb"); mktReset();
-    const left=m=>m.max-(S.market.n["p_"+m.id]||0);
-    modal("Acheter des lingots", `Vous avez <b>${S.ingots||0} §lingot§</b> et <b>${S.crystals} 💎</b>.<br><small>Limites par jour : ${left(a)} sac${left(a)>1?"s":""}, ${left(b2)} coffre${left(b2)>1?"s":""}.</small>`,
-      [{t:`20 §lingot§<small>💎 ${a.cost}</small>`, cls:"gold", f:()=>{ premiumBuy("ingc"); renderLoot(); }}, {t:`120 §lingot§<small>💎 ${b2.cost}</small>`, cls:"violet", f:()=>{ premiumBuy("ingb"); renderLoot(); }}, {t:"Fermer"}]); return; }
+  if(t.id==="ingBuy"){ mktReset();
+    const P=["ing50","ing100","ing500","ing1000"].map(id=>PREMIUM.find(x=>x.id===id));
+    modal("Acheter des lingots", `Vous avez <b>${S.ingots||0} §lingot§</b> et <b>${S.crystals} 💎</b>.<br><small>1 lingot = 1 objet forgé. Plus le pack est gros, moins le lingot coûte cher.</small>`,
+      P.map((m,k)=>({t:`${m.n.replace(/^[^0-9]*/,"").replace(" lingots","")} §lingot§<small>💎 ${fmt(m.cost)}</small>`, cls:k>=2?"violet":"gold", f:()=>{ if(S.crystals<m.cost){ toast("Pas assez de cristaux"); return; } premiumBuy(m.id); renderLoot(); }}))); return; }
   if(t.id==="invBuy"){ const m=PREMIUM.find(x=>x.id==="invx"), c=m.cost; modal("Agrandir l'inventaire", `+10 places (${invMax()} → ${invMax()+10}) pour <b>${c} 💎</b>. Vous avez ${S.crystals} 💎.`, [{t:"Annuler"},{t:`Acheter · ${c} 💎`, cls:"gold", f:()=>{ if(S.crystals<c){ toast("Pas assez de cristaux"); return; } premiumBuy("invx"); dirty.loot=true; renderLoot(); }}]); return; }
   if(t.id==="invSelBtn"){ invSel = invSel ? null : new Set(); renderLoot(); return; }
   if(t.id==="invSelCom"){ S.inv.filter(it=>it.ri===0 && (invFilter==="all"||it.slot===invFilter)).forEach(it=>invSel.add(it.id)); renderLoot(); return; }
@@ -4004,8 +4029,10 @@ const PREMIUM = [
   {id:"lpet",   ic:"🐾", n:"Faveur légendaire",        d:()=>"Votre prochaine invocation de familier sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("fams"), give:()=>{ S.favPet=1; }, once:()=>!!S.favPet},
   {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.favSkl=1; }, once:()=>!!S.favSkl},
   {id:"slot",   ic:"➕", n:"Place de familier en plus", d:()=>S.extraSlot ? "Déjà achetée" : "Une place de plus dans l'équipe, pour toujours", cost:500, max:1, ok:()=>unlocked("fams"), once:()=>S.extraSlot>0, give:()=>{ S.extraSlot=1; calc(); dirty.fams=true; }},
-  {id:"ingc",   ic:"§lingot§", n:"Sac de 20 lingots",   d:()=>`Pour forger 20 objets · vous en avez ${S.ingots||0}`, cost:40, max:5, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+20; dirty.loot=true; }},
-  {id:"ingb",   ic:"§lingot§", n:"Coffre de 120 lingots", d:()=>"Le plus avantageux : 120 lingots d'un coup", cost:200, max:2, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+120; dirty.loot=true; }},
+  {id:"ing50",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>`Pour forger 50 objets · vous en avez ${S.ingots||0}`, cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
+  {id:"ing100",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"4,8 💎 le lingot", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
+  {id:"ing500",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"4,4 💎 le lingot", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
+  {id:"ing1000", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"4,2 💎 le lingot, le plus avantageux", cost:4200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
   {id:"invx",   ic:"📦", n:"+10 places d'inventaire",   d:()=>`Inventaire : ${invMax()} places${(S.invX||0)>=INV_BUY_MAX?" (maximum)":` · jusqu'à ${INV_BASE+INV_STEP*INV_BUY_MAX}`}`, get cost(){ return 80+40*(S.invX||0); }, max:99, once:()=>(S.invX||0)>=INV_BUY_MAX, give:()=>{ S.invX=(S.invX||0)+1; dirty.loot=true; }},
   {id:"cls",    ic:"🎭", n:"Changer de classe",         d:()=>"Choisissez une autre classe déjà débloquée, sans attendre la Renaissance", cost:100, max:3, ok:()=>Object.keys(S.classes||{}).length>1, give:()=>{ setTimeout(()=>classPicker(null,null), 200); }},
 ];
