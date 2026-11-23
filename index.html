@@ -938,6 +938,11 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .royup{display:flex;flex-direction:column;align-items:center;line-height:1.1;flex:none;max-width:118px}.royup small{font-size:10px;white-space:normal}
 .roystock{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;font-weight:800}.roystock .btn{padding:3px 10px}
 .expcur.done{box-shadow:inset 0 0 0 3px #2fae4f}
+.patpct{display:flex;gap:3px;margin:4px 0;flex-wrap:wrap}.patpct .chip{padding:2px 6px;font-size:11px;min-width:0}.exprow .mid{min-width:0}
+.royic.big{width:64px;height:64px;margin:0 auto 6px}.royic.big .sp{width:44px;height:44px}
+.smoke circle{animation:smk 3s ease-out infinite}@keyframes smk{0%{opacity:.9;translate:0 0}100%{opacity:0;translate:4px -14px}}
+.glow{animation:glw 1.6s ease-in-out infinite}@keyframes glw{50%{opacity:.7}}
+@media (prefers-reduced-motion:reduce){.smoke circle,.glow{animation:none}}
 </style>
 </head>
 <body>
@@ -953,7 +958,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1955";
+var BUILD_ID = "20261123-2008";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2554,7 +2559,7 @@ let invSel = null;   // sélection multiple dans l'inventaire (null = désactiv�
 function renderLoot(){
   const F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100, nf=fusionGroups().length;
   const band = sumBand({ic:spr("lingot"), cid:"ingB", val:S.ingots||0, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
-      btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>§lingot§ 1</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>§lingot§ 9</small></button><button class="btn gold" id="forge100" data-fn="100">×100<small>§lingot§ 85</small></button>`,
+      btns:[1,10,100].map(n=>`<button class="btn gold" id="forge${n}" data-fn="${n}" ${(S.ingots||0)<ingCost(n)?"disabled":""}>×${n}<small>§lingot§ ${ingCost(n)}</small></button>`).join(""),
       ft:`<button class="linkbtn" id="ingBuy">Acheter des lingots</button> · <button class="linkbtn" id="ingHelp">En gagner</button> · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard');
   const worn = SLOTKEYS.map(k=>{ const it=S.equip[k], sd=SLOTS[k];
     return it ? itemTile(it, `data-sheq="${k}" title="${sd.n} · ${it.name}"`, (it.set?`<span class="tset">${SETS[it.set].ic}</span>`:"")+`<span class="canup">▲</span>`) : `<div class="tile empty" title="${sd.n}"><span class="ti">${sd.ic}</span></div>`; }).join("");
@@ -2709,6 +2714,9 @@ function openSheet(kind, id){
     title = m.title;
     body = `<div class="small">${m.from} · ${m.date.split("-").reverse().join("/")}</div><div class="msgbody">${m.body}</div>${m.reward?`<div class="giftbox">🎁 ${rewardTxt(m.reward)}${gift?"":" <span class='up'>· récupéré</span>"}</div>`:""}`;
     acts = [ ...(gift?[{t:"Récupérer le cadeau", act:"claimMail", cls:"gold"}]:[]), {t:"← Courrier", act:"back"} ];
+  } else if(kind==="roy"){
+    if(!S.city){ closeSheet(); return; }
+    const sh=roySheet(id); title=sh.title; body=sh.body; acts=sh.acts;
   } else if(kind==="bld"){
     if(!S.city){ closeSheet(); return; }
     const sh=bldSheet(id); title=sh.title; body=sh.body; acts=sh.acts;
@@ -2745,6 +2753,8 @@ function sheetAct(act){
     dirty.loot=true; closeSheet(); return;
   }
   if(kind==="bld" && act==="bld"){ upgradeBld(id); openSheet(kind,id); return; }
+  if(kind==="roy" && act==="roy"){ upgradeRoy(id); openSheet(kind,id); return; }
+  if(kind==="roy" && act==="rcol"){ const n=collect(id); if(n){ Sfx.play("coin"); toast(`🧺 +${n} ${id==="fonderie"?spr("lingot"):spr("boule")}`); save(); dirty.city=true; } openSheet(kind,id); return; }
   if((kind==="daily"||kind==="rewards") && act==="claimDaily"){ claimDaily(); openSheet("rewards"); return; }
   if(act.startsWith("rtab:")){ rewTab=act.slice(5); openSheet("rewards"); return; }
   if(act.startsWith("q:")){ claimQuest(+act.slice(2)); openSheet("rewards"); return; }
@@ -3258,7 +3268,7 @@ function modal(title, body, acts){
 }
 
 document.addEventListener("click", e=>{
-  const t = e.target.closest("button, [data-collect], [data-shbld], [data-tfloor], #goal.raidgo, [data-rkp]"); if(!t) return;
+  const t = e.target.closest("button, [data-collect], [data-shroy], [data-shbld], [data-tfloor], #goal.raidgo, [data-rkp]"); if(!t) return;
   if(t.tagName==="BUTTON" && !t.dataset.skill && !t.disabled) Sfx.play(t.closest("nav") || t.dataset.sub || t.dataset.dtab || t.dataset.shoptab || t.dataset.ftab ? "tab" : "ui");
   if(t.dataset.fuse && t.closest("#modal")){ const [sl,ri]=t.dataset.fuse.split("|"); fuse(sl,+ri); if(!$("#summon").classList.contains("on")) openFusions(); else $("#modal").classList.remove("on"); return; }
   if(t.id==="mClose"){ if(sheet) closeSheet(); else $("#modal").classList.remove("on"); return; }
@@ -3328,7 +3338,9 @@ document.addEventListener("click", e=>{
   if(t.dataset.shpet){ openSheet("pet", t.dataset.shpet); return; }
   if(t.dataset.collect){ const id=t.dataset.collect, n=collect(id); if(n){ Sfx.play("coin"); vibe(8); const ic=id==="fonderie"?spr("lingot"):id==="menagerie"?spr("boule"):CRES[STOCK_KEYS[id]].ic; toast(`🧺 +${fmt(n)} ${ic}`); if(t.classList.contains("bub")){ t.style.display="none"; renderCityRes(); } else dirty.city=true; save(); } return; }
   if(t.dataset.roy){ upgradeRoy(t.dataset.roy); return; }
+  if(t.dataset.shroy){ openSheet("roy", t.dataset.shroy); return; }
   if(t.dataset.exp){ expSend(t.dataset.exp); return; }
+  if(t.dataset.pat){ S.city.patPct=+t.dataset.pat; renderCity(); return; }
   if(t.dataset.shbld){ openSheet("bld", t.dataset.shbld); return; }
   if(t.id==="btnDaily"){ rewTab = dailyReady() ? "cal" : (S.quests.list.some(q=>!q.claimed && q.prog>=q.goal) ? "quests" : (ACH.some(achReady) ? "ach" : mailUnread()>0 ? "mail" : "quests")); openSheet("rewards"); return; }
   if(t.dataset.skill){ useSkill(t.dataset.skill); return; }
@@ -3451,27 +3463,29 @@ function upgradeRoy(id){
 }
 /* Expéditions : on envoie des soldats, ils reviennent avec du butin */
 const EXPS = [
-  {id:"court", n:"Patrouille",       h:1, sol:10, ic:"§carte§"},
-  {id:"moyen", n:"Raid en forêt",    h:4, sol:25, ic:"§chariot§"},
-  {id:"long",  n:"Grande expédition", h:8, sol:50, ic:"§couronne§"},
+  {id:"court", n:"Patrouille",       h:1, pct:true, ic:"§carte§"},
+  {id:"moyen", n:"Raid en forêt",    h:4, sol:25, ic:"§chariot§", fixed:{ingots:40, orbs:2}},
+  {id:"long",  n:"Grande expédition", h:8, sol:50, ic:"§couronne§", fixed:{ingots:90, orbs:5, runes:3, item:true}},
 ];
-function expLoot(e){
-  const c=S.city, m=1+0.1*(c.lv.caserne||0)+0.03*(c.raid||1);
-  const prod=k=>Math.ceil(prodOf({or:"mine",bois:"scierie",pierre:"carriere"}[k], c.lv[{or:"mine",bois:"scierie",pierre:"carriere"}[k]])*60*e.h*0.6);
-  return {ingots:Math.round((e.h===1?6:e.h===4?22:45)*m), orbs:e.h===1?0:Math.round((e.h===4?2:5)*m), runes:e.h===8?Math.round(3*m):0, item:e.h===8,
-          or:prod("or"), bois:prod("bois"), pierre:prod("pierre")};
+const patSent = () => Math.max(1, Math.floor((S.city.soldiers||0)*(S.city.patPct||50)/100));
+function expLoot(e, sent){
+  if(e.fixed) return {...e.fixed};
+  const c=S.city, n = sent ?? patSent(), share = n/Math.max(1,cityPop()), m = share*2*(1+0.1*(c.lv.caserne||0));   // toute l'armée ≈ 2 h de production, plus avec la caserne
+  const prod=id=>Math.ceil(prodOf(id, c.lv[id])*60*m);
+  return {or:prod("mine"), bois:prod("scierie"), pierre:prod("carriere")};
 }
-const expLootTxt = l => [l.ingots&&`§lingot§ ${l.ingots}`, l.orbs&&`🔮 ${l.orbs}`, l.runes&&`✨ ${l.runes} runes`, l.item&&"🎁 un objet", `💰🌲🪨 ${fmt(l.or)}`].filter(Boolean).join(" · ");
+const expLootTxt = l => [l.ingots&&`§lingot§ ${l.ingots}`, l.orbs&&`🔮 ${l.orbs}`, l.runes&&`✨ ${l.runes} runes`, l.item&&"🎁 un objet", l.or&&`💰 ${fmt(l.or)} · 🌲 ${fmt(l.bois)} · 🪨 ${fmt(l.pierre)}`].filter(Boolean).join(" · ");
 function expSend(id){
   const c=S.city, e=EXPS.find(x=>x.id===id); if(!e || c.exp) return;
-  if(c.soldiers<e.sol){ toast(`Il faut ${e.sol} soldats disponibles.`); return; }
-  c.soldiers-=e.sol; c.exp={id, end:Date.now()+e.h*3600e3, sol:e.sol, ad:false};
+  const need = e.pct ? patSent() : e.sol;
+  if(c.soldiers<need || need<1){ toast(e.pct?"Aucun soldat disponible.":`Il faut ${e.sol} soldats disponibles.`); return; }
+  c.soldiers-=need; c.exp={id, end:Date.now()+e.h*3600e3, sol:need, ad:false};
   Sfx.play("success"); toast(`${e.n} : départ ! Retour dans ${e.h} h.`); dirty.city=true; save();
 }
 function expClaim(){
   const c=S.city, x=c.exp; if(!x || Date.now()<x.end) return;
-  const e=EXPS.find(y=>y.id===x.id), l=expLoot(e);
-  S.ingots=(S.ingots||0)+l.ingots; S.orbs+=l.orbs; c.res.or+=l.or; c.res.bois+=l.bois; c.res.pierre+=l.pierre;
+  const e=EXPS.find(y=>y.id===x.id), l=expLoot(e, x.sol);
+  S.ingots=(S.ingots||0)+(l.ingots||0); S.orbs+=(l.orbs||0); c.res.or+=(l.or||0); c.res.bois+=(l.bois||0); c.res.pierre+=(l.pierre||0);
   if(l.runes){ S.runes=S.runes||{}; const ks=Object.keys(RUNES); for(let i=0;i<l.runes;i++){ const k=pick(ks); S.runes[k]=(S.runes[k]||0)+1; } }
   const cards=[];
   if(l.item){ const ri = Math.random()<0.15 ? 4 : 3, it=makeItem(Math.max(1,craftLvl()), ri); placeItem(it); dirty.loot=true; cards.push({ic:SLOTS[it.slot].ic, n:it.name, ri, tag:"Butin d'expédition"}); }
@@ -3663,6 +3677,11 @@ function renderCity(){
     renderCityRes(); requestAnimationFrame(updBubbles); return;
   }
   if(cityTab==="royaume"){
+    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 Tout récolter</button></div>
+      <div class="villagewrap">${royalSVG()}<div class="vhint">👆 Touchez un bâtiment royal : ils rendent votre chevalier plus fort pour toujours</div></div>`;
+    renderCityRes(); requestAnimationFrame(updBubbles); return;
+  }
+  if(cityTab==="royaumeListe"){
     const rows = ROY.map(b=>{ const L=royLv(b.id), mx=L>=ROY_MAX, cst=royCost(b), ok=!mx && affordC(cst);
       const st = (b.id==="fonderie"||b.id==="menagerie") && L ? `<div class="roystock"><span>${b.id==="fonderie"?"§lingot§":"🔮"} ${Math.floor(c.stock[b.id]||0)} / ${Math.floor(stockCap(b.id))}</span><button class="btn green sm" data-collect="${b.id}" ${(c.stock[b.id]||0)>=1?"":"disabled"}>Récolter</button></div>` : "";
       return `<div class="royrow"><div class="royic">${b.ic}</div><div class="mid"><div class="t">${b.n}</div><div class="lv">${L?"Niveau "+L+(mx?" (max)":""):"À construire"}</div>
@@ -3679,11 +3698,12 @@ function renderCity(){
       top = `<div class="card expcur ${done?"done":""}"><div class="chead"><h2>${cur.ic} ${cur.n}</h2><span class="small">${x.sol} soldats</span></div>
         <div class="prog"><i id="expBar" style="width:${Math.min(100,(1-left/(cur.h*3600e3))*100)}%"></i></div>
         <div class="small" id="expLeft" style="margin:4px 0 8px">${done?"De retour avec le butin !":"Retour dans "+fmtLeft(left)}</div>
-        <div class="small">Butin : ${expLootTxt(expLoot(cur))}</div>
+        <div class="small">Butin : ${expLootTxt(expLoot(cur, x.sol))}</div>
         <div class="btnrow" style="margin-top:8px">${done?`<button class="btn gold" id="expClaim">🎁 Récupérer le butin</button>`:x.ad?"":`<button class="btn blue sm" id="expAd">📺 −30 min</button>`}</div></div>`;
-    } else top = `<div class="card"><div class="small">Envoyez des soldats en mission. Pendant leur absence, ils ne défendent pas le fief. Plus la caserne est haute, plus le butin est gros.</div><div class="small" style="margin-top:4px">Soldats disponibles : <b>${Math.floor(c.soldiers)}</b> / ${cityPop()}</div></div>`;
-    const list = EXPS.map(e=>{ const l=expLoot(e), ok=!x && c.soldiers>=e.sol;
-      return `<div class="row exprow"><div class="ic">${e.ic}</div><div class="mid"><div class="t">${e.n}<span class="lv">${e.h} h · ${e.sol} soldats</span></div><div class="d">${expLootTxt(l)}</div></div>
+    } else top = `<div class="card"><div class="small">Envoyez des soldats en mission (une à la fois). Pendant leur absence, ils ne défendent pas le fief. La Patrouille rapporte plus si vous envoyez plus de soldats et si votre caserne est haute.</div><div class="small" style="margin-top:4px">Soldats disponibles : <b>${Math.floor(c.soldiers)}</b> / ${cityPop()}</div></div>`;
+    const list = EXPS.map(e=>{ const l=expLoot(e), need=e.pct?patSent():e.sol, ok=!x && c.soldiers>=need && need>=1;
+      const pick = e.pct ? `<div class="patpct">${[25,50,75,100].map(p=>`<button class="chip ${(c.patPct||50)===p?"on":""}" data-pat="${p}">${p}%</button>`).join("")}</div>` : "";
+      return `<div class="row exprow"><div class="ic">${e.ic}</div><div class="mid"><div class="t">${e.n}<span class="lv">${e.h} h · ${need} soldat${need>1?"s":""}</span></div>${pick}<div class="d">${expLootTxt(l)}</div></div>
         <button class="btn ${ok?"gold":""} sm" data-exp="${e.id}" ${ok?"":"disabled"}>Envoyer</button></div>`; }).join("");
     el.innerHTML = seg + top + `<div class="card grow"><h2>Missions</h2><div class="pager" data-pg="exp"><div class="pgsrc list">${list}</div></div></div>`;
     return;
@@ -3707,9 +3727,95 @@ function renderCity(){
   </div></div>`;
   renderCityRes();
 }
+/* ---------- Quartier royal ---------- */
+const RPOS = {
+  forge:     {x:78,  y:198}, temple:   {x:284, y:198},
+  biblio:    {x:78,  y:294}, marche:   {x:284, y:294},
+  fonderie:  {x:78,  y:388}, menagerie:{x:284, y:388},
+};
+const rTier = L => L>=20 ? 3 : L>=10 ? 2 : 1;
+function rForge(x,y,L){ const t=rTier(L), wall=t>=2?"#9aa1b0":"#8c6a4a", roof=t>=3?"#f2c94c":"#4a3b5c";
+  return `<ellipse cx="${x}" cy="${y+3}" rx="44" ry="7" fill="#0002"/>
+  <rect x="${x-34}" y="${y-34}" width="58" height="34" fill="${wall}" stroke="#3a2a1a" stroke-width="2"/>
+  <path d="M${x-40} ${y-34} L${x-5} ${y-56} L${x+30} ${y-34} Z" fill="${roof}" stroke="#2d2216" stroke-width="2"/>
+  <rect x="${x+8}" y="${y-70}" width="10" height="26" fill="#6b4a33" stroke="#2d2216" stroke-width="2"/>
+  <g class="smoke"><circle cx="${x+13}" cy="${y-76}" r="5" fill="#ccc9"/><circle cx="${x+18}" cy="${y-86}" r="7" fill="#ccc7"/></g>
+  <rect x="${x-24}" y="${y-24}" width="20" height="24" rx="2" fill="#2b1a10"/><rect x="${x-22}" y="${y-20}" width="16" height="18" fill="#ff8a3d" class="glow"/>
+  <path d="M${x+28} ${y} h18 l-3 -8 h-12 z M${x+26} ${y-12} h22 v4 h-22z" fill="#4a4f5c" stroke="#2d2216" stroke-width="1.5"/>
+  ${t>=2?`<line x1="${x-30}" y1="${y-34}" x2="${x-30}" y2="${y-60}" stroke="#5e3a1d" stroke-width="2"/><path class="flag" d="M${x-30} ${y-60} l14 4 -14 5z" fill="#e0313f"/>`:""}
+  ${t>=3?`<rect x="${x-34}" y="${y-36}" width="58" height="4" fill="#f2c94c"/>`:""}`; }
+function rTemple(x,y,L){ const t=rTier(L), gold=t>=3;
+  return `<ellipse cx="${x}" cy="${y+3}" rx="46" ry="7" fill="#0002"/>
+  <rect x="${x-40}" y="${y-6}" width="80" height="6" fill="#e9e4d8" stroke="#8a8270" stroke-width="1.5"/><rect x="${x-36}" y="${y-11}" width="72" height="5" fill="#f4efe3" stroke="#8a8270" stroke-width="1.5"/>
+  ${[0,1,2,3].map(i=>`<rect x="${x-30+i*18}" y="${y-44}" width="8" height="33" fill="#fbf8f0" stroke="#8a8270" stroke-width="1.5"/>`).join("")}
+  <rect x="${x-36}" y="${y-49}" width="72" height="6" fill="#f4efe3" stroke="#8a8270" stroke-width="1.5"/>
+  <path d="M${x-38} ${y-49} L${x} ${y-68} L${x+38} ${y-49} Z" fill="${gold?"#f2c94c":"#f4efe3"}" stroke="#8a8270" stroke-width="1.5"/>
+  ${t>=2?`<path d="M${x-14} ${y-66} a14 14 0 0 1 28 0" fill="${gold?"#ffd43b":"#9fd3ff"}" stroke="#8a8270" stroke-width="1.5"/><line x1="${x}" y1="${y-80}" x2="${x}" y2="${y-90}" stroke="#8a8270" stroke-width="2"/><circle cx="${x}" cy="${y-91}" r="3" fill="#ffd43b"/>`:""}
+  <path d="M${x} ${y-30} c-6 -8 -14 0 0 10 c14 -10 6 -18 0 -10z" fill="#e03131"/>`; }
+function rBiblio(x,y,L){ const t=rTier(L), roof=t>=3?"#f2c94c":"#2f4ea8";
+  const tw=(cx,h,w)=>`<rect x="${cx-w/2}" y="${y-h}" width="${w}" height="${h}" fill="#c9b48a" stroke="#5b4630" stroke-width="2"/><path d="M${cx-w/2-5} ${y-h} L${cx} ${y-h-26} L${cx+w/2+5} ${y-h} Z" fill="${roof}" stroke="#1e2f6b" stroke-width="2"/>
+    <rect x="${cx-5}" y="${y-h+10}" width="10" height="13" rx="5" fill="#ffe8a3" stroke="#5b4630" stroke-width="1.5"/>`;
+  return `<ellipse cx="${x}" cy="${y+3}" rx="40" ry="7" fill="#0002"/>${t>=2?tw(x+22,40,22):""}${tw(x-4,56,30)}
+  <path d="M${x-14} ${y} v-14 a10 10 0 0 1 20 0 v14z" fill="#5a3a22"/>
+  <g transform="translate(${x-38},${y-18})"><rect width="16" height="12" rx="1" fill="#e03131" stroke="#5b4630" stroke-width="1.2"/><rect x="2" y="2" width="12" height="2" fill="#fff8"/></g>`; }
+function rMarche(x,y,L){ const t=rTier(L), n=t+1;
+  const stall=(cx,col)=>`<rect x="${cx-14}" y="${y-22}" width="28" height="22" fill="#c08a52" stroke="#5b3a1e" stroke-width="1.5"/>
+    <path d="M${cx-18} ${y-22} L${cx-14} ${y-36} L${cx+14} ${y-36} L${cx+18} ${y-22} Z" fill="${col}" stroke="#5b3a1e" stroke-width="1.5"/>
+    <path d="M${cx-10} ${y-36} L${cx-12} ${y-22} M${cx} ${y-36} V${y-22} M${cx+10} ${y-36} L${cx+12} ${y-22}" stroke="#fff" stroke-width="3" opacity=".8"/>
+    <circle cx="${cx-6}" cy="${y-14}" r="3.5" fill="#e03131"/><circle cx="${cx+1}" cy="${y-14}" r="3.5" fill="#ffd43b"/><circle cx="${cx+8}" cy="${y-14}" r="3.5" fill="#40c057"/>`;
+  const cols=["#e03131","#3b5bdb","#f08c00","#7048e8"], xs=n===2?[x-17,x+17]:n===3?[x-30,x,x+30]:[x-36,x-12,x+12,x+36];
+  return `<ellipse cx="${x}" cy="${y+3}" rx="${n*16+8}" ry="7" fill="#0002"/>${xs.map((cx,i)=>stall(cx,cols[i])).join("")}
+  ${t>=3?`<g transform="translate(${x-6},${y-4})"><ellipse cx="6" cy="2" rx="9" ry="3" fill="#e59a00"/><circle cx="2" cy="-1" r="3" fill="#ffd43b"/><circle cx="8" cy="-2" r="3" fill="#ffd43b"/></g>`:""}`; }
+function rFonderie(x,y,L){ const t=rTier(L), pile=t===1?2:t===2?4:7;
+  return `<ellipse cx="${x}" cy="${y+3}" rx="46" ry="7" fill="#0002"/>
+  <path d="M${x-36} ${y} V${y-30} q18 -14 36 0 V${y}z" fill="#9c4b2e" stroke="#4a2414" stroke-width="2"/>
+  <path d="M${x-26} ${y} v-12 a8 8 0 0 1 16 0 v12z" fill="#ff6b1a" class="glow"/>
+  <rect x="${x+2}" y="${y-58}" width="14" height="58" fill="#8a3b2b" stroke="#4a2414" stroke-width="2"/>${t>=2?`<rect x="${x+20}" y="${y-46}" width="11" height="46" fill="#8a3b2b" stroke="#4a2414" stroke-width="2"/>`:""}
+  <g class="smoke"><circle cx="${x+9}" cy="${y-64}" r="6" fill="#bbb9"/><circle cx="${x+14}" cy="${y-76}" r="8" fill="#bbb7"/></g>
+  ${Array.from({length:pile},(_,i)=>{ const r=Math.floor(i/3), c=i%3; return `<path transform="translate(${x+22+c*7-r*3},${y-4-r*5})" d="M0 0 h7 l-1.5 -4 h-4z" fill="#ffc93c" stroke="#a07a1a" stroke-width="1"/>`; }).join("")}`; }
+function rMenagerie(x,y,L){ const t=rTier(L), an=t===1?1:t===2?2:3;
+  const animal=(ax,ay,c)=>`<ellipse cx="${ax}" cy="${ay}" rx="8" ry="5.5" fill="${c}" stroke="#4a3a2a" stroke-width="1.2"/><circle cx="${ax+8}" cy="${ay-3}" r="3.6" fill="${c}" stroke="#4a3a2a" stroke-width="1.2"/><circle cx="${ax+9}" cy="${ay-4}" r=".9" fill="#222"/>`;
+  return `<ellipse cx="${x}" cy="${y+3}" rx="48" ry="8" fill="#0002"/><ellipse cx="${x}" cy="${y-6}" rx="44" ry="12" fill="#a8e07c"/>
+  ${[...Array(9)].map((_,i)=>`<rect x="${x-44+i*11}" y="${y-16}" width="3" height="14" fill="#8a5a2b"/>`).join("")}<rect x="${x-44}" y="${y-12}" width="92" height="3" fill="#a06a35"/>
+  <rect x="${x-34}" y="${y-38}" width="24" height="20" fill="#c08a52" stroke="#5b3a1e" stroke-width="1.5"/><path d="M${x-38} ${y-38} L${x-22} ${y-50} L${x-6} ${y-38}Z" fill="#8a3b2b" stroke="#5b3a1e" stroke-width="1.5"/>
+  ${[["#f4efe3",x+2,y-6],["#d9a066",x+24,y-4],["#868e96",x-10,y-2]].slice(0,an).map(a=>animal(a[1],a[2],a[0])).join("")}
+  <g transform="translate(${x+30},${y-44})"><line x1="0" y1="0" x2="0" y2="26" stroke="#5e3a1d" stroke-width="2"/><rect x="-11" y="-2" width="22" height="16" rx="3" fill="${t>=3?"#f2c94c":"#fff4d6"}" stroke="#5e3a1d" stroke-width="1.5"/><use href="#sp-patte" x="-7" y="0" width="14" height="13"/></g>`; }
+const RDRAW = {forge:rForge, temple:rTemple, biblio:rBiblio, marche:rMarche, fonderie:rFonderie, menagerie:rMenagerie};
+function royalSVG(){
+  const c=S.city;
+  const g = id => { const P=RPOS[id], b=royDef(id), L=royLv(id), can=L<ROY_MAX && affordC(royCost(b));
+    const art = L ? RDRAW[id](P.x,P.y,L) : vSite(P.x, P.y-4, 64);
+    const bub = (id==="fonderie"||id==="menagerie") && L ? `<g class="bub" data-collect="${id}" style="display:none" transform="translate(${P.x-62} ${P.y-68})"><circle cx="16" cy="16" r="17" fill="#fff" stroke="#2fae4f" stroke-width="3"/><use href="#sp-${id==="fonderie"?"lingot":"boule"}" x="5" y="4" width="22" height="22"/><rect x="-4" y="31" width="40" height="13" rx="6" fill="#2fae4f"/><text class="bubn" x="16" y="41" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">0</text></g>` : "";
+    return `<g class="bld ${can?"can":""}" data-shroy="${id}" role="button" tabindex="0" aria-label="${b.n} niveau ${L}"><rect x="${P.x-56}" y="${P.y-92}" width="112" height="104" fill="transparent"/>${art}${vLabel(P.x, P.y+14, b.n)}${vBadge(P.x+40, P.y-64, L)}</g>${bub}`; };
+  return `<svg class="vsvg" viewBox="0 0 360 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quartier royal">
+  <defs><linearGradient id="rsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf8a"/><stop offset="1" stop-color="#ffe9c4"/></linearGradient>
+  <pattern id="rpave" width="20" height="12" patternUnits="userSpaceOnUse"><rect width="20" height="12" fill="#d8cbb1"/><path d="M0 0 H20 M0 6 H20 M10 0 V6 M0 6 V12 M20 6 V12" stroke="#bfae8e" stroke-width="1"/></pattern></defs>
+  <rect width="360" height="130" fill="url(#rsky)"/>
+  <g opacity=".95"><rect x="120" y="44" width="120" height="86" fill="#e9dcc2" stroke="#8a7350" stroke-width="2"/>
+  ${[0,1,2,3,4,5,6,7].map(i=>`<rect x="${120+i*15.5}" y="36" width="9" height="9" fill="#e9dcc2" stroke="#8a7350" stroke-width="1.5"/>`).join("")}
+  <rect x="100" y="20" width="30" height="110" fill="#e1d2b4" stroke="#8a7350" stroke-width="2"/><path d="M96 20 L115 -4 L134 20Z" fill="#3557d6" stroke="#1e2f6b" stroke-width="2"/>
+  <rect x="230" y="20" width="30" height="110" fill="#e1d2b4" stroke="#8a7350" stroke-width="2"/><path d="M226 20 L245 -4 L264 20Z" fill="#3557d6" stroke="#1e2f6b" stroke-width="2"/>
+  <path d="M160 130 v-34 a20 20 0 0 1 40 0 v34z" fill="#5a3a22"/><rect x="170" y="56" width="20" height="16" fill="#f2c94c" stroke="#8a7350"/><use href="#sp-couronne" x="173" y="57" width="14" height="14"/>
+  <path class="flag" d="M115 -4 l16 5 -16 6z" fill="#e0313f"/><path class="flag" d="M245 -4 l16 5 -16 6z" fill="#e0313f"/></g>
+  <rect y="128" width="360" height="312" fill="#8fdc6a"/>
+  <path d="M150 128 H210 L230 440 H130Z" fill="url(#rpave)"/>
+  <circle cx="180" cy="262" r="30" fill="url(#rpave)" stroke="#bfae8e" stroke-width="2"/><circle cx="180" cy="262" r="20" fill="#5ec8f2" stroke="#8a7350" stroke-width="3"/><circle cx="180" cy="262" r="5" fill="#a8e6ff"/><path d="M180 246 v-10" stroke="#a8e6ff" stroke-width="3" class="flow"/>
+  ${tree(20,160)}${tree(340,160)}${tree(28,262,.8)}${tree(334,262,.8)}${tree(176,404,.7)}${tree(16,380,.8)}${tree(346,380,.8)}
+  ${ROY.map(b=>g(b.id)).join("")}
+  </svg>`;
+}
+function roySheet(id){
+  const b=royDef(id), L=royLv(id), mx=L>=ROY_MAX, cst=royCost(b), ok=!mx && affordC(cst), c=S.city;
+  const st = (id==="fonderie"||id==="menagerie") && L ? `<div class="small" style="margin-top:6px">En stock : <b>${Math.floor(c.stock[id]||0)} / ${Math.floor(stockCap(id))}</b> ${id==="fonderie"?"lingots":"orbes"}</div>` : "";
+  return {title:b.n, body:`<div class="sheeticon royic big">${b.ic}</div><div class="small">${b.d}</div>
+    <div class="slist"><div><span>Niveau</span><b>${L}${mx?" (max)":` → ${L+1}`}</b></div><div><span>Actuel</span><b>${L?b.txt(L):"—"}</b></div>${mx?"":`<div><span>Après</span><b class="up">${b.txt(L+1)}</b></div>`}</div>${st}
+    ${mx?"":`<div class="small" style="margin-top:10px">Coût : ${costTxt(cst)}</div><div class="small">Vous avez : ${costTxt(c.res)}</div>`}`,
+    acts:[...(st?[{t:"🧺 Récolter", act:"rcol", dis:(c.stock[id]||0)<1}]:[]), ...(mx?[]:[{t:L?"⬆️ Améliorer":"🔨 Construire", act:"roy", cls:"gold", dis:!ok}])]};
+}
 function updBubbles(){
   if(!S.city || !S.city.stock) return;
-  document.querySelectorAll(".bub[data-collect]").forEach(g=>{ const id=g.dataset.collect, v=S.city.stock[id]||0, show = v >= Math.max(1, prodOf(id,S.city.lv[id])*2);
+  document.querySelectorAll(".bub[data-collect]").forEach(g=>{ const id=g.dataset.collect, v=S.city.stock[id]||0, show = STOCK_KEYS[id] && v >= Math.max(1, prodOf(id,S.city.lv[id])*2);
+    if(id==="fonderie"||id==="menagerie"){ const sh=v>=1; g.style.display=sh?"":"none"; if(sh){ const t=g.querySelector(".bubn"), tx=String(Math.floor(v)); if(t.textContent!==tx) t.textContent=tx; g.classList.toggle("full", v>=stockCap(id)*0.98); } return; }
     g.style.display = show?"":"none"; if(show){ const t=g.querySelector(".bubn"); const tx=fmt(Math.floor(v)); if(t.textContent!==tx) t.textContent=tx; g.classList.toggle("full", v>=stockCap(id)*0.98); } });
 }
 function renderCityRes(){
@@ -3727,6 +3833,7 @@ function updateCity(){
   if(now-cityT>1000){   // rafraîchit chiffres et boutons sans tout reconstruire
     cityT=now; renderCityRes(); updBubbles();
     const eb=$("#expBar"); if(eb && S.city.exp){ const cur=EXPS.find(e=>e.id===S.city.exp.id), left=Math.max(0,S.city.exp.end-Date.now()); eb.style.width=Math.min(100,(1-left/(cur.h*3600e3))*100)+"%"; $("#expLeft").textContent = left?"Retour dans "+fmtLeft(left):"De retour avec le butin !"; if(!left && !$("#expClaim")) dirty.city=true; }
+    document.querySelectorAll(".bld[data-shroy]").forEach(g=>{ const d=royDef(g.dataset.shroy); g.classList.toggle("can", royLv(d.id)<ROY_MAX && affordC(royCost(d))); });
     document.querySelectorAll("[data-roy]").forEach(b=>{ const d=royDef(b.dataset.roy); b.disabled = royLv(d.id)>=ROY_MAX || !affordC(royCost(d)); b.classList.toggle("gold", !b.disabled); });
     document.querySelectorAll(".bld[data-shbld]").forEach(g=>{ g.classList.toggle("can", affordC(bldCost(bldDef(g.dataset.shbld)))); });
     const hb=$(".cityhp .bar"); if(hb){ hb.querySelector("i").style.width=(S.city.hp/cityMaxHP()*100)+"%"; hb.querySelector("b").textContent=`❤️ ${fmt(S.city.hp)} / ${fmt(cityMaxHP())}`; }
