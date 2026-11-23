@@ -911,11 +911,14 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .rkrow.me{background:#ffe9a8;border-radius:12px;border-top-color:transparent;box-shadow:inset 0 0 0 2px #f2c94c}
 .rkn{width:38px;text-align:center;font-weight:900;color:var(--mut)}.rkn.m1,.rkn.m2,.rkn.m3{font-size:20px}
 .rkname{flex:1;min-width:0;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkv{font-weight:900;color:var(--ink,#3b2a14)}
-.rkme{display:flex;align-items:center;gap:10px;margin-top:8px}.rksub{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.rksub button{font-size:12px;padding:6px 2px}
+.rkme{display:flex;align-items:center;gap:10px;margin-top:8px}.rksub{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}#view-rank{display:flex;flex-direction:column}#tab-rank{display:flex;flex-direction:column;flex:1;min-height:0}.rksub button{font-size:12px;padding:6px 2px}
 .pin{width:100%;font:inherit;font-size:18px;font-weight:800;padding:10px 12px;border-radius:12px;border:2px solid #c9a35a;background:#fffaf0;color:#3b2a14;text-align:center}
 .perr{color:#e03131;font-weight:700;min-height:18px;margin-top:6px;font-size:13px}
 #defSeg .seg button{white-space:nowrap;font-size:14px;padding:8px 2px}#defSeg .tdot{vertical-align:middle}
 .tmark b{font-size:9.5px}
+.setsA{margin-top:5px;height:24px;overflow:hidden;display:flex;flex-wrap:nowrap;gap:4px}.setsA>*{margin:0!important}.setsA:empty{display:none}@media (max-height:700px){.setsA{display:none}}
+.btn.green{background:linear-gradient(#5fd37a,#2fae4f);color:#fff;border-color:#1f7a37}
+#heroName{font-weight:900;max-width:52%;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
 </style>
 </head>
 <body>
@@ -931,7 +934,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1737";
+var BUILD_ID = "20261123-1751";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -953,6 +956,7 @@ var BUILD_ID = "20261123-1737";
     <button class="pill s" data-view="prest"><span class="pi">👻</span><span id="souls">0</span></button>
   </div>
   <button class="iconbtn gift" id="btnDaily" aria-label="Récompenses et courrier">🎁<span class="dot" id="dot-daily">!</span></button>
+  <button class="iconbtn" data-view="rank" aria-label="Classement">🏆</button>
   <button class="iconbtn" data-view="opts" aria-label="Options">⚙️</button>
 </header>
 
@@ -993,7 +997,7 @@ var BUILD_ID = "20261123-1737";
       <div class="herobox">
         <div class="av" id="heroAv">⚔️</div>
         <div style="flex:1;min-width:0">
-          <div class="hl">Vous <span id="heroLine"></span></div>
+          <div class="hl"><b id="heroName">Vous</b> <span id="heroLine"></span></div>
           <div class="bar hhp"><i id="hhpFill"></i><b id="hhpTxt"></b></div>
         </div>
       </div>
@@ -1005,8 +1009,6 @@ var BUILD_ID = "20261123-1737";
     <div id="goal" class="goal"></div>
     <div id="heroPanel" class="card hpanel" style="display:none"><div class="pager" data-pg="hero"><div class="pgsrc list">
       <div id="clsCard"></div>
-      <div class="grid6" id="equip"></div>
-      <div id="setsBox"></div>
       <div class="stat5" id="stats"></div>
     </div></div></div>
     <div id="logCard" hidden><div id="log"></div></div>
@@ -1019,6 +1021,7 @@ var BUILD_ID = "20261123-1737";
   <section class="view" id="view-loot" hidden><div class="vtitle">⚒️ Atelier</div><div class="subnav"></div><div id="tab-loot"></div></section>
   <section class="view" id="view-city" hidden><div class="vtitle">🏰 Mon fief</div><div id="tab-city"></div></section>
   <section class="view" id="view-prest" hidden><div class="vtitle">👻 Renaissance</div><div id="tab-prest"></div></section>
+  <section class="view" id="view-rank" hidden><div class="vtitle">🏆 Classement</div><div id="tab-rank"></div></section>
   <section class="view" id="view-opts" hidden><div class="vtitle">⚙️ Options</div><div id="tab-opts" data-autopg="opts"></div></section>
 </main>
 
@@ -1973,6 +1976,22 @@ function upgrade(slot, max){
   }
   if(n){ calc(); dirty.equip=dirty.stats=dirty.loot=true; vibe(8); track("upgrade", n); Sfx.play("up"); }
 }
+function upAllInfo(){   // combien de niveaux on peut acheter en tout sur l'équipement porté
+  let n=0; for(const k of SLOTKEYS){ const it=S.equip[k]; if(it && it.ilvl<craftLvl() && S.scraps>=upCost(it)) n++; } return {n};
+}
+function upgradeAll(){
+  // un niveau à la fois sur la pièce la plus basse, pour monter tout l'équipement en même temps
+  let n=0, guard=0;
+  while(guard++<5000){
+    const list=SLOTKEYS.map(k=>S.equip[k]).filter(it=>it && it.ilvl<craftLvl() && S.scraps>=upCost(it) && S.mats[SLOTS[it.slot].mat]>=upMat(it.ilvl+1));
+    if(!list.length) break;
+    list.sort((a,b)=>a.ilvl-b.ilvl || upCost(a)-upCost(b));
+    const it=list[0]; S.scraps-=upCost(it); S.mats[SLOTS[it.slot].mat]-=upMat(it.ilvl+1);
+    for(const st of ["atk","hp","def"]) if(it[st]) it[st]*=ITEM_G;
+    it.ilvl++; n++;
+  }
+  if(n){ calc(); dirty.equip=dirty.stats=dirty.loot=true; vibe(10); track("upgrade", n); Sfx.play("up"); toast(`▲ +${n} niveau${n>1?"x":""} d'équipement`); }
+}
 function upMaxInfo(it){   // combien de niveaux on peut payer d'un coup
   let n=0, tot=0, mt=0, lv=it.ilvl; const m=SLOTS[it.slot].mat;
   while(lv<craftLvl()){ const c=Math.ceil(craftScrap(lv+1)*0.35*(1+0.5*it.ri)), mn=upMat(lv+1); if(tot+c>S.scraps || mt+mn>S.mats[m]) break; tot+=c; mt+=mn; lv++; n++; }
@@ -2409,6 +2428,7 @@ function itemTile(it, attrs, extra, cls){
   return `<button class="tile itile ${cls||""}" style="--c:${RAR[it.ri].c}" ${attrs}><span class="ti">${itemArt(it)}</span><span class="tlv">${it.ilvl}</span>${extra||""}</button>`;
 }
 function renderEquip(){
+  if(!$("#equip")){ updEquipUp(); return; }
   $("#equip").innerHTML = SLOTKEYS.map(k=>{
     const it=S.equip[k], sd=SLOTS[k];
     if(!it) return `<div class="tile empty" title="${sd.n}"><span class="ti">${sd.ic}</span></div>`;
@@ -2418,6 +2438,7 @@ function renderEquip(){
 }
 /* Petite flèche verte sur les objets portés qu'on peut renforcer avec ses scraps */
 function updEquipUp(){
+  const ub=$("#eqUpAll"); if(ub){ const d=!upAllInfo().n; if(ub.disabled!==d) ub.disabled=d; }
   for(const box of [$("#equip"), $("#eqRowA")]){ if(!box || box.offsetParent===null) continue;
   for(const el of box.querySelectorAll("[data-sheq]")){
     const it=S.equip[el.dataset.sheq]; const ok = !!it && it.ilvl<craftLvl() && S.scraps>=upCost(it);
@@ -2516,8 +2537,8 @@ function renderLoot(){
   if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
   const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
   $("#tab-loot").innerHTML = band
-    + `<div class="card teamcard"><div class="chead"><h2>Équipé<small>🔩 ${fmt(S.scraps)}</small></h2><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div>
-        <div class="teamrow eqrow" id="eqRowA" style="grid-template-columns:repeat(6,1fr)">${worn}</div></div>
+    + `<div class="card teamcard"><div class="chead"><h2>Équipé<small>🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
+        <div class="teamrow eqrow" id="eqRowA" style="grid-template-columns:repeat(6,1fr)">${worn}</div><div id="setsBox" class="setsA">${setsHTML()}</div></div>
       <div class="card grow"><div class="chead"><h2>Inventaire<small>${S.inv.length}/${invMax()}</small></h2>
           <div class="cbtns">${nf?`<button class="btn violet sm" id="fuseOpen">✨ Fusions <b class="fnb">${nf}</b></button>`:""}${(S.invX||0)<INV_BUY_MAX && !invSel?`<button class="btn sm" id="invBuy" title="Agrandir l'inventaire">+10 📦</button>`:""}<button class="btn sm ${invSel?"gold":""}" id="invSelBtn" title="Sélectionner pour démonter ou vendre">${invSel?"Terminé":"☑️ Trier"}</button></div></div>
         <div class="chips" style="margin-bottom:6px">${chips}</div>
@@ -2903,7 +2924,7 @@ function frameUI(){
     if(E && E.boss) $("#timerFill").style.width = (E.timer/30*100)+"%";
     $("#hhpFill").style.width = hpP+"%";
     $("#hhpTxt").textContent = fmt(hp)+" / "+fmt(C.hp);
-    $("#heroLine").innerHTML = "⚔️ "+fmt(C.atk)+" &nbsp; 🧱 "+fmt(C.def);
+    $("#heroLine").innerHTML = "⚡ "+fmt(heroPower()); const hn=$("#heroName"), nm=S.pseudo||"Vous"; if(hn.textContent!==nm) hn.textContent=nm;
   } else {
     $("#miniE").style.width = ep+"%";
     $("#miniH").style.width = hpP+"%";
@@ -2941,6 +2962,7 @@ function showView(v){
   if(v==="loot"){ dirty.loot=true; }
   if(v==="prest") dirty.prest=true;
   if(v==="opts") dirty.opts=true;
+  if(v==="rank") renderRank();
   if(v==="hero") dirty.stats=dirty.equip=true;
   if(v==="fams") dirty.fams=true;
   if(v==="city"){ dirty.city=true; lastPointer=0; }
@@ -3219,7 +3241,7 @@ document.addEventListener("click", e=>{
   if(t.id==="altarReset"){ S.souls += altarSpent(); S.altar={}; calc(); dirty.stats=true; renderPrest(); save(); return; }
   if(t.dataset.chal){ chalStart(t.dataset.chal); return; }
   if(t.dataset.dtab){ defTab=t.dataset.dtab; renderDefis(true); return; }
-  if(t.dataset.rk){ rkTab=t.dataset.rk; renderDefis(true); return; }
+  if(t.dataset.rk){ rkTab=t.dataset.rk; renderRank(); return; }
   if(t.dataset.tgo){ towerScrollToCur(true); return; }
   if(t.dataset.tmore){ towerTop+=20; renderTower(true); return; }
   { const tf=t.closest && t.closest("[data-tfloor]"); if(tf && !t.closest("button")){ const f=+tf.dataset.tfloor, cur=S.chal.floor;
@@ -3295,7 +3317,8 @@ document.addEventListener("click", e=>{
     case "repairBtn": repairCity(); break;
     case "evForce": eventForce=!eventForce; dirty.opts=true; break;
     case "pseudoBtn": askPseudo(false); break;
-    case "rkRetry": LB.err=""; LB.at={}; renderDefis(true); break;
+    case "rkRetry": LB.err=""; LB.at={}; renderRank(); break;
+    case "eqUpAll": upgradeAll(); break;
     case "tutoReset": S.tuto.step=0; S.tuto.cnt=0; S.tuto.gs={}; S.tuto.gq=[]; S.tuto.intro=false; showView("combat"); break;
     case "guidesBtn": guidesList(); break;
     case "demoBtn": modal("Charger la partie de test ?", "Votre partie actuelle sera remplacée. Copiez d'abord votre code de sauvegarde si vous voulez la garder.", [{t:"Annuler"},{t:"Charger",cls:"gold",f:loadDemo}]); break;
@@ -4623,14 +4646,13 @@ let defisSig="";
 function renderDefis(force){
   const box=$("#defis"); if(!box) return;
   if(!unlocked("defis")){ box.innerHTML=""; $("#defSeg").innerHTML=""; return; }
-  const c=S.chal, sig=[defTab,c.floor,c.keys,c.wtries,c.wbest.toFixed(2),JSON.stringify(c.wclaim),c.adKey===today(),!!MODE,c.dtries,JSON.stringify(S.runes||{}),runeToday(),rkTab,LB.ver].join("|");
+  const c=S.chal, sig=[defTab,c.floor,c.keys,c.wtries,c.wbest.toFixed(2),JSON.stringify(c.wclaim),c.adKey===today(),!!MODE,c.dtries,JSON.stringify(S.runes||{}),runeToday()].join("|");
   if(sig===defisSig && !force) return;
   const first = !defisSig.startsWith(defTab+"|") ;
   defisSig=sig;
-  $("#defSeg").innerHTML = `<div class="seg"><button data-dtab="tower" class="${defTab==="tower"?"on":""}">🗼 Tour</button><button data-dtab="titan" class="${defTab==="titan"?"on":""}">🐲 Titan</button><button data-dtab="rune" class="${defTab==="rune"?"on":""}">✨ Donjon${(c.dtries||0)>0?` <span class="tdot">${c.dtries}</span>`:""}</button><button data-dtab="rank" class="${defTab==="rank"?"on":""}">🏆 Rang</button></div>`;
+  $("#defSeg").innerHTML = `<div class="seg"><button data-dtab="tower" class="${defTab==="tower"?"on":""}">🗼 Tour</button><button data-dtab="titan" class="${defTab==="titan"?"on":""}">🐲 Titan</button><button data-dtab="rune" class="${defTab==="rune"?"on":""}">✨ Donjon${(c.dtries||0)>0?` <span class="tdot">${c.dtries}</span>`:""}</button></div>`;
   if(defTab==="tower"){ renderTower(!first); if(first) requestAnimationFrame(()=>towerScrollToCur(false)); }
   else if(defTab==="rune") renderDungeon();
-  else if(defTab==="rank") renderRank();
   else renderTitan();
 }
 /* Objectif suivant, toujours visible sous le combat */
@@ -5491,6 +5513,12 @@ function save(){
 /* ---------- Sauvegarde en ligne (quand le jeu est ouvert dans claude.ai) ----------
    Copie de la partie dans l'espace privé du joueur. Ailleurs (site web, appli Android),
    claude n'existe pas et seule la sauvegarde de l'appareil est utilisée. */
+/* Puissance : un seul nombre qui résume le chevalier (dégâts par seconde, vie et défense) */
+function heroPower(){
+  if(typeof C==="undefined" || !C) return 0;
+  const dps = (C.atk||0)/(C.interval||1)*(1+(C.crit||0)/100) + (C.famDps||0);
+  return dps*10 + (C.hp||0) + (C.def||0)*5;
+}
 /* ---------- Classement en ligne (Supabase) ----------
    Remplir SB_URL et SB_KEY (clé publique « anon ») pour l'activer. Sans elles, le pseudo marche hors ligne
    et l'onglet indique que le classement arrive bientôt. */
@@ -5498,8 +5526,8 @@ const SB_URL = "https://jvpeyliecpwjfztqmcdc.supabase.co", SB_KEY = "sb_publisha
 const LB_ON = () => !!(SB_URL && SB_KEY) && typeof fetch === "function";
 const LB_AUTH = "lame-lb-auth";
 const LB = {ver:0, data:{}, at:{}, me:{}, err:"", busy:false, lastPush:0, lastSig:""};
-const RK = [{k:"best", n:"Étape", u:v=>"étape "+fmt(v)}, {k:"tower", n:"Tour", u:v=>"étage "+fmt(v)}, {k:"titan", n:"Titan", u:v=>"×"+(v>=1000?fmt(v):(+v).toFixed(1))}, {k:"rebirths", n:"Renais.", u:v=>fmt(v)+" ⟳"}];
-let rkTab = "best", pseudoOpen = false;
+const RK = [{k:"power", n:"Puissance", u:v=>"⚡ "+fmt(v)}, {k:"best", n:"Étape", u:v=>"étape "+fmt(v)}, {k:"tower", n:"Tour", u:v=>"étage "+fmt(v)}, {k:"titan", n:"Titan", u:v=>"×"+(v>=1000?fmt(v):(+v).toFixed(1))}, {k:"rebirths", n:"Renais.", u:v=>fmt(v)+" ⟳"}];
+let rkTab = "power", pseudoOpen = false, lbNoPower = false;
 const esc = t => String(t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const BAD = ["merde","pute","putain","connard","connasse","salope","encul","batard","bâtard","nique","niqu","pd","fdp","ntm","tg","bite","couille","chatte","nazi","hitler","negr","nègre","fuck","shit","bitch","cunt","dick","pussy","nigg","fag","whore","slut","porn","sex","admin","moderat"];
 function pseudoErr(n){
@@ -5557,18 +5585,21 @@ async function lbToken(){
 }
 function lbRow(name){
   const c=S.chal||{};
-  return {name, best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
+  const r={name, power:Math.floor(heroPower()), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
+  if(lbNoPower) delete r.power;
+  return r;
 }
 async function lbUpsert(row){
   const a=await lbToken();
   const r=await lbFetch("/rest/v1/players?on_conflict=id", {method:"POST", headers:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:JSON.stringify({id:a.uid, ...row})});
   if(r.status===409) return "taken";
+  if(r.status===400 && !lbNoPower && "power" in row){ const tx=await r.text(); if(/power/.test(tx)){ lbNoPower=true; delete row.power; return lbUpsert(row); } }   // colonne pas encore créée
   return r.ok ? "ok" : "err";
 }
 async function lbClaim(n){ try{ return await lbUpsert(lbRow(n)); }catch(e){ return "offline"; } }
 async function lbPush(force){
   if(!LB_ON() || !S.pseudo || LB.busy) return;
-  const row=lbRow(S.pseudo), sig=[row.name,row.best,row.tower,row.titan,row.titan_wk,row.rebirths].join("|");
+  const row=lbRow(S.pseudo), sig=[row.name,row.power,row.best,row.tower,row.titan,row.titan_wk,row.rebirths].join("|");
   if(sig===LB.lastSig || (!force && Date.now()-LB.lastPush<60000)) return;
   LB.busy=true; LB.lastPush=Date.now();
   try{
@@ -5594,13 +5625,13 @@ async function lbLoad(k){
       const cr=c.headers.get("content-range")||""; const tot=+(cr.split("/")[1]||NaN); LB.me[k]=isNaN(tot)?0:tot+1;
     } else LB.me[k]=0;
   }catch(e){ LB.err="Impossible de joindre le classement. Vérifiez votre connexion."; LB.at[k]=0; }
-  finally{ LB.busy=false; LB.ver++; if(view==="defis" && defTab==="rank") renderDefis(true); }
+  finally{ LB.busy=false; LB.ver++; if(view==="rank") renderRank(); }
 }
 function renderRank(){
-  const box=$("#defis"), R=RK.find(r=>r.k===rkTab)||RK[0];
+  const box=$("#tab-rank"), R=RK.find(r=>r.k===rkTab)||RK[0]; if(!box) return;
   const sub=`<div class="seg rksub">${RK.map(r=>`<button data-rk="${r.k}" class="${r.k===R.k?"on":""}">${r.n}</button>`).join("")}</div>`;
-  const myV=lbRow(S.pseudo||"")[R.k];
-  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="titan"?"cette semaine":"tous les joueurs"}</span></div>${sub}
+  const myV=R.k==="power"?Math.floor(heroPower()):lbRow(S.pseudo||"")[R.k];
+  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="titan"?"cette semaine":R.k==="power"?"attaque, vie et défense":"tous les joueurs"}</span></div>${sub}
     <div class="rkme"><span class="rkn">${LB.me[R.k]?"#"+LB.me[R.k]:"–"}</span><span class="rkname">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"} <small class="small">(vous)</small></span><span class="rkv">${myV>0?R.u(myV):"–"}</span></div></div>`;
   let body;
   if(!LB_ON()) body=`<div class="small" style="text-align:center;padding:24px 8px">🏆<br><b>Le classement en ligne arrive bientôt.</b><br>Votre nom est déjà réservé sur cet appareil : vos records y apparaîtront dès son ouverture.</div>`;
