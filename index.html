@@ -960,7 +960,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-2029";
+var BUILD_ID = "20261123-2104";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2486,7 +2486,7 @@ function itemArt(it){ const k=it.slot+"|"+(it.set||"")+"|"+it.ri; return ART_CAC
 function setBreakWarn(it){   // prévient quand équiper cet objet casse un ensemble actif
   const cur=S.equip[it.slot]; if(!cur || !cur.set || it.set===cur.set) return "";
   const n=setCounts()[cur.set]||0; if(n<2) return "";
-  const lose = n>=4 ? "le bonus 4 pièces" : n===2 ? "le bonus 2 pièces" : "";
+  const lose = n===6 ? "le bonus 6 pièces" : n===4 ? "le bonus 4 pièces" : n===2 ? "le bonus 2 pièces" : "";
   return lose ? `<div class="small" style="color:var(--red);margin-top:6px">⚠️ L'équiper retire ${lose} de l'ensemble ${SETS[cur.set].n} (${n} → ${n-1} pièces).</div>` : "";
 }
 function itemTile(it, attrs, extra, cls){
@@ -2697,7 +2697,7 @@ function updateAtelier(){
 /* ---------- Fiches (objet, familier) ---------- */
 function statList(it){
   const p=[];
-  if(it.set){ const c=setCounts()[it.set]||0; p.push([SETS[it.set].ic+" Ensemble "+SETS[it.set].n, c+"/4 portés"]); }
+  if(it.set){ const c=setCounts()[it.set]||0; p.push([SETS[it.set].ic+" Ensemble "+SETS[it.set].n, c+"/6 portés"]); }
   if(it.atk) p.push(["⚔️ Attaque",fmt(it.atk)]);
   if(it.def) p.push(["🧱 Défense",fmt(it.def)]);
   if(it.hp)  p.push(["❤️ PV",fmt(it.hp)]);
@@ -3237,7 +3237,9 @@ function rebirth(){
   const chest = chestOf(S.maxStage), oldBest = S.best;
   if(runClimb()<20) return;
   const keep = Object.assign({}, S, {souls:S.souls+g, prestiges:S.prestiges+1});
+  const paid = [...SLOTKEYS.map(k=>S.equip[k]), ...S.inv].filter(it=>it && (it.sov || it.set==="souverain"));   // objets payés : gardés
   S = newState(keep);
+  for(const it of paid){ if(!S.equip[it.slot] || S.equip[it.slot].ri<5) S.equip[it.slot]=it; else S.inv.push(it); }
   S.crystals += chest.crystals; S.orbs += chest.orbs;                                       // coffre de Renaissance (plus de scraps ni d'or : on repart de zéro)
   const st = Math.min(10*al("start"), Math.floor(oldBest/2/10)*10);                         // départ avancé
   if(st>=10){ S.stage = S.maxStage = st+1; }
@@ -4399,7 +4401,7 @@ function bpPeek(key){
     modal(it.name, `<div class="sheeticon iarth">${itemArt(it)}</div>${rarTag(5)}<div class="sovtag">👑 Souverain · +${Math.round((SOV_BOOST-1)*100)} % de stats et 2 bonus</div>
       <div class="small">Arrive au niveau ${it.ilvl} (votre niveau d'objets actuel)</div>${statList(it)}
       ${d!==null?`<div class="slist"><div><span>Vs objet porté</span><span class="${d>0.5?"up":d<-0.5?"down":""}">${d>0.5?"▲":d<-0.5?"▼":"="} ${Math.abs(d).toFixed(0)} %</span></div></div>`:""}
-      <div class="small" style="margin-top:6px;text-align:left">${SETS.souverain.ic} <b>Ensemble du Souverain</b><br>2 pièces : ${SETS.souverain.b2}<br>4 pièces : ${SETS.souverain.b4}</div>
+      <div class="small" style="margin-top:6px;text-align:left">${SETS.souverain.ic} <b>Ensemble du Souverain</b><br>2 pièces : ${SETS.souverain.b2}<br>4 pièces : ${SETS.souverain.b4}<br>6 pièces : ${SETS.souverain.b6}</div>
       ${state?`<div class="small" style="margin-top:6px"><b>${state}</b></div>`:""}`, [{t:"OK", cls:"gold"}]);
   } else {
     modal(`Palier ${i}`, `<div class="small" style="font-size:15px;line-height:1.7">${bpMini(r)}</div>${state?`<div class="small" style="margin-top:8px"><b>${state}</b></div>`:""}`, [{t:"OK", cls:"gold"}]);
@@ -4812,7 +4814,7 @@ const GUIDES = {
     ["⬆️","Les objets sortent au niveau 1 et vont dans l'Inventaire : touchez-en un pour le comparer et l'équiper (une flèche ▲ signale les meilleurs). Renforcez vos objets portés avec des scraps : +6 % par niveau."],
     ["💎","La rareté compte beaucoup : chaque rareté vaut environ 3 fois la précédente. Un Commun niveau 100 vaut à peine un Mythique niveau 1."],
     ["♻️","3 objets identiques de même rareté (5 pour les Épiques, 8 pour les Légendaires) se fusionnent en un objet de la rareté au-dessus, qui repart au niveau 1 et coûte des scraps. Les autres peuvent être gardés, démontés ou vendus."],
-    ["✨","Certains objets appartiennent à l'un des 8 ensembles (Loup, Templier, Ombres, Wyrm, Marchand, Berserker, Glacier, Paladin), reconnaissables à leurs couleurs : porter 2 ou 4 pièces du même donne un gros bonus."],
+    ["✨","Certains objets appartiennent à l'un des 8 ensembles (Loup, Templier, Ombres, Wyrm, Marchand, Berserker, Glacier, Paladin), reconnaissables à leurs couleurs : porter 2, 4 ou 6 pièces du même donne un gros bonus."],
     ["☑️","Dans l'Inventaire, le bouton Sélection permet de choisir plusieurs objets pour les démonter ou les vendre d'un coup. Des places en plus s'achètent avec le bouton +10 📦 de l'Inventaire."]]},
   skills:{ic:"💥", t:"Les compétences sont débloquées", s:"Les compétences", go:"combat", go_t:"Essayer", l:[
     ["💥","3 boutons apparaissent sous le combat, un par compétence équipée : attaques, soins ou bonus temporaires."],
@@ -5527,7 +5529,7 @@ const ACH = [
   {id:"coll",  n:"Collectionneur",  d:"Obtenir tous les familiers d'invocation", v:()=>PETS.filter(p=>!p.event && S.pets[p.id]).length, t:[[()=>PETS.filter(p=>!p.event).length,100]], old:["coll"]},
   {id:"skc",   n:"Grimoire complet", d:"Obtenir toutes les compétences",      v:()=>S.skl?Object.keys(S.skl.owned).length:0, t:[[()=>SKILLS.length,120]], old:["skc"]},
   {id:"relic", n:"Relique",         d:"Posséder un objet Mythique",           v:()=>[...S.inv, ...Object.values(S.equip)].some(it=>it && it.ri>=5)?1:0, t:[[1,80]], old:["mi1"]},
-  {id:"set",   n:"Panoplie",        d:"Porter 4 pièces d'un même ensemble",   v:()=>Math.max(0,...Object.values(setCounts())), t:[[4,40]], old:["set4"]},
+  {id:"set",   n:"Panoplie",        d:"Porter {g} pièces d'un même ensemble",  v:()=>Math.max(0,...Object.values(setCounts())), t:[[4,40],[6,100]], old:["set4"]},
   {id:"set2",  n:"Double panoplie", d:"Avoir deux bonus d'ensemble actifs",   v:()=>Object.values(setCounts()).filter(n=>n>=2).length, t:[[2,40]], old:["set2"]},
   {id:"bp30",  n:"Champion de la saison", d:"Atteindre le palier 30 du passe de combat", v:()=>typeof bpLevel==="function"?bpLevel():0, t:[[30,100]], old:["bp30"]},
 ];
@@ -5573,15 +5575,15 @@ function rewardsSheet(){
 
 /* ---------- Ensembles d'équipement ---------- */
 const SETS = {
-  loup:     {n:"du Loup",      ic:"§p_loup§",   b2:"+15 % d'attaque",            b4:"+40 % d'attaque, +10 % de vitesse et 4 % de triple coup", e2:{atk:15},  e4:{atk:25, spd:10, tpl:4}},
-  templier: {n:"du Templier",  ic:"§bouclier§", b2:"+20 % de défense",           b4:"+40 % de PV, +40 % de défense et 6 % d'esquive", e2:{def:20},  e4:{def:20, hp:40, dodge:6}},
-  ombres:   {n:"des Ombres",   ic:"§dague§",    b2:"+5 % de critique et +25 % de dégâts critiques", b4:"+10 % de critique, +75 % de dégâts critiques et +5 % de vol de vie", e2:{crit:5, critd:25},  e4:{crit:5, vol:5, critd:50}},
-  wyrm:     {n:"du Wyrm",      ic:"§p_dragon§", b2:"+25 % de dégâts des familiers", b4:"+60 % de dégâts des familiers et +10 % d'attaque", e2:{fam:25}, e4:{fam:35, atk:10}},
-  marchand: {n:"du Marchand",  ic:"§sac§",      b2:"+20 % d'or",                 b4:"+50 % d'or et +25 % de scraps",              e2:{gold:20}, e4:{gold:30, scrap:25}},
-  berserk:  {n:"du Berserker", ic:"§hache§",    b2:"+10 % de vitesse",           b4:"+25 % de vitesse, +15 % d'attaque et 8 % de double coup", e2:{spd:10},  e4:{spd:15, atk:15, dbl:8}},
-  glacier:  {n:"du Glacier",   ic:"§nuage§",    b2:"+15 % de PV",                b4:"+35 % de PV, +2 % de régénération par seconde et 5 % d'esquive", e2:{hp:15}, e4:{hp:20, regen:2, dodge:5}},
-  souverain:{n:"du Souverain", ic:"§couronne§", excl:true, b2:"+30 % d'attaque et de PV", b4:"+20 % d'attaque, de PV, de défense et d'or, +10 % de vitesse, +40 % de dégâts critiques et 3 % de triple coup", e2:{atk:30, hp:30}, e4:{atk:20, hp:20, def:20, gold:20, spd:10, critd:40, tpl:3}},
-  paladin:  {n:"du Paladin",   ic:"§coeurvert§",b2:"+4 % de vol de vie",         b4:"+8 % de vol de vie et +20 % de défense",     e2:{vol:4},   e4:{vol:4, def:20}},
+  loup:     {n:"du Loup",      ic:"§p_loup§",   b2:"+15 % d'attaque",            b4:"+40 % d'attaque, +10 % de vitesse et 4 % de triple coup", e2:{atk:15},  e4:{atk:25, spd:10, tpl:4}, b6:"+30 % d'attaque et 4 % de triple coup", e6:{atk:30, tpl:4}},
+  templier: {n:"du Templier",  ic:"§bouclier§", b2:"+20 % de défense",           b4:"+40 % de PV, +40 % de défense et 6 % d'esquive", e2:{def:20},  e4:{def:20, hp:40, dodge:6}, b6:"+30 % de PV et de défense, 4 % d'esquive", e6:{hp:30, def:30, dodge:4}},
+  ombres:   {n:"des Ombres",   ic:"§dague§",    b2:"+5 % de critique et +25 % de dégâts critiques", b4:"+10 % de critique, +75 % de dégâts critiques et +5 % de vol de vie", e2:{crit:5, critd:25},  e4:{crit:5, vol:5, critd:50}, b6:"+5 % de critique et +75 % de dégâts critiques", e6:{crit:5, critd:75}},
+  wyrm:     {n:"du Wyrm",      ic:"§p_dragon§", b2:"+25 % de dégâts des familiers", b4:"+60 % de dégâts des familiers et +10 % d'attaque", e2:{fam:25}, e4:{fam:35, atk:10}, b6:"+60 % de dégâts des familiers", e6:{fam:60}},
+  marchand: {n:"du Marchand",  ic:"§sac§",      b2:"+20 % d'or",                 b4:"+50 % d'or et +25 % de scraps",              e2:{gold:20}, e4:{gold:30, scrap:25}, b6:"+50 % d'or et de scraps", e6:{gold:50, scrap:50}},
+  berserk:  {n:"du Berserker", ic:"§hache§",    b2:"+10 % de vitesse",           b4:"+25 % de vitesse, +15 % d'attaque et 8 % de double coup", e2:{spd:10},  e4:{spd:15, atk:15, dbl:8}, b6:"+15 % de vitesse et 8 % de double coup", e6:{spd:15, dbl:8}},
+  glacier:  {n:"du Glacier",   ic:"§nuage§",    b2:"+15 % de PV",                b4:"+35 % de PV, +2 % de régénération par seconde et 5 % d'esquive", e2:{hp:15}, e4:{hp:20, regen:2, dodge:5}, b6:"+30 % de PV, +2 % de régénération par seconde et 4 % d'esquive", e6:{hp:30, regen:2, dodge:4}},
+  souverain:{n:"du Souverain", ic:"§couronne§", excl:true, b2:"+30 % d'attaque et de PV", b4:"+20 % d'attaque, de PV, de défense et d'or, +10 % de vitesse, +40 % de dégâts critiques et 3 % de triple coup", e2:{atk:30, hp:30}, e4:{atk:20, hp:20, def:20, gold:20, spd:10, critd:40, tpl:3}, b6:"+30 % d'attaque et de PV, +40 % de dégâts critiques, 5 % de double et 4 % de triple coup", e6:{atk:30, hp:30, critd:40, dbl:5, tpl:4}},
+  paladin:  {n:"du Paladin",   ic:"§coeurvert§",b2:"+4 % de vol de vie",         b4:"+8 % de vol de vie et +20 % de défense",     e2:{vol:4},   e4:{vol:4, def:20}, b6:"+6 % de vol de vie, +30 % de défense et +20 % de PV", e6:{vol:6, def:30, hp:20}},
 };
 function setCounts(){ const c={}; for(const k of SLOTKEYS){ const it=S.equip[k]; if(it && it.set) c[it.set]=(c[it.set]||0)+1; } return c; }
 function setBonus(){
@@ -5589,18 +5591,19 @@ function setBonus(){
   const rb = typeof runeBonus==="function" ? runeBonus() : {}; for(const k in rb) b[k]=(b[k]||0)+rb[k];   // enchantements runiques
   for(const k in SETS){ const n=c[k]||0, d=SETS[k];
     if(n>=2) for(const x in d.e2) b[x]+=d.e2[x];
-    if(n>=4) for(const x in d.e4) b[x]+=d.e4[x]; }
+    if(n>=4) for(const x in d.e4) b[x]+=d.e4[x];
+    if(n>=6 && d.e6) for(const x in d.e6) b[x]=(b[x]||0)+d.e6[x]; }
   return b;
 }
 function setsHTML(){
   const c=setCounts(); const act=Object.keys(SETS).filter(k=>c[k]);
-  if(!act.length) return `<button class="setline" data-setsinfo="1">Ensembles : aucun porté · 2 ou 4 pièces du même = bonus</button>`;
-  return `<button class="setline" data-setsinfo="1">${act.map(k=>`<span class="${c[k]>=2?"on":""}">${SETS[k].ic} ${SETS[k].n} ${c[k]}/4${c[k]>=4?" ✓✓":c[k]>=2?" ✓":""}</span>`).join("")}</button>`;
+  if(!act.length) return `<button class="setline" data-setsinfo="1">Ensembles : aucun porté · 2, 4 ou 6 pièces du même = bonus</button>`;
+  return `<button class="setline" data-setsinfo="1">${act.map(k=>`<span class="${c[k]>=2?"on":""}">${SETS[k].ic} ${SETS[k].n} ${c[k]}/6${c[k]>=6?" ✓✓✓":c[k]>=4?" ✓✓":c[k]>=2?" ✓":""}</span>`).join("")}</button>`;
 }
 function setsDetail(){
   const c=setCounts(); const act=Object.keys(SETS).filter(k=>c[k]);
-  if(!act.length) return `<div class="small">Portez 2 ou 4 pièces d'un même ensemble (du Loup, du Templier, des Ombres) pour obtenir des bonus. Les objets Rares et mieux peuvent appartenir à un ensemble.</div>`;
-  return act.map(k=>`<div class="setrow">${SETS[k].ic} <b>Ensemble ${SETS[k].n}</b> · ${c[k]}/4<br><small class="${c[k]>=2?"on":""}">2 pièces : ${SETS[k].b2}</small><br><small class="${c[k]>=4?"on":""}">4 pièces : ${SETS[k].b4}</small></div>`).join("");
+  if(!act.length) return `<div class="small">Portez 2, 4 ou 6 pièces d'un même ensemble (du Loup, du Templier, des Ombres) pour obtenir des bonus. Les objets Rares et mieux peuvent appartenir à un ensemble.</div>`;
+  return act.map(k=>`<div class="setrow">${SETS[k].ic} <b>Ensemble ${SETS[k].n}</b> · ${c[k]}/6<br><small class="${c[k]>=2?"on":""}">2 pièces : ${SETS[k].b2}</small><br><small class="${c[k]>=4?"on":""}">4 pièces : ${SETS[k].b4}</small><br><small class="${c[k]>=6?"on":""}">6 pièces : ${SETS[k].b6}</small></div>`).join("");
 }
 
 /* ---------- Événement : Invasion de dragons (chaque week-end) ---------- */
