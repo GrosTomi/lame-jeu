@@ -849,6 +849,9 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 .grid5 .tile.itile .ti{font-size:0}
 .sheeticon.iarth{width:76px;height:76px;margin:0 auto}.sheeticon.iarth .iart{width:100%;height:100%}
 .row.fuse .ic .iart{width:34px;height:34px}
+.tile .canup{display:none;position:absolute;top:2px;right:3px;width:17px;height:17px;border-radius:50%;background:#2f9e44;color:#fff;font-size:10px;line-height:17px;text-align:center;font-family:Nunito;font-weight:900;box-shadow:0 1px 0 #1b6b2c;animation:upb 1.4s ease-in-out infinite}
+.tile.up .canup{display:block}
+@keyframes upb{50%{transform:translateY(-2px)}}
 </style>
 </head>
 <body>
@@ -864,7 +867,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1414";
+var BUILD_ID = "20261123-1418";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2268,8 +2271,17 @@ function renderEquip(){
   $("#equip").innerHTML = SLOTKEYS.map(k=>{
     const it=S.equip[k], sd=SLOTS[k];
     if(!it) return `<div class="tile empty" title="${sd.n}"><span class="ti">${sd.ic}</span></div>`;
-    return itemTile(it, `data-sheq="${k}" title="${sd.n} · ${it.name}"`, it.set?`<span class="tset">${SETS[it.set].ic}</span>`:"");
+    return itemTile(it, `data-sheq="${k}" title="${sd.n} · ${it.name}"`, (it.set?`<span class="tset">${SETS[it.set].ic}</span>`:"")+`<span class="canup" aria-label="Améliorable">▲</span>`);
   }).join("");
+  updEquipUp();
+}
+/* Petite flèche verte sur les objets portés qu'on peut renforcer avec ses scraps */
+function updEquipUp(){
+  const box=$("#equip"); if(!box || box.offsetParent===null) return;
+  for(const el of box.querySelectorAll("[data-sheq]")){
+    const it=S.equip[el.dataset.sheq]; const ok = !!it && it.ilvl<craftLvl() && S.scraps>=upCost(it);
+    if(el.classList.contains("up")!==ok) el.classList.toggle("up", ok);
+  }
 }
 
 /* ---------- Forge ---------- */
@@ -2696,6 +2708,7 @@ function tickNum(id, v, f){
   el.parentElement.classList.toggle("ticking", !!t.t0);
 }
 function frameUI(){
+  if(view==="combat") updEquipUp();
   tickNum("gold", S.gold, fmt);
   tickNum("souls", S.souls, v=>String(v));
   tickNum("crys", S.crystals, v=>String(v));
