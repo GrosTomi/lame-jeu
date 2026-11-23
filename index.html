@@ -864,7 +864,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1405";
+var BUILD_ID = "20261123-1414";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1508,7 +1508,7 @@ function newState(keep){
     iap:{speed:false, noads:false, starter:false}, ads:{day:"", gems:0, boost:0, boostUntil:0},
     equip:{arme:null,casque:null,armure:null,bottes:null,bouclier:null,talisman:null},
     inv:[], scraps:60, mats:{metal:2,acier:2,cuir:2,bois:2,gemme:2}, opts:{autoEquip:false, qty:1, vibe:true, speed:1, showRaids:true, music:true, vol:0.6, sfx:true, notif:true, autoSkill:false},
-    tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{coup:{stars:1,copies:0}, bandage:{stars:1,copies:0}, cri:{stars:1,copies:0}}, eq:["coup","cri","bandage"], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}}, event:{tokens:0, bought:{}},
+    tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
   if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
@@ -4130,6 +4130,7 @@ function checkUnlocks(silent){
     if(unlocked(k) && !S.tuto.seen[k]){
       S.tuto.seen[k]=true;
       if(!silent){ log(`🔓 Vous débloquez ${UNLOCK_TXT[k]} !`, "boss"); Sfx.play("success"); guideQueue(k);
+        if(k==="skills") sklStarter();
         if(k==="fams" || k==="skills"){ S.orbs += PULL10_COST; log(`🎁 Cadeau : +${PULL10_COST} 🔮 Orbes pour une première invocation ×10 !`, "good"); } }
     }
   }
@@ -4658,9 +4659,15 @@ function updSkills(){
   });
 }
 /* --- Invocation de compétences : cristaux, niveau d'invocation propre, garantie Légendaire --- */
+/* Les compétences restent vides tant qu'elles ne sont pas débloquées ; au déblocage, on reçoit les 3 de départ (Communes). */
+function sklStarter(){
+  if(Object.keys(S.skl.owned).length) return;
+  for(const id of ["coup","cri","bandage"]) S.skl.owned[id]={stars:1, copies:0};
+  S.skl.eq=["coup","cri","bandage"].slice(0, sklMax()); renderSkills(); dirty.fams=true;
+}
 function addSkill(sk){
   const o=S.skl.owned[sk.id];
-  if(!o){ S.skl.owned[sk.id]={stars:1, copies:0}; return {sk, kind:"new"}; }
+  if(!o){ S.skl.owned[sk.id]={stars:1, copies:0}; if(S.skl.eq.length<sklMax()) S.skl.eq.push(sk.id); return {sk, kind:"new"}; }
   if(o.stars>=5){ S.crystals+=3; return {sk, kind:"refund"}; }
   o.copies++; const need=STAR_NEED[o.stars-1];
   if(o.copies>=need){ o.copies-=need; o.stars++; return {sk, kind:"star", stars:o.stars}; }
@@ -5185,6 +5192,8 @@ function load(o){
     if(!o.skl){   // anciens joueurs : ceux qui avaient déjà les compétences gardent Frappe puissante, Rage et Soin
       if((o.best||1)>=UNLOCK.skills || (o.prestiges||0)>0) S.skl = {owned:{frappe:{stars:1,copies:0}, rage:{stars:1,copies:0}, soin:{stars:1,copies:0}}, eq:["frappe","rage","soin"], pulls:0, pity:0, firstLeg:true};
     } else { S.skl = Object.assign({owned:{}, eq:[], pulls:0, pity:0}, o.skl); S.skl.eq = S.skl.eq.filter(id=>sklDef(id) && S.skl.owned[id]); }
+    if(!unlocked("skills") && !(S.skl.pulls>0) && Object.keys(S.skl.owned).every(id=>["coup","cri","bandage"].includes(id))){ S.skl.owned={}; S.skl.eq=[]; }
+    if(unlocked("skills")) sklStarter();
     S.quests = Object.assign({day:"", list:[], bonus:false}, o.quests||{});
     S.ach = Object.assign({claimed:{}}, o.ach||{}); S.event = Object.assign({tokens:0, bought:{}}, o.event||{});
     const legacySet = n => /du Loup$/.test(n)?"loup":/du Templier$/.test(n)?"templier":/des Ombres$/.test(n)?"ombres":undefined;
