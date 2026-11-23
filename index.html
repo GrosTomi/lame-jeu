@@ -931,7 +931,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1729";
+var BUILD_ID = "20261123-1737";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -5494,7 +5494,7 @@ function save(){
 /* ---------- Classement en ligne (Supabase) ----------
    Remplir SB_URL et SB_KEY (clé publique « anon ») pour l'activer. Sans elles, le pseudo marche hors ligne
    et l'onglet indique que le classement arrive bientôt. */
-const SB_URL = "", SB_KEY = "";
+const SB_URL = "https://jvpeyliecpwjfztqmcdc.supabase.co", SB_KEY = "sb_publishable_jaOyDDFMO85kBoGgjD6F6Q_pyhXD-PQ";
 const LB_ON = () => !!(SB_URL && SB_KEY) && typeof fetch === "function";
 const LB_AUTH = "lame-lb-auth";
 const LB = {ver:0, data:{}, at:{}, me:{}, err:"", busy:false, lastPush:0, lastSig:""};
@@ -5540,7 +5540,7 @@ function lbAuthGet(){ try{ return JSON.parse(localStorage.getItem(LB_AUTH)||"nul
 function lbAuthSet(a){ try{ localStorage.setItem(LB_AUTH, JSON.stringify(a)); }catch(e){} }
 async function lbFetch(path, opt={}, auth=true){
   const h={apikey:SB_KEY, "Content-Type":"application/json", ...(opt.headers||{})};
-  if(auth){ const a=await lbToken(); h.Authorization="Bearer "+a.at; } else h.Authorization="Bearer "+SB_KEY;
+  if(auth){ const a=await lbToken(); h.Authorization="Bearer "+a.at; } else if(!SB_KEY.startsWith("sb_")) h.Authorization="Bearer "+SB_KEY;   // les clés « sb_publishable » ne vont que dans apikey
   const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(), 9000);
   try{ return await fetch(SB_URL+path, {...opt, headers:h, signal:ctl.signal}); } finally { clearTimeout(tm); }
 }
