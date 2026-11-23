@@ -898,6 +898,12 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .dbtns{display:flex;gap:6px}.dbtn{flex:1;display:flex;flex-direction:column;padding:8px 4px;line-height:1.15}.dbtn b{font-family:var(--disp);font-weight:400;font-size:15px}.dbtn small{font-size:11px;font-weight:800}.dbtn small .sp{width:14px;height:14px;vertical-align:-2px}
 .dweek{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dday{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;border-radius:10px}.dday small{font-size:10px;font-weight:800;color:var(--mut)}.dday.on{background:#fff3bf;box-shadow:inset 0 0 0 2px #f2c94c}
 .dday .rune{padding:1px 4px 1px 2px;font-size:12px}
+
+.cbtns{display:flex;gap:5px;flex:none}.cbtns .btn{padding:5px 8px;font-size:12.5px}.fnb{display:inline-block;background:#fff;color:#7048e8;border-radius:8px;padding:0 5px;font-size:11px;margin-left:2px}
+.eqrow .tile{height:58px}.eqrow .tile.itile .ti{width:64%}
+@media (max-height:740px){.eqrow .tile{height:48px}}
+.selbar .btn{padding:6px 4px;font-size:13px}
+@media (max-height:620px){#tab-loot .teamcard{display:none}}
 </style>
 </head>
 <body>
@@ -913,7 +919,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1630";
+var BUILD_ID = "20261123-1643";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1587,7 +1593,7 @@ function newState(keep){
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}, tier:{}, tiersV2:true}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -1620,7 +1626,7 @@ const TALENTS = {
   10:[{t:"+8 % de critique",k:"crit",v:8},{t:"+15 % de vitesse",k:"spd",v:15}],
 };
 function ingHelp(){
-  talk([{t:"Les <b>Lingots</b> servent à forger des objets à l'Atelier : 1 lingot par objet, 9 pour ×10, 90 pour ×100.", mood:"happy", ic:"§lingot§"},
+  talk([{t:"Les <b>Lingots</b> servent à forger des objets à l'Atelier : 1 lingot par objet, sans réduction en ×10 ou ×100.", mood:"happy", ic:"§lingot§"},
         {t:"Chaque <b>boss</b> vaincu en donne 5, et 5 de plus pour un nouveau record. Les monstres en lâchent parfois un.", ic:"👑"},
         {t:"La <b>Tour</b> en donne à chaque étage, les <b>quêtes</b> aussi, et la Boutique en vend contre des cristaux. Les scraps, eux, servent à renforcer et à fusionner.", ic:"🗼"}],
        {title:"Les lingots", choices:[{t:"Compris !", cls:"gold"}]});
@@ -1687,7 +1693,7 @@ function altarBuy(id){
 /* --- Paliers de Renaissance : chaque Renaissance débloque quelque chose de concret --- */
 const PMILE = [
   {p:1,  ic:"🐾", t:"4e place dans l'équipe de familiers"},
-  {p:2,  ic:"§lingot§", t:"+25 % de lingots sur les boss"},
+  {p:2,  ic:"✨", t:"+1 essai par jour au Donjon des runes"},
   {p:3,  ic:"💥", t:"4e compétence équipée"},
   {p:5,  ic:"🎁", t:"Scraps des boss doublés"},
   {p:7,  ic:"👻", t:"Le Spectre des Âmes (Mythique) : offert, puis invocable"},
@@ -1825,7 +1831,7 @@ function forgeLevel(n){
 }
 const itemCost = () => Math.max(30, Math.ceil(craftScrap(Math.max(S.stage, S.maxStage-20))*0.2));   // valeur de référence en scraps (récompenses, marché)
 /* La forge coûte des Lingots : lâchés par les boss (pas par les monstres ordinaires, sauf rarement) et la Tour, achetables en cristaux. */
-const ingCost = n => n===100 ? 90 : n===10 ? 9 : n;
+const ingCost = n => n;   // prix fixe : 1 lingot = 1 objet, sans réduction
 const ING_DROP = 0.05;   // chance qu'un monstre ordinaire lâche un lingot
 function rollItemRarity(){
   const rates=forgeRates(forgeLevel().lv), tot=rates.reduce((a,b)=>a+b,0);
@@ -2056,7 +2062,7 @@ function kill(vis){
     S.stats.bosses++; track("boss"); if(vis) Sfx.play("boss");
     const cr = 3+Math.floor(S.stage/25); S.crystals += cr;
     const ob = 1 + (S.stage>=S.best ? 1 : 0); S.orbs += ob; S.treats += 3;   // orbes : +1 par boss, +1 de plus pour un nouveau record
-    const ig = Math.round((5 + (S.stage>=S.best ? 5 : 0))*(hasP(2)?1.25:1)); S.ingots = (S.ingots||0) + ig;   // lingots : 5 par boss, +5 pour un nouveau record
+    const ig = 5 + (S.stage>=S.best ? 5 : 0); S.ingots = (S.ingots||0) + ig;   // lingots : 5 par boss, +5 pour un nouveau record
     if(vis){ floatTxt(`+${ob} 🔮`,"fam",true); setTimeout(()=>floatTxt(`+${ig} §lingot§`,"gold",true), 250); }
     log(`🏆 <b>${E.n}</b> terrassé ! +${fmt(g)} or · +${cr} 💎 · +${ob} 🔮 · +3 🍖`, "boss");
     dropMats(true, vis);
@@ -2372,11 +2378,11 @@ function renderEquip(){
 }
 /* Petite flèche verte sur les objets portés qu'on peut renforcer avec ses scraps */
 function updEquipUp(){
-  const box=$("#equip"); if(!box || box.offsetParent===null) return;
+  for(const box of [$("#equip"), $("#eqRowA")]){ if(!box || box.offsetParent===null) continue;
   for(const el of box.querySelectorAll("[data-sheq]")){
     const it=S.equip[el.dataset.sheq]; const ok = !!it && it.ilvl<craftLvl() && S.scraps>=upCost(it);
     if(el.classList.contains("up")!==ok) el.classList.toggle("up", ok);
-  }
+  } }
 }
 
 /* ---------- Forge ---------- */
@@ -2439,33 +2445,47 @@ function renderRes(){
   const el=$("#resBox"); if(!el) return;
   el.innerHTML = `<div class="rchip" title="Lingots : pour forger">§lingot§ ${S.ingots||0}</div><div class="rchip" title="Scraps : pour renforcer et fusionner">🔩 ${fmt(S.scraps)}</div>`;
 }
+function fuseRowsHTML(){
+  return fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${artSVG(g.slot, null, g.ri)}</div><div class="mid"><div class="t">${FUSE_NEED[g.ri]} ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b> · <b class="fcost ${S.scraps>=fuseCost(g.ri)?"":"no"}" data-needc="sc:${fuseCost(g.ri)}">🔩 ${fmt(fuseCost(g.ri))}</b></div></div>
+    <button class="btn violet sm" data-fuse="${g.slot}|${g.ri}" data-need="sc:${fuseCost(g.ri)}" ${S.scraps>=fuseCost(g.ri)?"":"disabled"}>Fusionner</button></div>`).join("");
+}
+function openFusions(){
+  const rows=fuseRowsHTML(), n=fusionGroups().length;
+  modal("✨ Fusions", `<div class="small" style="margin-bottom:8px">3 objets identiques de même rareté (5 Épiques, 8 Légendaires) donnent 1 objet de la rareté au-dessus, au niveau 1, contre des scraps (vous avez <b>${fmt(S.scraps)} 🔩</b>). Les moins avancés sont sacrifiés en premier.</div>
+    <div style="text-align:left">${rows || `<div class="empty-msg">Rien à fusionner pour l'instant.</div>`}</div>`,
+    n>1 ? [{t:"Fermer"},{t:"Tout fusionner", cls:"violet", f:()=>{ const p=fusePlan(); if(!p.n) return; modal("Tout fusionner ?", `${p.n} fusion${p.n>1?"s":""} pour <b>${fmt(p.cost)} 🔩</b> (vous avez ${fmt(S.scraps)}).<br><small>Les objets obtenus repartent au niveau 1.</small>`, [{t:"Annuler", f:openFusions},{t:"Fusionner", cls:"violet", f:fuseAll}]); }}] : [{t:"Fermer"}]);
+}
+function equipBestAll(){   // « Les meilleurs » : comme pour les familiers, équipe le meilleur objet de chaque emplacement (à niveau égal)
+  let n=0;
+  for(const k of SLOTKEYS){ const cur=S.equip[k]; let best=null, bs=cur?score(cur):0;
+    for(const it of S.inv){ if(it.slot!==k) continue; const sc=score(it)*Math.pow(ITEM_G, Math.max(0,(cur?cur.ilvl:1)-it.ilvl)); if(sc>bs*1.02){ best=it; bs=sc; } }
+    if(best){ equipItem(best); n++; } }
+  toast(n ? `✨ ${n} objet${n>1?"s":""} équipé${n>1?"s":""}` : "Vous portez déjà vos meilleurs objets"); if(n){ Sfx.play("up"); save(); }
+  dirty.loot=dirty.equip=true; renderLoot();
+}
 let invSel = null;   // sélection multiple dans l'inventaire (null = désactivée)
 function renderLoot(){
-  let body;
-  if(atelierTab==="craft"){
-    const F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100;
-    const fus = fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${artSVG(g.slot, null, g.ri)}</div><div class="mid"><div class="t">${FUSE_NEED[g.ri]} ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b> · <b class="fcost ${S.scraps>=fuseCost(g.ri)?"":"no"}" data-needc="sc:${fuseCost(g.ri)}">🔩 ${fmt(fuseCost(g.ri))}</b></div></div>
-        <button class="btn violet sm" data-fuse="${g.slot}|${g.ri}" data-need="sc:${fuseCost(g.ri)}" ${S.scraps>=fuseCost(g.ri)?"":"disabled"}>Fusionner<small>🔩 ${fmt(fuseCost(g.ri))}</small></button></div>`).join("");
-    const nf=fusionGroups().length;
-    body = sumBand({ic:spr("lingot"), cid:"ingB", val:S.ingots||0, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
-        btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>§lingot§ ${ingCost(1)}</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>§lingot§ ${ingCost(10)}</small></button><button class="btn violet" id="forge100" data-fn="100">×100<small>§lingot§ ${ingCost(100)}</small></button>`,
-        ft:`<button class="linkbtn" id="ingHelp">Gagner des lingots</button> · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard')
-      + `<div class="card grow"><div class="chead"><h2>✨ Fusions<small>3 identiques (5 Épiques, 8 Légendaires) = 1 de rareté supérieure, niveau 1</small></h2>${nf>1?`<button class="btn violet sm" id="fuseAll">Tout</button>`:""}</div>
-        ${fus?`<div class="pager" data-pg="fuse"><div class="pgsrc list">${fus}</div></div>`:`<div class="empty-msg">Rien à fusionner pour l'instant. Forgez des objets : 3 objets identiques de même rareté se fusionnent en 1 de rareté supérieure.</div>`}</div>`;
-  } else {
-    const chips = [["all","Tout"],...SLOTKEYS.map(k=>[k,SLOTS[k].ic])].map(([k,t])=>`<button class="chip ${invFilter===k?"on":""}" data-filter="${k}">${t}</button>`).join("");
-    const items = S.inv.filter(it=>invFilter==="all"||it.slot===invFilter).sort((a,b)=>SLOTKEYS.indexOf(a.slot)-SLOTKEYS.indexOf(b.slot) || b.ri-a.ri || b.ilvl-a.ilvl);
-    if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
-    const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
-    body = `<div class="card grow"><div class="invtop"><div class="chips">${chips}</div>${(S.invX||0)<INV_BUY_MAX && !invSel?`<button class="btn sm violet" id="invBuy">+10 📦</button>`:""}<button class="btn sm ${invSel?"gold":""}" id="invSelBtn">${invSel?"Terminé":"☑️ Sélection"}</button></div>
-      ${items.length ? `<div class="pager" data-pg="inv"><div class="pgsrc grid5">${items.map(it=>{ const cur=S.equip[it.slot]; const better = !cur || score(it)*Math.pow(ITEM_G,(cur.ilvl-it.ilvl))>score(cur)*1.005;
-          return itemTile(it, `data-shinv="${it.id}"`, (better && !invSel?`<span class="tup">▲</span>`:"")+(invSel && invSel.has(it.id)?`<span class="selmark">✓</span>`:""), invSel && invSel.has(it.id)?"sel":""); }).join("")}</div></div>`
-        : `<div class="empty-msg" style="flex:1">Inventaire vide. Forgez des objets !</div>`}
-      ${invSel ? `<div class="btnrow" style="margin-top:6px"><button class="btn sm" id="invSelAll">Tout</button><button class="btn sm gold" id="invSelDism" ${nSel?"":"disabled"}>♻️ Démonter ${nSel||""}<small>+${fmt(selList.reduce((a,it)=>a+dismantleValue(it),0))} 🔩</small></button><button class="btn sm" id="invSelSell" ${nSel?"":"disabled"}>🪙 Vendre ${nSel||""}</button></div>`
-        : `<div class="btnrow" style="margin-top:6px"><button class="btn sm" id="dismCommon">♻️ Démonter Communs</button><button class="btn sm" id="sellCommon">🪙 Vendre Communs</button></div>`}</div>`;
-  }
-  $("#tab-loot").innerHTML = `<div class="segrow"><div class="seg"><button data-atab="craft" class="${atelierTab==="craft"?"on":""}">Forger</button><button data-atab="inv" class="${atelierTab==="inv"?"on":""}">Inventaire ${S.inv.length}/${invMax()}</button></div><div class="reschips" id="resBox"></div></div>` + body;
-  renderRes();
+  const F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100, nf=fusionGroups().length;
+  const band = sumBand({ic:spr("lingot"), cid:"ingB", val:S.ingots||0, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
+      btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>§lingot§ 1</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>§lingot§ 10</small></button><button class="btn violet" id="forge100" data-fn="100">×100<small>§lingot§ 100</small></button>`,
+      ft:`<button class="linkbtn" id="ingBuy">Acheter des lingots</button> · <button class="linkbtn" id="ingHelp">En gagner</button> · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard');
+  const worn = SLOTKEYS.map(k=>{ const it=S.equip[k], sd=SLOTS[k];
+    return it ? itemTile(it, `data-sheq="${k}" title="${sd.n} · ${it.name}"`, (it.set?`<span class="tset">${SETS[it.set].ic}</span>`:"")+`<span class="canup">▲</span>`) : `<div class="tile empty" title="${sd.n}"><span class="ti">${sd.ic}</span></div>`; }).join("");
+  const chips = [["all","Tout"],...SLOTKEYS.map(k=>[k,SLOTS[k].ic])].map(([k,t])=>`<button class="chip ${invFilter===k?"on":""}" data-filter="${k}">${t}</button>`).join("");
+  const items = S.inv.filter(it=>invFilter==="all"||it.slot===invFilter).sort((a,b)=>SLOTKEYS.indexOf(a.slot)-SLOTKEYS.indexOf(b.slot) || b.ri-a.ri || b.ilvl-a.ilvl);
+  if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
+  const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
+  $("#tab-loot").innerHTML = band
+    + `<div class="card teamcard"><div class="chead"><h2>Équipé<small>🔩 ${fmt(S.scraps)}</small></h2><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div>
+        <div class="teamrow eqrow" id="eqRowA" style="grid-template-columns:repeat(6,1fr)">${worn}</div></div>
+      <div class="card grow"><div class="chead"><h2>Inventaire<small>${S.inv.length}/${invMax()}</small></h2>
+          <div class="cbtns">${nf?`<button class="btn violet sm" id="fuseOpen">✨ Fusions <b class="fnb">${nf}</b></button>`:""}${(S.invX||0)<INV_BUY_MAX && !invSel?`<button class="btn sm" id="invBuy" title="Agrandir l'inventaire">+10 📦</button>`:""}<button class="btn sm ${invSel?"gold":""}" id="invSelBtn" title="Sélectionner pour démonter ou vendre">${invSel?"Terminé":"☑️ Trier"}</button></div></div>
+        <div class="chips" style="margin-bottom:6px">${chips}</div>
+        ${items.length ? `<div class="pager" data-pg="inv"><div class="pgsrc grid5">${items.map(it=>{ const cur=S.equip[it.slot]; const better = !cur || score(it)*Math.pow(ITEM_G,(cur.ilvl-it.ilvl))>score(cur)*1.005;
+            return itemTile(it, `data-shinv="${it.id}"`, (better && !invSel?`<span class="tup">▲</span>`:"")+(invSel && invSel.has(it.id)?`<span class="selmark">✓</span>`:""), invSel && invSel.has(it.id)?"sel":""); }).join("")}</div></div>`
+          : `<div class="empty-msg" style="flex:1">Inventaire vide. Forgez des objets avec vos lingots !</div>`}
+        ${invSel ? `<div class="btnrow selbar" style="margin-top:6px"><button class="btn sm" id="invSelAll">Tout</button><button class="btn sm" id="invSelCom">Communs</button><button class="btn sm gold" id="invSelDism" ${nSel?"":"disabled"}>♻️ ${nSel||""}<small>+${fmt(selList.reduce((a,it)=>a+dismantleValue(it),0))} 🔩</small></button><button class="btn sm" id="invSelSell" ${nSel?"":"disabled"}>🪙 ${nSel||""}</button></div>` : ""}</div>`;
+  updEquipUp();
 }
 let atelierLvl = 0, lastPointer = 0, atelierT = 0, ptrDown = false;
 document.addEventListener("pointerdown", ()=>{ lastPointer = performance.now(); ptrDown = true; }, true);
@@ -2686,7 +2706,7 @@ function renderPrest(){
     body = `<div class="card soulcard"><div class="big">👻 ${free}</div><div class="small">Âme${free>1?"s":""} à dépenser à l'Autel</div>
         <div class="soulnote">Gagnez des Âmes en renaissant. Une Âme dépensée disparaît.</div></div>
       <div class="card" style="text-align:center"><h2>Renaître</h2>
-        <div class="small" style="margin-bottom:10px">${S.maxStage<prestMin()?`Atteignez l'étape ${prestMin()} pour renaître (record de cette partie : ${S.maxStage}). Chaque Renaissance demande 20 étapes de plus que la précédente.`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b> et <b>${ch.orbs} 🔮</b> (l'or, les scraps et les lingots repartent de zéro)${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
+        <div class="small" style="margin-bottom:10px">${S.maxStage<prestMin()?`Atteignez l'étape ${prestMin()} pour renaître (record de cette partie : ${S.maxStage}). Chaque Renaissance demande 20 étapes de plus que la précédente.`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b> et <b>${ch.orbs} 🔮</b> (l'or et les scraps repartent de zéro, les lingots sont gardés)${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
         ${S.maxStage>=prestMin() && g<=0?`<div class="small" style="margin:-4px 0 8px;color:var(--red)">Vous êtes reparti de l'étape ${S.runStart}. Montez plus haut que votre point de départ pour gagner des âmes.</div>`:""}
         <button class="btn violet wide" id="btnPrest" ${g>0 && runClimb()>=20?"":"disabled"}>🔥 Renaître (+${g} âmes)</button></div>
       ${nextM?`<div class="card"><div class="chead"><h2>Prochain palier</h2><span class="small">Renaissances : <b>${S.prestiges}</b></span></div><div class="mrow"><span class="mp">${nextM.p}</span><span class="mi">${nextM.ic}</span><span class="mt">${nextM.t}</span></div></div>`:""}`;
@@ -2818,7 +2838,7 @@ function updNeed(){
 }
 function frameUI(){
   updNeed();
-  if(view==="combat") updEquipUp();
+  if(view==="combat" || view==="loot") updEquipUp();
   tickNum("gold", S.gold, fmt);
   tickNum("souls", S.souls, v=>String(v));
   tickNum("crys", S.crystals, v=>String(v));
@@ -3150,6 +3170,7 @@ function modal(title, body, acts){
 document.addEventListener("click", e=>{
   const t = e.target.closest("button, [data-shbld], [data-tfloor], #goal.raidgo"); if(!t) return;
   if(t.tagName==="BUTTON" && !t.dataset.skill && !t.disabled) Sfx.play(t.closest("nav") || t.dataset.sub || t.dataset.dtab || t.dataset.shoptab || t.dataset.ftab ? "tab" : "ui");
+  if(t.dataset.fuse && t.closest("#modal")){ const [sl,ri]=t.dataset.fuse.split("|"); fuse(sl,+ri); if(!$("#summon").classList.contains("on")) openFusions(); else $("#modal").classList.remove("on"); return; }
   if(t.id==="mClose"){ if(sheet) closeSheet(); else $("#modal").classList.remove("on"); return; }
   if(t.dataset.pickcls){ pickClass(t.dataset.pickcls); return; }
   if(t.dataset.guide){ guideShow(t.dataset.guide, false); return; }
@@ -3196,8 +3217,15 @@ document.addEventListener("click", e=>{
   if(t.dataset.forge){ buyForge(t.dataset.forge); return; }
   if(t.dataset.sheq){ openSheet("eq", t.dataset.sheq); return; }
   if(t.dataset.shinv){ if(invSel){ const id=t.dataset.shinv; invSel.has(id)?invSel.delete(id):invSel.add(id); renderLoot(); return; } openSheet("inv", t.dataset.shinv); return; }
+  if(t.id==="fuseOpen"){ openFusions(); return; }
+  if(t.id==="eqBest"){ equipBestAll(); return; }
+  if(t.id==="ingBuy"){ const a=PREMIUM.find(x=>x.id==="ingc"), b2=PREMIUM.find(x=>x.id==="ingb"); mktReset();
+    const left=m=>m.max-(S.market.n["p_"+m.id]||0);
+    modal("Acheter des lingots", `Vous avez <b>${S.ingots||0} §lingot§</b> et <b>${S.crystals} 💎</b>.<br><small>Limites par jour : ${left(a)} sac${left(a)>1?"s":""}, ${left(b2)} coffre${left(b2)>1?"s":""}.</small>`,
+      [{t:`20 §lingot§<small>💎 ${a.cost}</small>`, cls:"gold", f:()=>{ premiumBuy("ingc"); renderLoot(); }}, {t:`120 §lingot§<small>💎 ${b2.cost}</small>`, cls:"violet", f:()=>{ premiumBuy("ingb"); renderLoot(); }}, {t:"Fermer"}]); return; }
   if(t.id==="invBuy"){ const m=PREMIUM.find(x=>x.id==="invx"), c=m.cost; modal("Agrandir l'inventaire", `+10 places (${invMax()} → ${invMax()+10}) pour <b>${c} 💎</b>. Vous avez ${S.crystals} 💎.`, [{t:"Annuler"},{t:`Acheter · ${c} 💎`, cls:"gold", f:()=>{ if(S.crystals<c){ toast("Pas assez de cristaux"); return; } premiumBuy("invx"); dirty.loot=true; renderLoot(); }}]); return; }
   if(t.id==="invSelBtn"){ invSel = invSel ? null : new Set(); renderLoot(); return; }
+  if(t.id==="invSelCom"){ S.inv.filter(it=>it.ri===0 && (invFilter==="all"||it.slot===invFilter)).forEach(it=>invSel.add(it.id)); renderLoot(); return; }
   if(t.id==="invSelAll"){ const vis=S.inv.filter(it=>invFilter==="all"||it.slot===invFilter); const all=vis.every(it=>invSel.has(it.id)); vis.forEach(it=>all?invSel.delete(it.id):invSel.add(it.id)); renderLoot(); return; }
   if(t.id==="invSelDism" || t.id==="invSelSell"){ const dism=t.id==="invSelDism", list=S.inv.filter(it=>invSel.has(it.id)); if(!list.length) return;
     const tot=list.reduce((a,it)=>a+(dism?dismantleValue(it):sellValue(it)),0), hi=list.filter(it=>it.ri>=3).length;
@@ -3254,7 +3282,7 @@ document.addEventListener("click", e=>{
       modal("Taux de la forge", `<div style="text-align:left"><div class="small" style="margin-bottom:8px">Votre <b>niveau de forge</b> est ${F.lv}/${SUM_MAX}. Chaque objet forgé le fait progresser, et chaque niveau augmente vos chances d'obtenir des objets rares.</div>
         <table class="rtab"><tr><th></th><th>Maintenant</th>${nx?`<th>Niv. ${F.lv+1}</th>`:""}<th>Niv. ${SUM_MAX}</th><th>Puissance</th></tr>
         ${RAR.map((r,i)=>`<tr><td style="color:${r.c}">${r.n}</td><td><b>${cell(now[i])}</b></td>${nx?`<td>${cell(nx[i])}</td>`:""}<td>${cell(mx[i])}</td><td>×${r.m}</td></tr>`).join("")}</table>
-        <div class="small">Une forge coûte 1 lingot (9 pour ×10, 90 pour ×100). Les lingots tombent surtout sur les boss et dans la Tour. Chacun des 6 types d'objet a la même chance de sortir. Les objets sortent niveau 1 : renforcez-les en touchant un objet porté. Fusion : 3 objets du même type et de même rareté donnent 1 objet de rareté supérieure, au niveau du meilleur des trois.</div></div>`, [{t:"OK",cls:"gold"}]); break; }
+        <div class="small">Une forge coûte 1 lingot, sans réduction (10 pour ×10, 100 pour ×100). Les lingots tombent surtout sur les boss et dans la Tour. Chacun des 6 types d'objet a la même chance de sortir. Les objets sortent niveau 1 : renforcez-les en touchant un objet porté. Fusion : 3 objets du même type et de même rareté donnent 1 objet de rareté supérieure, au niveau du meilleur des trois.</div></div>`, [{t:"OK",cls:"gold"}]); break; }
     case "btnPrestX": break;
     case "btnPrest": modal("Renaître ?", `Vous perdez or, forge, équipement et ressources. Vous gardez familiers et 💎, et gagnez <b style="color:var(--violet)">${soulGain()} âmes</b>.`, [{t:"Annuler"},{t:"🔥 Renaître",cls:"violet",f:rebirth}]); break;
     case "expBtn": { const code=btoa(unescape(encodeURIComponent(JSON.stringify(S)))); $("#saveTxt").value=code; try{ navigator.clipboard.writeText(code).then(()=>{ t.textContent="Copié ✔"; },()=>{}); }catch(_){} break; }
@@ -4287,7 +4315,7 @@ const GUIDES = {
     ["🔮","Chaque invocation fait monter votre niveau d'invocation. Au départ, vous n'obtenez que des Communs (gris), des Peu communs (verts) et des Rares (bleus)."],
     ["⭐","Les Épiques (violets) se débloquent au niveau d'invocation "+RAR_UNLOCK[3]+", les Légendaires (orange) au niveau "+RAR_UNLOCK[4]+" et les Mythiques (rouges) au niveau "+RAR_UNLOCK[5]+", avec un taux très bas. Une fois les Légendaires débloqués, un Légendaire est garanti au plus tard à la "+PITY+"e invocation."]]},
   loot:  {ic:"🔨", t:"L'Atelier est ouvert", s:"L'Atelier", go:"loot", go_t:"Fabriquer", l:[
-    ["§lingot§","La forge coûte des Lingots, surtout lâchés par les boss et la Tour (1 lingot par objet, 9 pour ×10, 90 pour ×100). Chaque forge donne un objet au hasard parmi les 6 (arme, casque, armure, bottes, bouclier, talisman)."],
+    ["§lingot§","La forge coûte des Lingots, surtout lâchés par les boss et la Tour (1 lingot par objet, sans réduction en ×10 ou ×100). Chaque forge donne un objet au hasard parmi les 6 (arme, casque, armure, bottes, bouclier, talisman)."],
     ["🔩","Les scraps, lâchés par tous les monstres, servent à renforcer vos objets et à payer les fusions."],
     ["🔨","Chaque objet forgé fait monter votre niveau de forge. Comme pour les invocations : Communs, Peu communs et Rares au départ, Épiques au niveau "+RAR_UNLOCK[3]+", Légendaires au niveau "+RAR_UNLOCK[4]+", Mythiques au niveau "+RAR_UNLOCK[5]+"."],
     ["⬆️","Les objets sortent au niveau 1 et vont dans l'Inventaire : touchez-en un pour le comparer et l'équiper (une flèche ▲ signale les meilleurs). Renforcez vos objets portés avec des scraps : +6 % par niveau."],
@@ -4311,7 +4339,7 @@ const GUIDES = {
     ["⚔️","Le Passe de combat : une saison de 30 jours avec 30 paliers de récompenses. Tout le monde a la piste gratuite."]]},
   rune: {ic:"✨", t:"Le Donjon des runes", s:"Le Donjon des runes", l:[
     ["✨","Chaque jour, le Donjon garde une rune différente : Feu le lundi, Givre le mardi, Foudre le mercredi, Vie le jeudi, Ombre le vendredi, Sang le samedi, Or le dimanche."],
-    ["⚔️","Vous avez 3 essais par jour contre son gardien, en Normal, Difficile ou Héroïque : plus c'est dur, plus il donne de runes."],
+    ["⚔️","Vous avez 3 essais par jour contre son gardien (4 après le palier de Renaissance 2), en Normal, Difficile ou Héroïque : plus c'est dur, plus il donne de runes."],
     ["💎","Les runes enchantent vos objets Légendaires (1 emplacement) et Mythiques (2) : touchez l'objet porté, puis choisissez une rune."],
     ["⬆️","Chaque niveau d'enchantement coûte autant de runes que son numéro, jusqu'au niveau 10. Les runes sont gardées à la Renaissance."]]},
   pass: {ic:"⚔️", t:"Le Passe de combat", s:"Le Passe de combat", l:[
@@ -4326,7 +4354,7 @@ const GUIDES = {
     ["🐲","Le Titan de la semaine : infligez-lui un maximum de dégâts en 30 secondes, 3 essais par jour. Plus vous frappez fort, plus vous débloquez de récompenses, remises à zéro chaque lundi."],
     ["📍","Les Défis ont leur propre onglet en bas de l'écran."]]},
   prest: {ic:"👻", t:"La Renaissance est débloquée", s:"La Renaissance", go:"prest", go_t:"Voir les Âmes", l:[
-    ["🔥","À partir de l'étape "+PREST_MIN+" (puis 20 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro (or, scraps et lingots compris) avec des Âmes et un coffre de cristaux et d'orbes. Plus vous êtes allé loin, plus vous gagnez."],
+    ["🔥","À partir de l'étape "+PREST_MIN+" (puis 20 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro (or et scraps compris, les lingots sont gardés) avec des Âmes et un coffre de cristaux et d'orbes. Plus vous êtes allé loin, plus vous gagnez."],
     ["⏩","Les Âmes ne comptent que le chemin parcouru pendant la partie : si vous repartez d'une étape avancée, il faut monter au moins 20 étapes plus haut pour renaître à nouveau."],
     ["👻","Les Âmes sont une monnaie : dépensez-les à l'Autel des Âmes pour des améliorations permanentes : or, scraps, familiers, chances de forge, départ avancé à une étape plus haute…"],
     ["🏅","Chaque Renaissance débloque un palier : 4e place de familier, forge automatique, 4e compétence, familier exclusif…"],
@@ -4383,8 +4411,8 @@ const W_TIERS = [{r:1,cr:20,ob:1},{r:3,cr:40,ob:2},{r:8,cr:60,ob:3},{r:20,cr:100
 function weekId(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return d.getFullYear()+"-S"+(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)); }
 function chalReset(){
   const c=S.chal, d=today(), w=weekId();
-  if(c.day!==d){ c.day=d; c.keys=Math.max(c.keys, TOWER_KEYS); c.wtries=W_TRIES; c.dtries=DUNG_TRIES; }
-  if(c.dtries===undefined) c.dtries=DUNG_TRIES;
+  if(c.day!==d){ c.day=d; c.keys=Math.max(c.keys, TOWER_KEYS); c.wtries=W_TRIES; c.dtries=dungTries(); }
+  if(c.dtries===undefined) c.dtries=dungTries();
   if(c.wk!==w){ c.wk=w; c.wbest=0; c.wclaim={}; }
 }
 const towerStage = f => 4 + f*3;
@@ -5163,7 +5191,8 @@ const RUNES = {
 };
 const RUNE_DAY = ["or","feu","givre","foudre","vie","ombre","sang"];   // dimanche → samedi
 const JOURS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
-const RUNE_MAX = 10, DUNG_TRIES = 3;
+const RUNE_MAX = 10, DUNG_TRIES_BASE = 3;
+const dungTries = () => DUNG_TRIES_BASE + (hasP(2)?1:0);
 const DUNG_DIFF = [{n:"Normal", off:-10, r:2}, {n:"Difficile", off:0, r:4}, {n:"Héroïque", off:10, r:8}];
 const runeToday = () => RUNE_DAY[new Date().getDay()];
 const runeSlots = it => it && it.ri>=5 ? 2 : it && it.ri>=4 ? 1 : 0;
@@ -5210,7 +5239,7 @@ function renderDungeon(){
   const diffs = DUNG_DIFF.map((d,i)=>`<button class="btn ${i===2?"red":i===1?"gold":"blue"} dbtn" data-dung="${i}" ${t>0&&!MODE?"":"disabled"}><b>${d.n}</b><small>Étape ${Math.max(5,base+d.off)} · +${d.r} ${spr(R.ic)}</small></button>`).join("");
   const week = RUNE_DAY.map((x,i)=>({x,i})).slice(1).concat([{x:RUNE_DAY[0],i:0}]).map(({x,i})=>`<div class="dday ${x===r?"on":""}"><small>${JOURS[i].slice(0,3)}</small>${runeChip(x,(S.runes||{})[x]||0)}</div>`).join("");
   box.innerHTML = `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
-    <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small">Essais : <b>${t}</b>/${DUNG_TRIES}</span></div>
+    <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small">Essais : <b>${t}</b>/${dungTries()}</span></div>
       <div class="dbtns">${diffs}</div><div class="small" style="margin-top:6px">Un essai est utilisé même en cas de défaite. Les essais reviennent chaque jour.</div></div>
     <div class="card grow"><div class="chead"><h2>Vos runes</h2></div><div class="dweek">${week}</div>
       <div class="small" style="margin-top:8px">Les runes enchantent vos objets <b style="color:${RAR[4].c}">Légendaires</b> (1 emplacement) et <b style="color:${RAR[5].c}">Mythiques</b> (2). Touchez un objet porté pour l'enchanter. Chaque niveau coûte autant de runes que son numéro (jusqu'au niveau ${RUNE_MAX}).</div></div>`;
