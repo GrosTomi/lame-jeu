@@ -936,7 +936,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1822";
+var BUILD_ID = "20261123-1847";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -4552,7 +4552,9 @@ function guideWatch(){
 function guideShow(k, first){
   const g=GUIDES[k]; if(!g) return;
   S.tuto.gs[k]=true; save();
-  const acts = first && g.go && view!==g.go ? [{t:"Plus tard"}, {t:g.go_t, cls:"gold", f:()=> g.sub ? goSub(g.sub) : showView(g.go)}] : [{t:"Compris !", cls:"gold"}];
+  const later = ()=>{ const st=tutoCur(); const to=st && (st.nav||st.view);   // « Plus tard » : Hubert ne pousse plus vers cet onglet tant qu'on n'y va pas
+    if(st && to && (to===g.go || to===g.sub || (GROUP.includes(to) && GROUP.includes(g.go)))){ S.tuto.later=st.id; coachHide(); save(); } };
+  const acts = first && g.go && view!==g.go ? [{t:"Plus tard", f:later}, {t:g.go_t, cls:"gold", f:()=> g.sub ? goSub(g.sub) : showView(g.go)}] : [{t:"Compris !", cls:"gold"}];
   if(k==="boss") acts[acts.length-1].f = ()=>{ if(E && E.boss) E.timer=30; };   // le temps de lecture ne compte pas
   $("#modal").classList.remove("on");
   const lines = [{t:`<b>${g.t}</b>`, ic:g.ic, mood:"wow"}, ...g.l.map(([ic,tx])=>({t:tx, ic}))];
@@ -4907,6 +4909,7 @@ function updTuto(){
   const st=tutoCur();
   if(!st){ if(TK.coachKey) coachHide(); return; }
   const here = (st.view && view===st.view) || (st.nav && view===st.nav) || (st.inView && st.inView[view]) || (!st.view && !st.nav);
+  if(S.tuto.later===st.id){ if(here) S.tuto.later=""; else { if(TK.coachKey) coachHide(); return; } }
   const el=tutoTarget(st);
   coachShow(st.id+(here?"":"-nav"), here ? st.text : "Par ici ! Touchez l'onglet qui brille pour continuer.", el);
 }
