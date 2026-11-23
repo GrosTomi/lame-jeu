@@ -905,6 +905,11 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .selbar .btn{padding:6px 4px;font-size:13px}
 @media (max-height:620px){#tab-loot .teamcard{display:none}}
 .row .d:empty{display:none}
+
+.seg5 button{display:flex;flex-direction:column;align-items:center;line-height:1.05;padding:5px 2px;font-size:16px;position:relative}
+.seg5 button small{font-size:10.5px;font-family:var(--disp);margin-top:1px}.seg5 button .sp{width:20px;height:20px}
+.seg5 .tdot{position:absolute;top:1px;right:4px}
+.ptile.cr{border-color:#c5b3ff}
 </style>
 </head>
 <body>
@@ -920,7 +925,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1700";
+var BUILD_ID = "20261123-1709";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -3222,6 +3227,7 @@ document.addEventListener("click", e=>{
   if(t.dataset.sub){ goSub(t.dataset.sub); return; }
   if(t.dataset.talents){ talentsSheet(); return; }
   if(t.id==="defendBtn" || (t.closest && t.closest("#goal.raidgo"))){ defendRaid(); return; }
+  if(t.dataset.ingshop){ atelierTab="craft"; showView("loot"); return; }
   if(t.dataset.shoptab){ shopTab=t.dataset.shoptab; renderShop(); return; }
   if(t.dataset.shopbuy){ buyProduct(t.dataset.shopbuy); return; }
   if(t.dataset.shopad){ adForGems(); return; }
@@ -3987,7 +3993,7 @@ function bpGive(r){
 function bpClaim(key){
   bpCheck(); const [tr,is]=key.split(":"), i=+is; if(!bpReady(tr,i)) return;
   const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); Sfx.play(r.skin||r.fav?"legend":"success"); vibe(12);
-  if(r.skin){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===r.skin).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
+  if(r.skin){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===r.skin).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Bonus, Apparences"}]); revealCb=()=>renderShop(); }
   else if(r._it){ lastPull=0; showReveal([{ic:SLOTS[r.item].ic, n:r._it.name, ri:5, rn:"Ensemble du Souverain", tag:"Mythique exclusif du Passe Royal · dans l'Inventaire"}]); revealCb=()=>renderShop(); }
   else toast(`⚔️ Palier ${i} : ${bpMini(r).replace(/<br>/g," · ").replace(/<span.*?<\/span>/g,"")}`);
   save(); renderShop();
@@ -3998,7 +4004,7 @@ function bpClaimAll(){
   for(let i=1;i<=bpLevel();i++) for(const tr of ["f","c","r"]) if(bpReady(tr,i)){ const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); n++; if(r.skin) sk=r.skin; if(r._it) its.push(r._it); }
   if(!n) return; Sfx.play("legend"); toast(`⚔️ ${n} récompense${n>1?"s":""} du passe récupérée${n>1?"s":""} !`);
   const cards=its.map(it=>({ic:SLOTS[it.slot].ic, n:it.name, ri:5, rn:"Ensemble du Souverain", tag:"Mythique exclusif"}));
-  if(sk) cards.unshift({ic:"🛡️", n:SKINS.find(x=>x.id===sk).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"});
+  if(sk) cards.unshift({ic:"🛡️", n:SKINS.find(x=>x.id===sk).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Bonus, Apparences"});
   if(cards.length){ lastPull=0; showReveal(cards); revealCb=()=>renderShop(); }
   save(); renderShop();
 }
@@ -4041,10 +4047,14 @@ const PREMIUM = [
   {id:"lpet",   ic:"🐾", n:"Faveur légendaire",        d:()=>"Votre prochaine invocation de familier sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("fams"), give:()=>{ S.favPet=1; }, once:()=>!!S.favPet},
   {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.favSkl=1; }, once:()=>!!S.favSkl},
   {id:"slot",   ic:"➕", n:"Place de familier en plus", d:()=>S.extraSlot ? "Déjà achetée" : "Une place de plus dans l'équipe, pour toujours", cost:500, max:1, ok:()=>unlocked("fams"), once:()=>S.extraSlot>0, give:()=>{ S.extraSlot=1; calc(); dirty.fams=true; }},
-  {id:"ing50",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>"", cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
-  {id:"ing100",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
-  {id:"ing500",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
-  {id:"ing1000", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"", cost:4200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
+  {id:"g40",   cat:"gold", ic:"🪙", n:"Petite bourse",      d:()=>`+${fmt(goldPack(200))} or`,  cost:40,  max:999, give:()=>{ S.gold+=goldPack(200); }},
+  {id:"g100",  cat:"gold", ic:"💰", n:"Sacoche d'or",       d:()=>`+${fmt(goldPack(550))} or`,  cost:100, max:999, give:()=>{ S.gold+=goldPack(550); }},
+  {id:"g250",  cat:"gold", ic:"👑", n:"Malle d'or",         d:()=>`+${fmt(goldPack(1500))} or`, cost:250, max:999, give:()=>{ S.gold+=goldPack(1500); }},
+  {id:"g600",  cat:"gold", ic:"🏆", n:"Caverne d'or",       d:()=>`+${fmt(goldPack(4000))} or`, cost:600, max:999, give:()=>{ S.gold+=goldPack(4000); }},
+  {id:"ing50", cat:"ing",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>"", cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
+  {id:"ing100", cat:"ing",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
+  {id:"ing500", cat:"ing",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
+  {id:"ing1000", cat:"ing", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"", cost:4200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
   {id:"invx",   ic:"📦", n:"+10 places d'inventaire",   d:()=>`Inventaire : ${invMax()} places${(S.invX||0)>=INV_BUY_MAX?" (maximum)":` · jusqu'à ${INV_BASE+INV_STEP*INV_BUY_MAX}`}`, get cost(){ return 80+40*(S.invX||0); }, max:99, once:()=>(S.invX||0)>=INV_BUY_MAX, give:()=>{ S.invX=(S.invX||0)+1; dirty.loot=true; }},
   {id:"cls",    ic:"🎭", n:"Changer de classe",         d:()=>"Choisissez une autre classe déjà débloquée, sans attendre la Renaissance", cost:100, max:3, ok:()=>Object.keys(S.classes||{}).length>1, give:()=>{ setTimeout(()=>classPicker(null,null), 200); }},
 ];
@@ -4085,40 +4095,54 @@ function mktBuy(id){
   S.market.n[id]=n+1; m.give(); Sfx.play("buy"); vibe(10); toast(`${m.ic} ${m.n} : acheté !`); dirty.fams=true;
   dirty.loot=dirty.res=true; save(); renderShop();
 }
-let shopTab = "real";
+let shopTab = "gems";
 function renderShop(){
   mktReset(); adDayReset();
   const el=$("#tab-shop"); if(!el) return;
+  if(shopTab==="real") shopTab="gems"; if(shopTab==="mkt") shopTab="bonus";
   const bpN = bpClaimable();
-  const seg = `<div class="seg"><button data-shoptab="real" class="${shopTab==="real"?"on":""}">Cristaux & or</button><button data-shoptab="bp" class="${shopTab==="bp"?"on":""}">Passe${bpN?` <span class="tdot">${bpN}</span>`:""}</button><button data-shoptab="mkt" class="${shopTab==="mkt"?"on":""}">Marché</button></div>`;
+  const T = (k,t) => `<button data-shoptab="${k}" class="${shopTab===k?"on":""}">${t}</button>`;
+  const seg = `<div class="seg seg5">${T("gems","💎<small>Cristaux</small>")}${T("gold","🪙<small>Or</small>")}${unlocked("loot")?T("ing","§lingot§<small>Lingots</small>"):""}${T("bp",`⚔️<small>Passe</small>${bpN?`<span class="tdot">${bpN}</span>`:""}`)}${T("bonus","✨<small>Bonus</small>")}</div>`;
   if(shopTab==="bp"){ el.innerHTML = seg + bpHTML(); bpScrollInit(); guideQueue("pass"); return; }
-  if(shopTab==="real"){
+  // tuile achetée en argent réel
+  const rtile = p => { const owned=(p.perm||p.once) && S.iap[p.id], d = p.gold ? `+${fmt(goldPack(p.gold))} or` : p.d, rib = p.best ? "Meilleure offre" : p.tag||"";
+    return `<div class="ptile ${p.best?"best":""} ${owned?"owned":""}">${rib?`<span class="rib">${rib}</span>`:""}<span class="pic">${p.ic}</span><b>${p.n}</b><small>${d}</small>
+      ${owned?`<span class="badge bup">Acheté</span>`:`<button class="btn gold sm" data-shopbuy="${p.id}">${p.price}</button>`}</div>`; };
+  // tuile achetée en cristaux
+  const ctile = m => { if(m.ok && !m.ok()) return ""; const can=S.crystals>=m.cost;
+    return `<div class="ptile cr"><span class="pic">${m.ic}</span><b>${m.n}</b><small>${m.d()}</small><button class="btn violet sm" data-prem="${m.id}" data-need="cr:${m.cost}" ${can?"":"disabled"}>💎 ${fmt(m.cost)}</button></div>`; };
+  const grp = (t, inner) => `<div class="ptgrp">${t}</div>${inner}`;
+  let tiles="";
+  if(shopTab==="gems"){
     const left=AD_LIMITS.gems-S.ads.gems;
-    const tile = p => { const owned=(p.perm||p.once) && S.iap[p.id], d = p.gold ? `+${fmt(goldPack(p.gold))} or` : p.d, rib = p.best ? "Meilleure offre" : p.tag||"";
-      return `<div class="ptile ${p.best?"best":""} ${owned?"owned":""}">${rib?`<span class="rib">${rib}</span>`:""}<span class="pic">${p.ic}</span><b>${p.n}</b><small>${d}</small>
-        ${owned?`<span class="badge bup">Acheté</span>`:`<button class="btn gold sm" data-shopbuy="${p.id}">${p.price}</button>`}</div>`; };
-    const P = PRODUCTS.filter(p=>!p.bp && !(p.once && S.iap[p.id]));
-    const tiles = `<div class="ptile free"><span class="pic">📺</span><b>Cristaux gratuits</b><small>+${AD_GEMS} 💎 par pub · ${left}/${AD_LIMITS.gems} aujourd'hui</small><button class="btn blue sm" data-shopad="1" ${left>0?"":"disabled"}>${S.iap.noads?"Récupérer":"Regarder"}</button></div>`
-      + `<div class="ptile pass"><span class="rib">${bpSeasonName()}</span><span class="pic">⚔️</span><b>Passe de combat</b><small>30 paliers, 2 armures exclusives</small><button class="btn violet sm" data-shoptab="bp">Voir</button></div>`
-      + P.map(tile).join("");
-    el.innerHTML = seg + `<div class="pager" data-pg="shop"><div class="pgsrc grid2">${tiles}</div></div>
-      <div class="shopft"><span>🧪 Mode test : achats simulés</span><button class="linkbtn" data-shoprestore="1">Restaurer mes achats</button></div>`;
-  } else {
-    const prow = m => { if(m.ok && !m.ok()) return ""; const n=S.market.n["p_"+m.id]||0, done=(m.once&&m.once()), left=m.max-n, can=!done && left>0 && S.crystals>=m.cost;
-      return `<div class="row shoprow prem"><div class="ic">${m.ic}</div><div class="mid"><div class="t">${m.n}</div><div class="d">${m.d()}${m.max<99 && !done?` · ${left}/${m.max} aujourd'hui`:""}</div></div>
-        ${done?`<span class="badge bup">Acquis</span>`:`<button class="btn violet sm" data-prem="${m.id}" ${!done && left>0?`data-need="cr:${m.cost}"`:""} ${can?"":"disabled"}>💎 ${m.cost}</button>`}</div>`; };
-    const mrow = m => { if(m.ok && !m.ok()) return ""; const c=m.cost(), n=S.market.n[m.id]||0, left=m.max-n, can = left>0 && (m.cur==="cr"?S.crystals>=c:S.gold>=c);
-      return `<div class="row shoprow"><div class="ic">${m.ic}</div><div class="mid"><div class="t">${m.n}</div><div class="d">${m.d()} · ${left}/${m.max} aujourd'hui</div></div>
-        <button class="btn ${m.cur==="cr"?"blue":"gold"} sm" data-mkt="${m.id}" ${left>0?`data-need="${m.cur==="cr"?"cr":"go"}:${c}"`:""} ${can?"":"disabled"}>${m.cur==="cr"?"💎":"🪙"} ${fmt(c)}</button></div>`; };
-    const skin = k => { const own=S.skins.owned[k.id], on=S.skins.hero===k.id;
-      return `<button class="skintile ${on?"on":""}" data-skin="${k.id}" ${!own && (k.bp || S.crystals<k.cost)?"disabled":""}><span class="skprev">${knightSVG(k.pal)}</span><b>${k.n}</b><small>${on?"Portée":own?"Porter":k.bp?"Passe":"💎 "+k.cost}</small></button>`; };
-    const aura = S.skins.owned.aura ? `<button class="btn ${S.skins.aura?"gold":""} sm" data-aura="1">${S.skins.aura?"Activée":"Activer"}</button>` : `<button class="btn violet sm" data-aura="1" ${S.crystals<150?"disabled":""}>💎 150</button>`;
-    const items = `<div class="mgrp">💎 Avantages premium</div>` + PREMIUM.map(prow).join("")
-      + `<div class="mgrp">🎨 Apparences</div><div class="skingrid">${SKINS.map(skin).join("")}</div>`
-      + `<div class="row shoprow"><div class="ic">✨</div><div class="mid"><div class="t">Aura dorée des familiers</div><div class="d">Vos familiers brillent en combat</div></div>${aura}</div>`
-      + `<div class="mgrp">🛒 Marché du jour</div>` + MARKET.filter(m=>!m.id.startsWith("orb")).map(mrow).join("");
-    el.innerHTML = seg + `<div class="card grow"><div class="pager" data-pg="mkt"><div class="pgsrc list">${items}</div></div></div>`;
+    tiles = `<div class="ptile free"><span class="pic">📺</span><b>Cristaux gratuits</b><small>+${AD_GEMS} 💎 par pub · ${left}/${AD_LIMITS.gems} aujourd'hui</small><button class="btn blue sm" data-shopad="1" ${left>0?"":"disabled"}>${S.iap.noads?"Récupérer":"Regarder"}</button></div>`
+      + PRODUCTS.filter(p=>p.id.startsWith("gems_") || (p.once && !S.iap[p.id])).map(rtile).join("")
+      + PRODUCTS.filter(p=>p.perm).map(rtile).join("");
+  } else if(shopTab==="gold"){
+    tiles = PRODUCTS.filter(p=>p.gold).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="gold").map(ctile).join("");
+  } else if(shopTab==="ing"){
+    tiles = `<div class="ptile free"><span class="pic">§lingot§</span><b>Vos lingots</b><small>${S.ingots||0} · 1 lingot = 1 objet forgé</small><button class="btn blue sm" data-ingshop="1">À l'Atelier</button></div>`
+      + PREMIUM.filter(m=>m.cat==="ing").map(ctile).join("");
   }
+  if(shopTab!=="bonus"){
+    el.innerHTML = seg + `<div class="pager" data-pg="shop-${shopTab}"><div class="pgsrc grid2">${tiles}</div></div>
+      <div class="shopft"><span>🧪 Mode test : achats simulés</span><button class="linkbtn" data-shoprestore="1">Restaurer mes achats</button></div>`;
+    return;
+  }
+  const prow = m => { if(m.ok && !m.ok()) return ""; const n=S.market.n["p_"+m.id]||0, done=(m.once&&m.once()), left=m.max-n, can=!done && left>0 && S.crystals>=m.cost;
+    return `<div class="row shoprow prem"><div class="ic">${m.ic}</div><div class="mid"><div class="t">${m.n}</div><div class="d">${m.d()}${m.max<99 && !done?` · ${left}/${m.max} aujourd'hui`:""}</div></div>
+      ${done?`<span class="badge bup">Acquis</span>`:`<button class="btn violet sm" data-prem="${m.id}" ${!done && left>0?`data-need="cr:${m.cost}"`:""} ${can?"":"disabled"}>💎 ${m.cost}</button>`}</div>`; };
+  const mrow = m => { if(m.ok && !m.ok()) return ""; const c=m.cost(), n=S.market.n[m.id]||0, left=m.max-n, can = left>0 && (m.cur==="cr"?S.crystals>=c:S.gold>=c);
+    return `<div class="row shoprow"><div class="ic">${m.ic}</div><div class="mid"><div class="t">${m.n}</div><div class="d">${m.d()} · ${left}/${m.max} aujourd'hui</div></div>
+      <button class="btn ${m.cur==="cr"?"blue":"gold"} sm" data-mkt="${m.id}" ${left>0?`data-need="${m.cur==="cr"?"cr":"go"}:${c}"`:""} ${can?"":"disabled"}>${m.cur==="cr"?"💎":"🪙"} ${fmt(c)}</button></div>`; };
+  const skin = k => { const own=S.skins.owned[k.id], on=S.skins.hero===k.id;
+    return `<button class="skintile ${on?"on":""}" data-skin="${k.id}" ${!own && (k.bp || S.crystals<k.cost)?"disabled":""}><span class="skprev">${knightSVG(k.pal)}</span><b>${k.n}</b><small>${on?"Portée":own?"Porter":k.bp?"Passe":"💎 "+k.cost}</small></button>`; };
+  const aura = S.skins.owned.aura ? `<button class="btn ${S.skins.aura?"gold":""} sm" data-aura="1">${S.skins.aura?"Activée":"Activer"}</button>` : `<button class="btn violet sm" data-aura="1" ${S.crystals<150?"disabled":""}>💎 150</button>`;
+  const items = `<div class="mgrp">✨ Avantages</div>` + PREMIUM.filter(m=>!m.cat).map(prow).join("")
+    + `<div class="mgrp">🛒 Marché du jour</div>` + MARKET.filter(m=>!m.id.startsWith("orb")).map(mrow).join("")
+    + `<div class="mgrp">🎨 Apparences</div><div class="skingrid">${SKINS.map(skin).join("")}</div>`
+    + `<div class="row shoprow"><div class="ic">✨</div><div class="mid"><div class="t">Aura dorée des familiers</div><div class="d">Vos familiers brillent en combat</div></div>${aura}</div>`;
+  el.innerHTML = seg + `<div class="card grow"><div class="pager" data-pg="mkt"><div class="pgsrc list">${items}</div></div></div>`;
 }
 function shopBody(){
   adDayReset();
@@ -4361,7 +4385,7 @@ const GUIDES = {
     ["💎","La rareté compte beaucoup : chaque rareté vaut environ 3 fois la précédente. Un Commun niveau 100 vaut à peine un Mythique niveau 1."],
     ["♻️","3 objets identiques de même rareté (5 pour les Épiques, 8 pour les Légendaires) se fusionnent en un objet de la rareté au-dessus, qui repart au niveau 1 et coûte des scraps. Les autres peuvent être gardés, démontés ou vendus."],
     ["✨","Certains objets appartiennent à l'un des 8 ensembles (Loup, Templier, Ombres, Wyrm, Marchand, Berserker, Glacier, Paladin), reconnaissables à leurs couleurs : porter 2 ou 4 pièces du même donne un gros bonus."],
-    ["☑️","Dans l'Inventaire, le bouton Sélection permet de choisir plusieurs objets pour les démonter ou les vendre d'un coup. Des places en plus s'achètent au Marché."]]},
+    ["☑️","Dans l'Inventaire, le bouton Sélection permet de choisir plusieurs objets pour les démonter ou les vendre d'un coup. Des places en plus s'achètent avec le bouton +10 📦 de l'Inventaire."]]},
   skills:{ic:"💥", t:"Les compétences sont débloquées", s:"Les compétences", go:"combat", go_t:"Essayer", l:[
     ["💥","3 boutons apparaissent sous le combat, un par compétence équipée : attaques, soins ou bonus temporaires."],
     ["⏳","Après usage, une compétence se recharge : le cercle bleu montre le temps restant."],
@@ -4371,10 +4395,9 @@ const GUIDES = {
     ["🎭","Votre classe a gagné un niveau : elle débloque un talent. Vous choisissez entre deux bonus, pour toujours."],
     ["👆","Touchez la ligne de votre classe, sous le combat, pour ouvrir les talents et faire votre choix. Chaque classe a les siens."]]},
   shop: {ic:"🛒", t:"La Boutique", s:"La Boutique", l:[
-    ["💎","Les cristaux sont votre monnaie la plus précieuse : gardez-les pour la Boutique."],
-    ["✨","Avantages premium : or ou scraps ×2 pendant 24 h, faveur légendaire, place de familier en plus, changement de classe…"],
-    ["🎨","Apparences : de nouvelles armures pour votre chevalier et une aura dorée pour vos familiers."],
-    ["🔑","Le Marché vend aussi des clés de la Tour, des essais contre le Titan et des scraps, renouvelés chaque jour."],
+    ["💎","La Boutique est rangée par onglets : Cristaux, Or, Lingots, Passe et Bonus. Les cristaux sont votre monnaie la plus précieuse."],
+    ["🪙","L'onglet Or regroupe tous les packs d'or, et l'onglet Lingots tous les packs de lingots pour forger."],
+    ["✨","L'onglet Bonus contient les avantages (boosts ×2, faveurs, places, classe), le marché du jour (clés, essais, scraps) et les apparences."],
     ["⚔️","Le Passe de combat : une saison de 30 jours avec 30 paliers de récompenses. Tout le monde a la piste gratuite."]]},
   rune: {ic:"✨", t:"Le Donjon des runes", s:"Le Donjon des runes", l:[
     ["✨","Chaque jour, le Donjon garde une rune différente : Feu le lundi, Givre le mardi, Foudre le mercredi, Vie le jeudi, Ombre le vendredi, Sang le samedi, Or le dimanche."],
@@ -4624,7 +4647,7 @@ function updGoal(){
 
 /* ---------- Info-bulles des monnaies ---------- */
 const CUR_HELP = {
-  gold:   "Or : gagné en battant des monstres (beaucoup plus sur les boss), pendant votre absence et avec les cadeaux. Sert à améliorer votre chevalier à la Forge et à acheter au Marché.",
+  gold:   "Or : gagné en battant des monstres (beaucoup plus sur les boss), pendant votre absence et avec les cadeaux. Sert à améliorer votre chevalier à la Forge et au marché du jour (Boutique, Bonus). Des packs d'or sont dans Boutique, Or.",
   crys:   "Cristaux : boss, nouveaux records, quêtes du jour, succès, Tour, Titan, Renaissance, pubs et Boutique. C'est la monnaie de la Boutique : orbes, clés, scraps, vitesse…",
   orbs:   "Orbes d'invocation : chaque boss (+1, +2 pour un nouveau record), parfois sur les monstres, chaque étage de la Tour, les quêtes du jour et de la semaine, le calendrier, le Titan, la Renaissance et pendant votre absence. Servent à invoquer familiers et compétences.",
   treats: "Friandises : lâchées par les monstres et les boss, la Tour, les quêtes et pendant votre absence. Servent à faire monter de niveau vos familiers.",
@@ -4632,7 +4655,7 @@ const CUR_HELP = {
   ingots: "Lingots : 5 par boss (+5 pour un nouveau record), parfois sur les monstres, chaque étage de la Tour, les quêtes et la Boutique. Servent à forger des objets à l'Atelier.",
   scraps: "Scraps : lâchés par tous les monstres (bien plus par les boss), pendant votre absence, et récompenses (Tour, quêtes, coffres, Marché). Servent à renforcer l'équipement et à payer les fusions.",
   tokens: "Écailles : lâchées par les dragonnets et les boss pendant l'invasion de dragons du week-end. S'échangent à la boutique de l'invasion.",
-  city:   "Ressources du fief : produites en continu par la mine, la scierie et la carrière, même jeu fermé. Gagnez-en aussi en repoussant les assauts et au Marché.",
+  city:   "Ressources du fief : produites en continu par la mine, la scierie et la carrière, même jeu fermé. Gagnez-en aussi en repoussant les assauts et au marché du jour (Boutique, Bonus).",
 };
 function applyCurHelp(){
   const set=(sel,k)=>document.querySelectorAll(sel).forEach(e=>{ if(e && e.title!==CUR_HELP[k]) e.title=CUR_HELP[k]; });
