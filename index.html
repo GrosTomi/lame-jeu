@@ -934,7 +934,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1751";
+var BUILD_ID = "20261123-1756";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -3434,7 +3434,7 @@ function cityOnStage(){
   if(S.city.pending) return;
   S.city.prog++;
   if(S.city.prog===RAID_EVERY-3) log(`⚠️ Des pillards approchent de votre fief : ils seront là dans 3 étapes.`, "bad");
-  if(S.city.prog>=RAID_EVERY){ S.city.prog=0; S.city.pending=true; log(`⚔️ Des pillards attendent devant votre fief. Défendez-le quand vous voulez !`, "bad"); toast(`${spr("attention")} Assaut prêt : défendez votre fief quand vous voulez`); }
+  if(S.city.prog>=RAID_EVERY){ S.city.prog=0; S.city.pending=true; log(`⚔️ Des pillards attendent devant votre fief. Défendez-le quand vous voulez !`, "bad"); }
   if(view==="city") dirty.city=true;
 }
 function defendRaid(){
@@ -4669,7 +4669,7 @@ let goalSig="";
 function updGoal(){
   const el=$("#goal"); if(!el) return;
   if(MODE){ el.innerHTML=""; goalSig=""; el.classList.remove("raidgo"); return; }
-  if(S.city && S.city.pending && unlocked("city")){
+  if(false){   // l'assaut ne s'affiche plus sur l'écran de combat : il se gère dans le fief
     if(goalSig!=="raid"){ goalSig="raid"; el.classList.add("raidgo"); el.innerHTML = `${spr("attention")}<div class="gt"><div class="gl1"><b>Assaut prêt</b>Des pillards attendent devant le fief</div></div><span class="gbtn">Défendre</span>`; }
     return;
   }
