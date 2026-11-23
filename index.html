@@ -923,6 +923,9 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .seg5 button{min-width:0}.seg5 button small{white-space:nowrap}
 .herobox .passbtn{width:40px;height:40px;margin-right:-4px}.herobox .passbtn .sp{width:24px;height:24px}
 #dot-pass{position:absolute;top:-5px;right:-5px}
+.sovtag{display:inline-block;margin:4px 0 6px;padding:3px 10px;border-radius:10px;background:linear-gradient(90deg,#8f5cf6,#f2c94c);color:#fff;font-weight:900;font-size:12.5px;text-shadow:0 1px 0 #0006}
+.bplvbuy{display:flex;gap:5px;flex:none}.bplvbuy .btn{display:flex;flex-direction:column;align-items:center;padding:4px 8px;line-height:1.1;font-size:15px;min-width:54px}.bplvbuy small{font-size:10.5px;white-space:nowrap}
+.bpc:disabled{opacity:1}
 </style>
 </head>
 <body>
@@ -938,7 +941,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1918";
+var BUILD_ID = "20261123-1943";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1649,7 +1652,7 @@ const TALENTS = {
   10:[{t:"+8 % de critique",k:"crit",v:8},{t:"+15 % de vitesse",k:"spd",v:15}],
 };
 function ingHelp(){
-  talk([{t:"Les <b>Lingots</b> servent à forger des objets à l'Atelier : 1 lingot par objet, sans réduction en ×10 ou ×100.", mood:"happy", ic:"§lingot§"},
+  talk([{t:"Les <b>Lingots</b> servent à forger des objets à l'Atelier : 1 lingot par objet, et moins cher en lot : 9 lingots le ×10, 85 lingots le ×100.", mood:"happy", ic:"§lingot§"},
         {t:"Chaque <b>boss</b> vaincu en donne 5, et 5 de plus pour un nouveau record. Les monstres en lâchent parfois un.", ic:"👑"},
         {t:"La <b>Tour</b> en donne à chaque étage, les <b>quêtes</b> aussi, et la Boutique en vend contre des cristaux. Les scraps, eux, servent à renforcer et à fusionner.", ic:"🗼"}],
        {title:"Les lingots", choices:[{t:"Compris !", cls:"gold"}]});
@@ -1717,7 +1720,7 @@ function altarBuy(id){
 const PMILE = [
   {p:1,  ic:"🐾", t:"4e place dans l'équipe de familiers"},
   {p:2,  ic:"✨", t:"+1 essai par jour au Donjon des runes"},
-  {p:3,  ic:"💥", t:"4e compétence équipée"},
+  {p:3,  ic:"💥", t:"4e compétence équipée et Donjon des runes"},
   {p:5,  ic:"🎁", t:"Scraps des boss doublés"},
   {p:7,  ic:"👻", t:"Le Spectre des Âmes (Mythique) : offert, puis invocable"},
   {p:10, ic:"🐾", t:"5e place dans l'équipe de familiers"},
@@ -1780,7 +1783,7 @@ const goldFor = s => 2*Math.pow(1.165,s-1);
    de leur vie, et leurs coups ne peuvent pas enlever plus d'une part fixe de la vôtre : un combat de boss dure 10 à 15 s. */
 const EN_HP0=18, EN_HPG=1.18, EN_ATK0=3, EN_ATKG=1.165, BOSS_HPM=3.3, BOSS_ATKM=1.35, ECO_PACE=1;
 const BOSS_CAP_HIT=0.07, BOSS_CAP_SKILL=0.18, BOSS_CAP_FAM=0.05, BOSS_CAP_TAKEN=0.2;
-const bossCapped = () => E && E.boss && !(MODE && MODE.kind==="wboss");
+const bossCapped = () => E && E.boss && !(MODE && (MODE.kind==="wboss" || MODE.kind==="tower"));   // Tour : épreuve de force, vos stats comptent en entier
 function enemyFor(s){
   const b=biomeOf(s), boss=isBoss(s);
   let [n,ic] = boss ? b.boss : pick(b.e), ev=false;
@@ -1854,7 +1857,7 @@ function forgeLevel(n){
 }
 const itemCost = () => Math.max(30, Math.ceil(craftScrap(Math.max(S.stage, S.maxStage-20))*0.2));   // valeur de référence en scraps (récompenses, marché)
 /* La forge coûte des Lingots : lâchés par les boss (pas par les monstres ordinaires, sauf rarement) et la Tour, achetables en cristaux. */
-const ingCost = n => n;   // prix fixe : 1 lingot = 1 objet, sans réduction
+const ingCost = n => n>=100 ? Math.round(n*0.85) : n>=10 ? Math.round(n*0.9) : n;   // ×10 : 9 lingots, ×100 : 85 lingots
 const ING_DROP = 0.05;   // chance qu'un monstre ordinaire lâche un lingot
 function rollItemRarity(){
   const rates=forgeRates(forgeLevel().lv), tot=rates.reduce((a,b)=>a+b,0);
@@ -2446,6 +2449,7 @@ function renderEquip(){
 }
 /* Petite flèche verte sur les objets portés qu'on peut renforcer avec ses scraps */
 function updEquipUp(){
+  const es=$("#eqScr"); if(es){ const t=fmt(S.scraps); if(es.dataset.v!==t){ es.dataset.v=t; es.innerHTML="🔩 "+t; } }
   const ub=$("#eqUpAll"); if(ub){ const d=!upAllInfo().n; if(ub.disabled!==d) ub.disabled=d; }
   for(const box of [$("#equip"), $("#eqRowA")]){ if(!box || box.offsetParent===null) continue;
   for(const el of box.querySelectorAll("[data-sheq]")){
@@ -2536,7 +2540,7 @@ let invSel = null;   // sélection multiple dans l'inventaire (null = désactiv�
 function renderLoot(){
   const F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100, nf=fusionGroups().length;
   const band = sumBand({ic:spr("lingot"), cid:"ingB", val:S.ingots||0, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
-      btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>§lingot§ 1</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>§lingot§ 10</small></button><button class="btn violet" id="forge100" data-fn="100">×100<small>§lingot§ 100</small></button>`,
+      btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>§lingot§ 1</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>§lingot§ 9</small></button><button class="btn gold" id="forge100" data-fn="100">×100<small>§lingot§ 85</small></button>`,
       ft:`<button class="linkbtn" id="ingBuy">Acheter des lingots</button> · <button class="linkbtn" id="ingHelp">En gagner</button> · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard');
   const worn = SLOTKEYS.map(k=>{ const it=S.equip[k], sd=SLOTS[k];
     return it ? itemTile(it, `data-sheq="${k}" title="${sd.n} · ${it.name}"`, (it.set?`<span class="tset">${SETS[it.set].ic}</span>`:"")+`<span class="canup">▲</span>`) : `<div class="tile empty" title="${sd.n}"><span class="ti">${sd.ic}</span></div>`; }).join("");
@@ -2545,7 +2549,7 @@ function renderLoot(){
   if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
   const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
   $("#tab-loot").innerHTML = band
-    + `<div class="card teamcard"><div class="chead"><h2>Équipé<small>🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
+    + `<div class="card teamcard"><div class="chead"><h2>Équipé<small id="eqScr">🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
         <div class="teamrow eqrow" id="eqRowA" style="grid-template-columns:repeat(6,1fr)">${worn}</div><div id="setsBox" class="setsA">${setsHTML()}</div></div>
       <div class="card grow"><div class="chead"><h2>Inventaire<small>${S.inv.length}/${invMax()}</small></h2>
           <div class="cbtns">${nf?`<button class="btn violet sm" id="fuseOpen">✨ Fusions <b class="fnb">${nf}</b></button>`:""}${(S.invX||0)<INV_BUY_MAX && !invSel?`<button class="btn sm" id="invBuy" title="Agrandir l'inventaire">+10 📦</button>`:""}<button class="btn sm ${invSel?"gold":""}" id="invSelBtn" title="Sélectionner pour démonter ou vendre">${invSel?"Terminé":"☑️ Trier"}</button></div></div>
@@ -2677,7 +2681,7 @@ function openSheet(kind, id){
     adDayReset(); const l=AD_LIMITS.boost-S.ads.boost;
     title = "Accélérer le jeu"; body = speedBody();
     acts = [{t:`📺 ${S.iap.noads?"Activer":"Regarder une pub"}<small>${BOOST_MIN} min · ${l}/${AD_LIMITS.boost} aujourd'hui</small>`, act:"adboost", cls:"blue", dis:l<=0},
-            ...(S.iap.speed?[]:[{t:`⚡ Pour toujours<small>${PRODUCTS.find(p=>p.id==="speed").price}</small>`, act:"buy:speed", cls:"gold"}])];
+            ...(S.iap.speed?[]:[{t:`⚡ ×3 pour toujours<small>${PRODUCTS.find(p=>p.id==="speed").price}</small>`, act:"buy:speed", cls:"gold"}])];
   } else if(kind==="daily" || kind==="rewards"){
     if(kind==="daily"){ rewTab="cal"; sheet.kind="rewards"; }
     questsRoll(); const sh=rewardsSheet(); title=sh.title; body=sh.body; acts=sh.acts;
@@ -2873,12 +2877,12 @@ function renderEnemy(){
 function updSpeedBtn(){
   const sp=$("#btnSpeed"), v=S.opts.speed||1;
   if(!speedUnlocked()){ setH(sp, "⚡<small>boost</small>"); sp.className="round lock"; return; }
-  setH(sp, "×"+v+(S.iap.speed?"":`<small>${fmtLeft(boostLeft())}</small>`)); sp.className = "round"+(v>1?" x"+v:"");
+  const bl=boostLeft(); setH(sp, "×"+Math.min(v,speedMax())+(S.iap.speed||!bl?"":`<small>${fmtLeft(bl)}</small>`)); sp.className = "round"+(v>1?" x"+v:"");
 }
 let speedT=0;
 function speedWatch(){   // fin du boost : retour à ×1
   const now=performance.now(); if(now-speedT<1000) return; speedT=now;
-  if(!speedUnlocked() && (S.opts.speed||1)>1){ S.opts.speed=1; log("⏳ Le boost de vitesse est terminé. Regardez une pub pour le relancer !", "bad"); }
+  if((S.opts.speed||1)>speedMax()){ S.opts.speed=speedMax(); log("⏳ Le boost de vitesse est terminé. Regardez une pub pour le relancer !", "bad"); }
   if(view==="combat") updSpeedBtn();
 }
 let featT=0;
@@ -3277,7 +3281,8 @@ document.addEventListener("click", e=>{
   if(t.dataset.dung!==undefined){ dungStart(+t.dataset.dung); return; }
   if(t.dataset.ptab){ prestTab=t.dataset.ptab; renderPrest(); return; }
   if(t.dataset.ctab){ cityTab=t.dataset.ctab; renderCity(); return; }
-  if(t.dataset.bp){ if(t.dataset.bp==="all") bpClaimAll(); else bpClaim(t.dataset.bp); return; }
+  if(t.dataset.bplv){ bpBuyLv(+t.dataset.bplv); return; }
+  if(t.dataset.bp){ if(t.dataset.bp==="all") bpClaimAll(); else if(bpReady(...t.dataset.bp.split(":").map((v,i)=>i?+v:v))) bpClaim(t.dataset.bp); else bpPeek(t.dataset.bp); return; }
   if(t.dataset.skin){ skinBuy(t.dataset.skin); return; }
   if(t.dataset.aura){ if(!S.skins.owned.aura){ if(S.crystals<150) return; S.crystals-=150; S.skins.owned.aura=1; S.skins.aura=true; Sfx.play("buy"); } else S.skins.aura=!S.skins.aura; renderKnight(true); save(); renderShop(); return; }
   if(t.dataset.unkpet){ const p=petDef(t.dataset.unkpet);
@@ -3347,12 +3352,14 @@ document.addEventListener("click", e=>{
     case "autoTeam": autoTeam(); break;
     case "rates": modal("Taux d'invocation", PETS_RATES_HTML(), [{t:"OK",cls:"gold"}]); break;
     case "btnMusic": S.opts.music=!S.opts.music; S.opts.music?Music.start():Music.stop(); updMusicBtn(); dirty.opts=true; save(); break;
-    case "btnSpeed": if(!speedUnlocked()){ openSheet("speed"); break; } S.opts.speed = (S.opts.speed||1)%3+1; dirty.enemy=true; vibe(10); break;
+    case "btnSpeed": { const mx=speedMax(); if(mx<2){ openSheet("speed"); break; }
+      if(mx===2 && (S.opts.speed||1)===2){ S.opts.speed=1; openSheet("speed"); break; }   // ×3 : proposer l'achat
+      S.opts.speed = (S.opts.speed||1)%mx+1; dirty.enemy=true; vibe(10); break; }
     case "btnShop": showView("shop"); break;
     case "btnShop2": orbHelp(); break;
     case "ingHelp": ingHelp(); break;
     case "collInfo": modal("Bonus de collection", collChips("pet")+`<div class="small">La Wyverne s'obtient à la boutique de l'invasion de dragons. Le Spectre des Âmes est offert au palier de Renaissance 7, puis rejoint les invocations Mythiques.</div>`, [{t:"OK", cls:"gold"}]); break;
-    case "bpInfo": modal("Gagner de l'XP de passe", `<div class="small" style="text-align:left;line-height:1.6">Connexion du jour : <b>+50</b><br>Quête du jour : <b>+40</b> · coffre des quêtes : <b>+60</b><br>Quête de la semaine : <b>+120</b> · coffre : <b>+200</b><br>Boss : <b>+10</b> (150 max par jour)<br>Étage de la Tour : <b>+25</b><br><br>${BP_XP} XP par palier, ${BP_TIERS} paliers par saison de ${BP_DAYS} jours.</div>`, [{t:"OK", cls:"gold"}]); break;
+    case "bpInfo": modal("Gagner de l'XP de passe", `<div class="small" style="text-align:left;line-height:1.6">Connexion du jour : <b>+50</b><br>Quête du jour : <b>+40</b> · coffre des quêtes : <b>+60</b><br>Quête de la semaine : <b>+120</b> · coffre : <b>+200</b><br>Boss : <b>+10</b> (150 max par jour)<br>Étage de la Tour : <b>+25</b><br><br>Le palier 1 demande ${bpNeed(1)} XP, puis chaque palier demande ${bpNeed(2)-bpNeed(1)} XP de plus (${bpNeed(BP_TIERS)} XP pour le dernier). ${BP_TIERS} paliers par saison de ${BP_DAYS} jours.<br>Pressé ? Achetez des paliers : ${BP_LV_COST} 💎 l\'unité, ${BP_LV10_COST} 💎 les 10.</div>`, [{t:"OK", cls:"gold"}]); break;
     case "collInfoS": modal("Bonus de collection", collChips("skl"), [{t:"OK", cls:"gold"}]); break;
     case "btnBoss": S.auto=true; dirty.enemy=true; vibe(15); break;
     case "dismCommon": case "sellCommon": {
@@ -3892,9 +3899,9 @@ const PRODUCTS = [
   {id:"orb_m",    ic:"§boule§", n:"Sac d'orbes",       d:"55 🔮 (+10 % offerts)", price:"4,99 €", orbs:55},
   {id:"orb_l",    ic:"§boule§", n:"Coffre d'orbes",    d:"120 🔮 (+20 % offerts)", price:"9,99 €", orbs:120, tag:"Populaire"},
   {id:"orb_xl",   ic:"§boule§", n:"Malle d'orbes",     d:"260 🔮 (+30 % offerts)", price:"19,99 €", orbs:260},
-  {id:"speed",    ic:"⚡", n:"Vitesse illimitée",   d:"Vitesse ×2 et ×3 débloquées pour toujours", price:"3,99 €", perm:true},
-  {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier du passe de combat pour cette saison", price:"4,99 €", bp:true},
-  {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
+  {id:"speed",    ic:"⚡", n:"Vitesse ×3",          d:"Vitesse ×3 (et ×2) débloquée pour toujours", price:"3,99 €", perm:true},
+  {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier et la vitesse ×2 pour cette saison", price:"4,99 €", bp:true},
+  {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), vitesse ×2, 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
   {id:"pass_up",  ic:"⬆️", n:"Passer au Passe Royal", d:"Ajoute la piste Royale, 10 paliers d'avance et l'Armure royale", price:"4,99 €", bp:true},
   {id:"noads",    ic:"🚫", n:"Sans publicités",     d:"Toutes les récompenses « pub » sont données sans pub", price:"4,99 €", perm:true},
 ];
@@ -3959,7 +3966,8 @@ const Monet = {
 };
 function adDayReset(){ const d=today(); if(S.ads.day!==d){ S.ads.day=d; S.ads.gems=0; S.ads.boost=0; } }
 const boostLeft = () => Math.max(0, (S.ads.boostUntil||0) - Date.now());
-const speedUnlocked = () => S.iap.speed || boostLeft()>0;
+const speedMax = () => (S.iap.speed || boostLeft()>0) ? 3 : (S.bp && S.bp.tier && S.bp.season===bpSeason()) ? 2 : 1;
+const speedUnlocked = () => speedMax()>1;
 
 /* ---------- Simulations (version web) ---------- */
 let adResolve = null, adTimer = null;
@@ -4000,7 +4008,7 @@ function grantProduct(id){
     case "speed": S.iap.speed=true; break;
     case "noads": S.iap.noads=true; break;
     case "pass_c": bpCheck(); S.bp.tier="c"; break;
-    case "pass_r": case "pass_up": bpCheck(); S.bp.tier="r"; S.bp.xp+=10*BP_XP; S.skins.owned.royal=1; break;
+    case "pass_r": case "pass_up": bpCheck(); S.bp.tier="r"; { const l0=bpLevel(); S.bp.xp=Math.max(S.bp.xp + (bpCum(Math.min(BP_TIERS,l0+10))-bpCum(l0)), bpCum(Math.min(BP_TIERS,l0+10))); } S.skins.owned.royal=1; break;
   }
   dirty.fams=dirty.loot=dirty.res=dirty.enemy=true; save();
 }
@@ -4036,6 +4044,7 @@ function speedBody(){
   adDayReset();
   const left=boostLeft();
   return `<div class="sheeticon">⚡</div><div class="small">Jouez en vitesse ×2 ou ×3 : combats, familiers et boss vont plus vite.</div>
+    <div class="slist" style="margin-top:8px"><div><span>×2</span><b>${speedMax()>=2?"✓ Débloqué":"Inclus dans le Passe Chevalier ou Royal"}</b></div><div><span>×3</span><b>${S.iap.speed?"✓ Pour toujours":`Pour toujours : ${PRODUCTS.find(p=>p.id==="speed").price}`}</b></div><div><span>Essai ×3</span><b>${BOOST_MIN} min avec une pub</b></div></div>
     ${left?`<div class="giftbox">⏳ Vitesse débloquée encore ${fmtLeft(left)}</div>`:""}`;
 }
 /* --- Onglet Boutique : argent réel (cristaux, or) et marché (cristaux / or contre clés, ressources…) --- */
@@ -4057,7 +4066,17 @@ function bpXP(n, boss){
   const before=bpLevel(); b.xp+=n; const after=bpLevel();
   if(after>before && after<=BP_TIERS && typeof toast==="function") toast(`⚔️ Passe de combat : palier ${after} atteint !`);
 }
-const bpLevel = () => Math.min(BP_TIERS, Math.floor((S.bp?S.bp.xp:0)/BP_XP));
+const bpNeed = L => 200 + 20*(L-1);                          // XP pour passer du palier L-1 au palier L
+const bpCum = L => 200*L + 10*L*(L-1);                         // XP totale pour atteindre le palier L
+const bpLevel = () => { const x=S.bp?S.bp.xp:0; let L=0; while(L<BP_TIERS && bpCum(L+1)<=x) L++; return L; };
+const BP_LV_COST = 150, BP_LV10_COST = 1200;
+function bpBuyLv(n){
+  bpCheck(); const lv=bpLevel(); if(lv>=BP_TIERS) return;
+  n=Math.min(n, BP_TIERS-lv); const cost = n>=10 ? BP_LV10_COST : n*BP_LV_COST;
+  if(S.crystals<cost) return;
+  modal(`Acheter ${n} palier${n>1?"s":""} ?`, `<div class="small">Vous passez du palier <b>${lv}</b> au palier <b>${lv+n}</b> pour <b>${cost} 💎</b>.</div>`,
+    [{t:"Annuler"}, {t:`Acheter · 💎 ${cost}`, cls:"gold", f:()=>{ if(S.crystals<cost) return; S.crystals-=cost; S.bp.xp=Math.max(S.bp.xp, bpCum(lv+n)); Sfx.play("buy"); toast(`⚔️ Palier ${lv+n} atteint !`); save(); renderShop(); }}]);
+}
 function bpReward(track, i){
   if(track==="f") return i%10===0 ? {crystals:30, orbs:5} : i%5===0 ? {crystals:15} : i%3===0 ? {orbs:3} : i%2===0 ? {gold:0.6} : {treats:5};
   if(track==="c") return i===30 ? {skin:"champion", crystals:100} : i===20 ? {fav:"skl"} : i===10 ? {fav:"pet"} : i%5===0 ? {crystals:60} : i%2===0 ? {orbs:6} : {treats:12, scraps:1};
@@ -4081,9 +4100,33 @@ function bpMini(r){
   if(r.scraps) p.push("🔩 "+fmt(Math.ceil(scrapFor(Math.max(1,S.best))*r.scraps)));
   return p.join("<br>");
 }
+const SOV_BOOST = 1.3;   // +30 % de stats par rapport à un Mythique normal
+function sovItem(slot, preview){
+  const lv=Math.max(1, craftLvl()), sd=SLOTS[slot], sc=Math.pow(ITEM_G,lv-1)*RAR[5].m*1.15*SOV_BOOST;   // toujours le meilleur jet, +30 %
+  const it={id:preview?"preview":uid(), slot, ri:5, ilvl:lv, set:"souverain", sov:1, name:SLOTS[slot].names[0]+" du Souverain"};
+  for(const k in sd.base) it[k]=sd.base[k]*sc;
+  if(slot==="talisman") it.crit=6*1.2*SOV_BOOST;
+  it.crit=(it.crit||0)+7.5; it.vol=(it.vol||0)+5;   // deux bonus au lieu d'un
+  return it;
+}
+function bpPeek(key){
+  const [tr,is]=key.split(":"), i=+is, r=bpReward(tr,i), own=bpOwns(tr), got=S.bp.cl[tr][i];
+  const state = got ? "✓ Déjà récupéré" : !own ? (tr==="r"?"🔒 Piste du Passe Royal":"🔒 Piste du Passe Chevalier") : i>bpLevel() ? `Atteignez le palier ${i}` : "";
+  if(r.item){
+    const it=sovItem(r.item, true), cur=S.equip[r.item];
+    const d = cur ? (score(it)/score(cur)-1)*100 : null;
+    modal(it.name, `<div class="sheeticon iarth">${itemArt(it)}</div>${rarTag(5)}<div class="sovtag">👑 Souverain · +${Math.round((SOV_BOOST-1)*100)} % de stats et 2 bonus</div>
+      <div class="small">Arrive au niveau ${it.ilvl} (votre niveau d'objets actuel)</div>${statList(it)}
+      ${d!==null?`<div class="slist"><div><span>Vs objet porté</span><span class="${d>0.5?"up":d<-0.5?"down":""}">${d>0.5?"▲":d<-0.5?"▼":"="} ${Math.abs(d).toFixed(0)} %</span></div></div>`:""}
+      <div class="small" style="margin-top:6px;text-align:left">${SETS.souverain.ic} <b>Ensemble du Souverain</b><br>2 pièces : ${SETS.souverain.b2}<br>4 pièces : ${SETS.souverain.b4}</div>
+      ${state?`<div class="small" style="margin-top:6px"><b>${state}</b></div>`:""}`, [{t:"OK", cls:"gold"}]);
+  } else {
+    modal(`Palier ${i}`, `<div class="small" style="font-size:15px;line-height:1.7">${bpMini(r)}</div>${state?`<div class="small" style="margin-top:8px"><b>${state}</b></div>`:""}`, [{t:"OK", cls:"gold"}]);
+  }
+}
 function bpGive(r){
   if(r.skin) S.skins.owned[r.skin]=1;
-  if(r.item){ const it=makeItem(1,5,r.item,"souverain"); it.name=SLOTS[r.item].names[0]+" du Souverain"; placeItem(it); dirty.loot=true; r._it=it; }
+  if(r.item){ const it=sovItem(r.item); placeItem(it); dirty.loot=true; r._it=it; }
   if(r.fav==="pet") S.favPet=1;
   if(r.fav==="skl") S.favSkl=1;
   const g={}; for(const k of ["crystals","orbs","treats","gold","scraps"]) if(r[k]) g[k]=r[k]; grant(g);
@@ -4107,16 +4150,16 @@ function bpClaimAll(){
   save(); renderShop();
 }
 function bpHTML(){
-  bpCheck(); const b=S.bp, lv=bpLevel(), inLv = lv>=BP_TIERS ? BP_XP : b.xp-lv*BP_XP, n=bpClaimable();
+  bpCheck(); const b=S.bp, lv=bpLevel(), need = lv>=BP_TIERS ? 1 : bpNeed(lv+1), inLv = lv>=BP_TIERS ? 1 : b.xp-bpCum(lv), n=bpClaimable();
   const d=Math.max(0,bpLeft()), days=Math.floor(d/864e5), hrs=Math.floor(d%864e5/36e5);
   const buy = !b.tier ? `<div class="bpbuy"><button class="btn blue" data-shopbuy="pass_c"><b>⚔️ Chevalier</b><small>4,99 €</small></button><button class="btn gold" data-shopbuy="pass_r"><b>👑 Royal</b><small>9,99 €</small></button></div>`
     : b.tier==="c" ? `<div class="bpbuy"><button class="btn gold" data-shopbuy="pass_up"><b>👑 Passer au Royal</b><small>4,99 €</small></button></div>`
     : `<div class="bpown">👑 Passe Royal actif</div>`;
   const cell = (tr,i) => { const r=bpReward(tr,i), got=b.cl[tr][i], rd=bpReady(tr,i), own=bpOwns(tr), reached=i<=lv;
-    return `<button class="bpc bpt-${tr} ${got?"got":""} ${rd?"rd":""} ${!own?"lock":""} ${!reached?"far":""}" data-bp="${tr}:${i}" ${rd?"":"disabled"}>${bpMini(r)}${got?`<i class="bpok">✓</i>`:!own?`<i class="bplk">🔒</i>`:""}</button>`; };
+    return `<button class="bpc bpt-${tr} ${got?"got":""} ${rd?"rd":""} ${!own?"lock":""} ${!reached?"far":""}" data-bp="${tr}:${i}">${bpMini(r)}${got?`<i class="bpok">✓</i>`:!own?`<i class="bplk">🔒</i>`:""}</button>`; };
   let cols=""; for(let i=1;i<=BP_TIERS;i++) cols+=`<div class="bpcol ${i<=lv?"on":""} ${i===lv+1?"nx":""}"><div class="bpn">${i}</div>${cell("f",i)}${cell("c",i)}${cell("r",i)}</div>`;
   return `<div class="card bphead"><div class="bpt"><b>⚔️ ${bpSeasonName()}</b><span>Fin dans ${days} j ${hrs} h · <button class="linkbtn" id="bpInfo">XP ?</button></span></div>
-      <div class="bplv"><span class="bplvn">${lv}</span><div class="bpbar"><div class="prog"><i style="width:${inLv/BP_XP*100}%"></i></div><small>${lv>=BP_TIERS?"Passe terminé !":`${inLv} / ${BP_XP} XP pour le palier ${lv+1}`}</small></div></div>
+      <div class="bplv"><span class="bplvn">${lv}</span><div class="bpbar"><div class="prog"><i style="width:${Math.min(100,inLv/need*100)}%"></i></div><small>${lv>=BP_TIERS?"Passe terminé !":`${inLv} / ${need} XP pour le palier ${lv+1}`}</small></div>${lv<BP_TIERS?`<div class="bplvbuy"><button class="btn violet sm" data-bplv="1" data-need="cr:${BP_LV_COST}" ${S.crystals>=BP_LV_COST?"":"disabled"}>+1<small>💎 ${BP_LV_COST}</small></button>${BP_TIERS-lv>=10?`<button class="btn violet sm" data-bplv="10" data-need="cr:${BP_LV10_COST}" ${S.crystals>=BP_LV10_COST?"":"disabled"}>+10<small>💎 ${BP_LV10_COST}</small></button>`:""}</div>`:""}</div>
       ${buy}${n?`<button class="btn gold" data-bp="all" style="width:100%;margin-top:6px;padding:7px">Tout récupérer (${n})</button>`:""}</div>
     <div class="card grow bpwrap"><div class="bplab"><div class="h"></div><div class="l1">Gratuit</div><div class="l2">⚔️ Chevalier</div><div class="l3">👑 Royal</div></div>
       <div class="bpscroll" id="bpScroll">${cols}</div></div>`;
@@ -4225,7 +4268,7 @@ function renderShop(){
   } else if(shopTab==="orb"){
     tiles = PRODUCTS.filter(p=>p.orbs).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="orb").map(ctile).join("");
   } else if(shopTab==="ing"){
-    tiles = `<div class="ptile free"><span class="pic">§lingot§</span><b>Vos lingots</b><small>${S.ingots||0} · 1 lingot = 1 objet forgé</small><button class="btn blue sm" data-ingshop="1">À l'Atelier</button></div>`
+    tiles = `<div class="ptile free"><span class="pic">§lingot§</span><b>Vos lingots</b><small>${S.ingots||0} · ×10 pour 9, ×100 pour 85</small><button class="btn blue sm" data-ingshop="1">À l'Atelier</button></div>`
       + PREMIUM.filter(m=>m.cat==="ing").map(ctile).join("");
   }
   if(shopTab!=="bonus"){
@@ -4723,7 +4766,8 @@ function renderDefis(force){
   if(sig===defisSig && !force) return;
   const first = !defisSig.startsWith(defTab+"|") ;
   defisSig=sig;
-  $("#defSeg").innerHTML = `<div class="seg"><button data-dtab="tower" class="${defTab==="tower"?"on":""}">🗼 Tour</button><button data-dtab="titan" class="${defTab==="titan"?"on":""}">🐲 Titan</button><button data-dtab="rune" class="${defTab==="rune"?"on":""}">✨ Donjon${(c.dtries||0)>0?` <span class="tdot">${c.dtries}</span>`:""}</button></div>`;
+  $("#defSeg").innerHTML = `<div class="seg"><button data-dtab="tower" class="${defTab==="tower"?"on":""}">🗼 Tour</button><button data-dtab="titan" class="${defTab==="titan"?"on":""}">🐲 Titan</button>${!hasP(3)?"":`<button data-dtab="rune" class="${defTab==="rune"?"on":""}">✨ Donjon${(c.dtries||0)>0?` <span class="tdot">${c.dtries}</span>`:""}</button>`}</div>`;
+  if(defTab==="rune" && !hasP(3)) defTab="tower";
   if(defTab==="tower"){ renderTower(!first); if(first) requestAnimationFrame(()=>towerScrollToCur(false)); }
   else if(defTab==="rune") renderDungeon();
   else renderTitan();
@@ -5192,7 +5236,8 @@ const ACH = [
   {id:"tower", n:"Grimpeur",        d:"Conquérir l'étage {g} de la Tour",     v:()=>S.chal?S.chal.floor-1:0, t:[[10,40],[50,120],[100,200],[250,350],[500,500]], old:["tw1","tw2"]},
   {id:"titan", n:"Tueur de titans",  d:"Infliger ×{g} au Titan de la semaine", v:()=>S.chal?S.chal.wbest||0:0, t:[[50,80],[500,150],[5000,300],[50000,500]], old:["ti1"]},
   {id:"gold",  n:"Trésor royal",    d:"Posséder {g} d'or",                    v:()=>S.gold, t:[[1e9,60],[1e15,100],[1e21,200],[1e30,350],[1e45,500]], old:["gold1"]},
-  {id:"streak",n:"Fidèle",          d:"Se connecter {g} jours d'affilée",     v:()=>S.streak?S.streak.n||0:0, t:[[7,40],[30,150],[100,400]], old:["str7","str30"]},
+  {id:"streak",n:"Fidèle",          d:"Se connecter {g} jours d'affilée",     v:()=>S.streak?S.streak.n||0:0, t:[[3,20],[7,40],[21,150]], old:[null,"str7"]},
+  {id:"taps",  n:"Main de fer",     d:"Frapper {g} fois vous-même",           v:()=>S.stats.tap||0, t:[[100,15],[1000,40],[10000,80],[50000,150],[250000,300],[1e6,500]]},
   {id:"petlv", n:"Meilleur ami",    d:"Monter un familier au niveau {g}",     v:()=>Math.max(0,...Object.values(S.pets).map(o=>o.lvl||1)), t:[[10,30],[25,60],[50,150]], old:[null,"pl25"]},
   {id:"slv",   n:"Invocateur suprême", d:"Atteindre le niveau d'invocation {g}", v:()=>sumLevel().lv, t:[[5,30],[10,60],[15,80],[20,100]], old:[null,null,null,"lv20"]},
   {id:"cls",   n:"Polyvalent",      d:"Débloquer {g} classes",                v:()=>Object.keys(S.classes).length, t:[[3,20],[5,40],[()=>CLASSES.length,100]], old:[null,"cl5"]},
@@ -5957,7 +6002,7 @@ setInterval(()=>{
   let real = (now-lastT)/1000; lastT = now;
   if(real > 1.5){ CATCH = Math.min(CATCH_MAX(), CATCH + real - 0.1); real = 0.1; }
   const vis = !document.hidden && CATCH<=0;
-  const sp = GAME_PACE*(speedUnlocked() ? (S.opts.speed||1) : 1);   // tout le combat tourne à 85 % (×1, ×2 et ×3)
+  const sp = GAME_PACE*Math.min(S.opts.speed||1, speedMax());   // tout le combat tourne à 85 % (×1, ×2 et ×3)
   let dt = real*sp;
   if(pausedForPick) dt = 0;   // le combat attend le choix de classe
   cityTick(real);
