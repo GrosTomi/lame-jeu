@@ -943,6 +943,8 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .smoke circle{animation:smk 3s ease-out infinite}@keyframes smk{0%{opacity:.9;translate:0 0}100%{opacity:0;translate:4px -14px}}
 .glow{animation:glw 1.6s ease-in-out infinite}@keyframes glw{50%{opacity:.7}}
 @media (prefers-reduced-motion:reduce){.smoke circle,.glow{animation:none}}
+.morest{flex:none;font-size:11.5px;font-weight:900;color:#3557d6;background:#e7ecff;border:1.5px solid #b7c4ff;border-radius:9px;padding:2px 7px;margin-left:auto;margin-right:6px;white-space:nowrap}
+.mstat h3{font-family:var(--disp);font-size:14px;margin:8px 0 2px;color:#7a5a20}.mstat>div{flex-wrap:wrap}.mstat small{width:100%;text-align:right;font-size:10.5px;color:var(--mut);margin-top:-2px}
 </style>
 </head>
 <body>
@@ -958,7 +960,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-2008";
+var BUILD_ID = "20261123-2029";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1492,10 +1494,16 @@ const BIOMES = [
 ];
 
 const FORGE = [
-  {id:"atk", n:"Force",     ic:"💪", d:"+10 % d'attaque",            base:10, g:1.3},
-  {id:"hp",  n:"Vigueur",   ic:"❤️", d:"+10 % de PV max",            base:10, g:1.3},
-  {id:"def", n:"Endurance", ic:"🧱", d:"+10 % de défense",           base:12, g:1.3},
-  {id:"spd", n:"Agilité",   ic:"⚡", d:"+4 % de vitesse d'attaque",   base:40, g:1.35, max:50},
+  {id:"atk",   n:"Force",        ic:"💪", d:"+1 % d'attaque",                 base:1,   g:1.0327},
+  {id:"hp",    n:"Vigueur",      ic:"❤️", d:"+1 % de PV max",                 base:1,   g:1.0327},
+  {id:"def",   n:"Endurance",    ic:"🧱", d:"+1 % de défense",                base:1.2, g:1.0327},
+  {id:"spd",   n:"Agilité",      ic:"⚡", d:"+1 % de vitesse d'attaque",      base:10,  g:1.085, max:200},
+  {id:"crit",  n:"Précision",    ic:"💥", d:"+0,1 % de chance de critique",   base:200, g:1.09,  max:150},
+  {id:"critd", n:"Brutalité",    ic:"§boum§", d:"+1 % de dégâts critiques",   base:150, g:1.06,  max:300},
+  {id:"vol",   n:"Soif de sang", ic:"🩸", d:"+0,05 % de vol de vie",          base:250, g:1.09,  max:200},
+  {id:"regen", n:"Vitalité",     ic:"💚", d:"+0,01 % de PV par seconde",      base:150, g:1.08,  max:200},
+  {id:"dodge", n:"Esquive",      ic:"§nuage§", d:"+0,1 % d'esquive",          base:300, g:1.09,  max:150},
+  {id:"dbl",   n:"Enchaînement", ic:"§epees§", d:"+0,1 % de double coup",      base:300, g:1.09,  max:150},
 ];
 
 const CLASSES = [
@@ -1626,7 +1634,7 @@ function newState(keep){
   const s = {
     gold:500, souls:0, runes:{}, soulsV2:true, matsGone:true, rar6:true, itemV2:true, runStart:1, ingots:0, ingV:true, favPet:0, favSkl:0, prestiges:0, best:1, pseudo:"", pseudoSkip:false,
     stage:1, kills:0, maxStage:1, auto:true, hp:null,
-    forge:{atk:0,hp:0,def:0,spd:0},
+    forge:{atk:0,hp:0,def:0,spd:0,crit:0,critd:0,vol:0,regen:0,dodge:0,dbl:0}, forgeV2:true,
     pets:{}, team:[], crystals:START_CRYS, pity:0, pulls:0,
     cls:"guerrier", classes:{guerrier:1}, city:null, cityStash:0,
     mail:{read:{}, claimed:{}}, daily:{day:0, last:"", total:0}, joined:new Date().toISOString().slice(0,10),
@@ -1702,28 +1710,27 @@ function forgeCost(f){ return f.base*Math.pow(f.g,S.forge[f.id]); }
 /* Les Âmes sont une monnaie : aucun bonus passif, on les dépense à l'autel et elles disparaissent. */
 /* --- Autel des Âmes : on dépense ses Âmes en améliorations permanentes (gratuit à réinitialiser) --- */
 const ALTAR = [
-  {id:"force",   ic:"⚔️", n:"Force des ancêtres",   d:"+25 % d'attaque et de PV",                                 c:1, max:50},
-  {id:"or",      ic:"🪙", n:"Avarice",              d:"+25 % d'or",                                                c:1, max:30},
-  {id:"scrap",   ic:"🔩", n:"Ferraille bénie",      d:"+25 % de scraps",                                           c:1, max:30},
-  {id:"start",   ic:"⏩", n:"Départ avancé",        d:"Après une Renaissance, repartez 10 étapes plus haut (au plus la moitié de votre record)", c:3, max:20},
-  {id:"meute",   ic:"🐾", n:"Lien des bêtes",       d:"+20 % de dégâts des familiers",                             c:2, max:25},
-  {id:"cdr",     ic:"⏳", n:"Concentration",        d:"−5 % de recharge des compétences",                          c:3, max:8},
-  {id:"fief",    ic:"🏰", n:"Seigneurie",           d:"+20 % de production du fief",                               c:2, max:25},
-  {id:"absence", ic:"🌙", n:"Veille nocturne",      d:"+2 h de gains pendant votre absence (8 h de base)",         c:3, max:8},
+  {id:"force",   ic:"⚔️", n:"Force des ancêtres",   d:"+10 % d'attaque et de PV",                                 c:1, max:50},
+  {id:"or",      ic:"🪙", n:"Avarice",              d:"+12,5 % d'or",                                              c:1, max:30},
+  {id:"scrap",   ic:"🔩", n:"Ferraille bénie",      d:"+12,5 % de scraps",                                         c:1, max:30},
+  {id:"meute",   ic:"🐾", n:"Lien des bêtes",       d:"+10 % de dégâts des familiers",                             c:2, max:25},
+  {id:"cdr",     ic:"⏳", n:"Concentration",        d:"−2,5 % de recharge des compétences",                        c:3, max:8},
+  {id:"fief",    ic:"🏰", n:"Seigneurie",           d:"+10 % de production du fief",                               c:2, max:25},
+  {id:"absence", ic:"🌙", n:"Veille nocturne",      d:"+1 h de gains pendant votre absence (8 h de base)",         c:3, max:8},
 ];
-const al = id => (id==="forge"||id==="faveur") ? 0 : ((S.altar && S.altar[id]) || 0);   // ces deux bonus ont été retirés
+const al = id => (id==="forge"||id==="faveur"||id==="start") ? 0 : ((S.altar && S.altar[id]) || 0);   // ces deux bonus ont été retirés
 /* Effet total pour un niveau donné (affiché « actuel → prochain ») */
 const ALTAR_FX = {
-  force:  l => `+${25*l} % ATK et PV`,
-  or:     l => `+${25*l} % d'or`,
-  scrap:  l => `+${25*l} % de scraps`,
+  force:  l => `+${10*l} % ATK et PV`,
+  or:     l => `+${(12.5*l).toString().replace(".",",")} % d'or`,
+  scrap:  l => `+${(12.5*l).toString().replace(".",",")} % de scraps`,
   start:  l => { const cap=Math.floor(S.best/2/10)*10, st=Math.min(10*l, cap); return st>=10 ? `départ à l'étape ${st+1}${10*l>cap?" (limité par votre record)":""}` : "départ à l'étape 1"; },
-  meute:  l => `+${20*l} % dégâts des familiers`,
-  cdr:    l => `−${5*l} % de recharge`,
+  meute:  l => `+${10*l} % dégâts des familiers`,
+  cdr:    l => `−${(2.5*l).toString().replace(".",",")} % de recharge`,
   forge:  l => `+${l} niveau${l>1?"x":""} de forge`,
   faveur: l => `+${l} niveau${l>1?"x":""} d'invocation`,
-  fief:   l => `+${20*l} % de production`,
-  absence:l => `${8+2*l} h de gains hors ligne`,
+  fief:   l => `+${10*l} % de production`,
+  absence:l => `${8+l} h de gains hors ligne`,
 };
 const altarCost = (a, lv) => a.c*(lv+1);
 function altarSpent(){ let t=0; for(const a of ALTAR) for(let l=0;l<al(a.id);l++) t+=altarCost(a,l); return t; }
@@ -1736,8 +1743,8 @@ function altarBuy(id){
 /* --- Paliers de Renaissance : chaque Renaissance débloque quelque chose de concret --- */
 const PMILE = [
   {p:1,  ic:"🐾", t:"4e place dans l'équipe de familiers"},
-  {p:2,  ic:"✨", t:"+1 essai par jour au Donjon des runes"},
-  {p:3,  ic:"💥", t:"4e compétence équipée et Donjon des runes"},
+  {p:2,  ic:"💥", t:"4e compétence équipée"},
+  {p:3,  ic:"✨", t:"Donjon des runes, avec 1 essai de plus par jour"},
   {p:5,  ic:"🎁", t:"Scraps des boss doublés"},
   {p:7,  ic:"👻", t:"Le Spectre des Âmes (Mythique) : offert, puis invocable"},
   {p:10, ic:"🐾", t:"5e place dans l'équipe de familiers"},
@@ -1745,7 +1752,7 @@ const PMILE = [
 ];
 const hasP = n => (S.prestiges||0) >= n;
 const teamMax = () => 3 + (hasP(1)?1:0) + (hasP(10)?1:0) + (S.extraSlot?1:0);
-const sklMax  = () => 3 + (hasP(3)?1:0);
+const sklMax  = () => 3 + (hasP(2)?1:0);
 /* --- Bonus de collection : toute une rareté réunie = bonus permanent --- */
 const COLL_P = [{atk:10},{hp:10},{hp:15},{atk:20},{atk:30},{atk:50,hp:50}];
 function collDone(kind, ri){
@@ -1761,24 +1768,29 @@ function calc(){
   let a=5,h=60,d=2,crit=5,vol=0,orp=0;
   for(const k of SLOTKEYS){ const it=S.equip[k]; if(!it) continue;
     a+=it.atk||0; h+=it.hp||0; d+=it.def||0; crit+=it.crit||0; vol+=it.vol||0; orp+=it.or||0; }
-  const sm = 1+0.25*al("force"), sb = setBonus(), cb = collBonus();
-  crit = Math.min(75, crit + teamBonus("crit") + clsBonus("crit") + sb.crit);
-  vol += teamBonus("vol") + clsBonus("vol") + sb.vol;
-  const atk = a*Math.pow(1.1,S.forge.atk)*sm*(1+teamBonus("atk")/100)*(1+clsBonus("atk")/100)*(1+sb.atk/100)*(1+cb.atk/100);
-  const interval = 1/((1+0.04*S.forge.spd)*(1+clsBonus("spd")/100)*(1+sb.spd/100));
+  for(const f of FORGE) if(S.forge[f.id]==null) S.forge[f.id]=0;
+  const sm = 1+0.10*al("force"), sb = setBonus(), cb = collBonus();
+  crit = Math.min(75, crit + teamBonus("crit") + clsBonus("crit") + sb.crit + 0.1*S.forge.crit);
+  vol += teamBonus("vol") + clsBonus("vol") + sb.vol + 0.05*S.forge.vol;
+  const atk = a*Math.pow(1.01,S.forge.atk)*sm*(1+teamBonus("atk")/100)*(1+clsBonus("atk")/100)*(1+sb.atk/100)*(1+cb.atk/100);
+  const interval = 1/((1+0.01*S.forge.spd)*(1+clsBonus("spd")/100)*(1+sb.spd/100));
   let famPct = 0; for(const id of S.team){ const o=S.pets[id]; if(o) famPct += petDef(id).dps*starMult(o.stars)*petLvlMult(o); }
   C = {
     atk,
-    hp:  h*Math.pow(1.1,S.forge.hp)*sm*(1+teamBonus("hp")/100)*(1+clsBonus("hp")/100)*(1+sb.hp/100)*(1+cb.hp/100),
-    def: d*Math.pow(1.1,S.forge.def)*sm*(1+teamBonus("def")/100)*(1+clsBonus("def")/100)*(1+sb.def/100),
+    hp:  h*Math.pow(1.01,S.forge.hp)*sm*(1+teamBonus("hp")/100)*(1+clsBonus("hp")/100)*(1+sb.hp/100)*(1+cb.hp/100),
+    def: d*Math.pow(1.01,S.forge.def)*sm*(1+teamBonus("def")/100)*(1+clsBonus("def")/100)*(1+sb.def/100),
     crit, vol:Math.min(vol,40),
-    gold:(1+orp/100+teamBonus("gold")/100+clsBonus("gold")/100)*(1+0.25*al("or"))*(boostOn("gold")?2:1),
+    gold:(1+orp/100+teamBonus("gold")/100+clsBonus("gold")/100)*(1+0.125*al("or"))*(boostOn("gold")?2:1),
     interval,
-    regen: 0.02 + (teamBonus("regen")+clsBonus("regen"))/100,
+    regen: 0.02 + (teamBonus("regen")+clsBonus("regen"))/100 + 0.0001*S.forge.regen,
+    critd: 100 + S.forge.critd + (sb.critd||0),                       // dégâts critiques en % de bonus (×2 de base)
+    dodge: Math.min(50, 0.1*S.forge.dodge + (sb.dodge||0)),
+    dbl:   Math.min(50, 0.1*S.forge.dbl + (sb.dbl||0)),
+    tpl:   Math.min(25, sb.tpl||0),
     famPct,
-    famDps: atk/interval*famPct/100*(1+clsBonus("fam")/100)*(1+0.2*al("meute")),   // les familiers frappent en % des dégâts du héros
+    famDps: atk/interval*famPct/100*(1+clsBonus("fam")/100)*(1+0.1*al("meute")),   // les familiers frappent en % des dégâts du héros
     loot: Math.min(70, 30 + teamBonus("loot") + clsBonus("loot")/3),
-    scrapMult: (1 + clsBonus("loot")/100)*(1 + teamBonus("loot")/100)*(1+0.25*al("scrap"))*(boostOn("scraps")?2:1),
+    scrapMult: (1 + clsBonus("loot")/100)*(1 + teamBonus("loot")/100)*(1+0.125*al("scrap"))*(boostOn("scraps")?2:1),
   };
   const tb = talentBonus();
   if(tb.atk){ C.atk*=1+tb.atk/100; C.famDps*=1+tb.atk/100; }
@@ -2099,7 +2111,7 @@ function spawn(){ E = MODE ? modeEnemy() : enemyFor(S.stage);
     if(typeof view!=="undefined" && view==="combat" && !document.hidden){ E.timer += 1.6; arenaBanner(`<small>Boss</small><b>${E.n}</b><span>${MECH[E.mech].ic} ${MECH[E.mech].n} : ${MECH[E.mech].d}</span>`, "boss", 2400); } } heroCd = Math.max(heroCd,0.25); dirty.enemy = true; if(fxOK()) enterFx(); }
 function hit(base, vis, cls){
   let dmg = base*(E.shell?0.3:1), cr = Math.random()*100 < C.crit;
-  if(cr) dmg *= 2;
+  if(cr) dmg *= 1 + C.critd/100;
   if(bossCapped()) dmg = Math.min(dmg, E.max*(cls==="crit"?BOSS_CAP_SKILL:BOSS_CAP_HIT));
   E.hp -= dmg;
   if(C.vol) S.hp = Math.min(C.hp, S.hp + dmg*C.vol/100);
@@ -2252,7 +2264,9 @@ function step(dt, vis){
   S.hp = Math.min(C.hp, S.hp + C.hp*C.regen*dt);
   skillsTick(dt); autoForgeTick(dt);
   heroCd -= dt;
-  if(heroCd<=0){ heroCd += C.interval/bm("spd"); hit(C.atk*bm("atk"), vis, "hit"); if(vis) knightAtk(); }
+  if(heroCd<=0){ heroCd += C.interval/bm("spd"); hit(C.atk*bm("atk"), vis, "hit"); if(vis) knightAtk();
+    const r=Math.random()*100, extra = r < C.tpl ? 2 : r < C.tpl + C.dbl ? 1 : 0;   // double et triple coup
+    for(let i=0;i<extra && E && E.hp>0 && deadT<=0;i++){ if(vis && i===0) floatTxt(extra===2?"Triple !":"Double !","fam",false); hit(C.atk*bm("atk"), vis, "hit"); } }
   if(E && E.mech==="regen" && E.hp>0) E.hp = Math.min(E.max, E.hp + E.max*0.012*dt);
   if(E && E.mech==="rage" && !E.raged && E.hp>0 && E.hp < E.max*0.25){ E.raged=true; E.atk*=1.8; if(vis){ floatTxt("ENRAGÉ !","crit"); $("#enemy").classList.add("raged"); } }
   if(C.famDps>0){
@@ -2264,10 +2278,11 @@ function step(dt, vis){
   E.cd -= dt;
   if(E.cd<=0){
     E.cd += 1.6;
-    let dmg = shielded() ? 0 : E.atk*E.atk/(E.atk+C.def);
+    const dodged = !shielded() && Math.random()*100 < (C.dodge||0);
+    let dmg = shielded() || dodged ? 0 : E.atk*E.atk/(E.atk+C.def);
     if(bossCapped()) dmg = Math.min(dmg, C.hp*BOSS_CAP_TAKEN);
     S.hp -= dmg;
-    if(vis && !dmg) floatTxt("Bloqué","fam",false,true);
+    if(vis && !dmg) floatTxt(dodged?"Esquive !":"Bloqué","fam",false,true);
     else if(vis){ floatTxt("-"+fmt(dmg),"dmg",false,true); enemyAtk(); Sfx.play("hurt"); const hb=$(".herobox"); if(hb && MOTION){ hb.classList.remove("ouch"); void hb.offsetWidth; hb.classList.add("ouch"); } }
     if(S.hp<=0){ die(); return; }
   }
@@ -2333,7 +2348,7 @@ const qtyBar = () => `<div class="seg">${[1,10,"max"].map(q=>`<button data-qty="
 function renderClass(){
   const c=clsDef(S.cls), l=S.classes[c.id]||1;
   const tp = talentPending();
-  $("#clsCard").innerHTML = `<button class="clsline" data-talents="1" title="Touchez pour voir les talents de la classe"><span class="ci">${c.ic}</span><b>${c.n} niv. ${l}</b><span class="cb">${clsTxt(c,l)}</span>${tp?`<span class="talchip">★ ${tp} talent${tp>1?"s":""} à choisir</span>`:`<span class="talmore">Talents ›</span>`}</button>`;
+  $("#clsCard").innerHTML = `<button class="clsline" data-talents="1" title="Touchez pour voir les talents de la classe"><span class="ci">${c.ic}</span><b>${c.n} niv. ${l}</b><span class="cb">${clsTxt(c,l)}</span><span class="morest" data-morestats="1">📊 Plus de stats</span>${tp?`<span class="talchip">★ ${tp} talent${tp>1?"s":""} à choisir</span>`:`<span class="talmore">Talents ›</span>`}</button>`;
   $("#heroAv").innerHTML = c.ic;
 }
 function classListHTML(pick, upId, newId){
@@ -2345,6 +2360,26 @@ function classListHTML(pick, upId, newId){
     return `<div class="clsrow ${!pick&&c.id===S.cls?"cur":""}"><div class="ci">${c.ic}</div><div class="mid"><div class="t">${c.n} <span style="color:var(--or3);font-size:12.5px">niv. ${l}</span>${badges}</div><div class="d">${clsTxt(c,l)}</div></div>
       ${pick?`<button class="btn gold sm" data-pickcls="${c.id}">Choisir</button>`:(c.id===S.cls?`<span class="badge bup">Active</span>`:"")}</div>`;
   }).join("");
+}
+function moreStats(){
+  const c=C, sb=setBonus(), p=v=>(Math.round(v*10)/10).toString().replace(".",",")+" %";
+  const R=(ic,n,v,why)=>`<div><span>${ic} ${n}</span><b>${v}</b>${why?`<small>${why}</small>`:""}</div>`;
+  modal("Statistiques du chevalier", `<div class="slist mstat">
+    <h3>Principales</h3>
+    ${R("⚔️","Attaque",fmt(c.atk))}${R("❤️","PV",fmt(c.hp))}${R("🧱","Défense",fmt(c.def))}${R("⏱️","Coups par seconde",(1/c.interval).toFixed(2))}
+    ${R("⚡","Puissance",fmt(heroPower()))}
+    <h3>Avancées</h3>
+    ${R("💥","Chance de critique",p(c.crit),"max 75 %")}
+    ${R("§boum§","Dégâts critiques","×"+(1+c.critd/100).toFixed(2).replace(".",","),"×2 de base")}
+    ${R("§epees§","Double coup",p(c.dbl),"max 50 %")}
+    ${R("§epees§","Triple coup",p(c.tpl),"ensembles · max 25 %")}
+    ${R("§nuage§","Esquive",p(c.dodge),"max 50 %")}
+    ${R("🩸","Vol de vie",p(c.vol),"max 40 %")}
+    ${R("💚","Régénération",p(c.regen*100)+"/s")}
+    ${R("⏳","Recharge des compétences","−"+p((1-(1-0.025*al("cdr"))*(1-(c.cdr||0)/100))*100))}
+    <h3>Économie</h3>
+    ${R("🐾","Dégâts des familiers",fmt(c.famDps)+"/s")}${R("🪙","Or","×"+c.gold.toFixed(2))}${R("🔩","Scraps","×"+c.scrapMult.toFixed(2))}
+  </div><div class="small" style="margin-top:6px">Les stats avancées viennent de la Forge (or), des ensembles d'équipement et des runes (Givre : esquive, Foudre : double coup, Ombre : dégâts critiques).</div>`, [{t:"OK", cls:"gold"}]);
 }
 function renderStats(){
   renderClass(); const sbx=$("#setsBox"); if(sbx) sbx.innerHTML = setsHTML();
@@ -3293,6 +3328,7 @@ document.addEventListener("click", e=>{
   if(t.dataset.tal){ const [L,i]=t.dataset.tal.split(":"); (S.talents[S.cls]=S.talents[S.cls]||{})[L]=+i; calc(); dirty.stats=true; renderClass(); Sfx.play("success"); save(); talentsSheet(); return; }
   if(t.closest("#modal")) return;
   if(t.dataset.sub){ goSub(t.dataset.sub); return; }
+  if(e.target.closest("[data-morestats]")){ moreStats(); return; }
   if(t.dataset.talents){ talentsSheet(); return; }
   if(t.id==="defendBtn" || (t.closest && t.closest("#goal.raidgo"))){ defendRaid(); return; }
   if(t.dataset.ingshop){ atelierTab="craft"; showView("loot"); return; }
@@ -3524,7 +3560,7 @@ function newCity(){
 /* Effets d'un bâtiment à un niveau donné */
 function cityPop(L){ L = L ?? S.city.lv.maison; return 5 + Math.floor(6*L*Math.pow(1.1,Math.max(0,L-1))); }
 const prodMult = () => 1 + cityPop()*0.02;
-function prodOf(id, L){ if(!L) return 0; const base={mine:12,scierie:15,carriere:12}[id]; return base*L*Math.pow(1.15,L-1)*prodMult()*(1+0.2*al("fief")); }   // par minute
+function prodOf(id, L){ if(!L) return 0; const base={mine:12,scierie:15,carriere:12}[id]; return base*L*Math.pow(1.15,L-1)*prodMult()*(1+0.1*al("fief")); }   // par minute
 const trainRate  = L => 2*L;                                  // soldiers / min
 const soldierPow = L => 2 + 0.5*L;
 const towerPow   = L => L ? 20*L*Math.pow(1.2,L-1) : 0;
@@ -4793,7 +4829,7 @@ const GUIDES = {
     ["⚔️","Le Passe de combat : une saison de 30 jours avec 30 paliers de récompenses. Tout le monde a la piste gratuite."]]},
   rune: {ic:"✨", t:"Le Donjon des runes", s:"Le Donjon des runes", l:[
     ["✨","Chaque jour, le Donjon garde une rune différente : Feu le lundi, Givre le mardi, Foudre le mercredi, Vie le jeudi, Ombre le vendredi, Sang le samedi, Or le dimanche."],
-    ["⚔️","Vous avez 3 essais par jour contre son gardien (4 après le palier de Renaissance 2), en 6 difficultés, de Normal à Cauchemar. Légendaire, Mythique et Cauchemar se débloquent en battant la difficulté précédente. Plus c'est dur, plus il donne de runes."],
+    ["⚔️","Vous avez 3 essais par jour contre son gardien (4 avec le palier de Renaissance 3), en 6 difficultés, de Normal à Cauchemar. Légendaire, Mythique et Cauchemar se débloquent en battant la difficulté précédente. Plus c'est dur, plus il donne de runes."],
     ["💎","Les runes enchantent vos objets Légendaires (1 emplacement) et Mythiques (2) : touchez l'objet porté, puis choisissez une rune."],
     ["⬆️","Chaque niveau d'enchantement coûte autant de runes que son numéro, jusqu'au niveau 10. Les runes sont gardées à la Renaissance."]]},
   pass: {ic:"⚔️", t:"Le Passe de combat", s:"Le Passe de combat", l:[
@@ -5255,7 +5291,7 @@ let rageT = 0;   // ancien nom gardé : > 0 quand un bonus d'attaque ou de vites
 function buff(k, m, dur){ BF[k].m = Math.max(BF[k].t>0?BF[k].m:1, m); BF[k].t = Math.max(BF[k].t, dur); }
 function useSkill(id){
   if(!unlocked("skills") || (skCd[id]||0)>0 || deadT>0 || !E || !S.skl.eq.includes(id)) return;
-  const sk=sklDef(id), pw=sklPow(id); skCd[id]=sk.cd*(1-0.05*al("cdr"))*(1-(C.cdr||0)/100);
+  const sk=sklDef(id), pw=sklPow(id); skCd[id]=sk.cd*(1-0.025*al("cdr"))*(1-(C.cdr||0)/100);
   switch(sk.t){
     case "dmg":   hit(C.atk*sk.m*pw, true, "crit"); shake(); Sfx.play("crit"); break;
     case "multi": for(let i=0;i<sk.k;i++) setTimeout(()=>{ if(E && deadT<=0) hit(C.atk*sk.m*pw, true, "crit"); if(i===sk.k-1) shake(); }, i*130); Sfx.play("crit"); break;
@@ -5299,7 +5335,7 @@ function updSkills(){
   if(view!=="combat" || !unlocked("skills")) return;
   document.querySelectorAll(".skbtn").forEach(b=>{
     const s=sklDef(b.dataset.skill); if(!s) return; const cd=skCd[s.id]||0;
-    b.style.setProperty("--p", (cd/(s.cd*(1-0.05*al("cdr")))*100).toFixed(1)+"%");
+    b.style.setProperty("--p", (cd/(s.cd*(1-0.025*al("cdr")))*100).toFixed(1)+"%");
     b.querySelector(".skt").textContent = cd>0 ? Math.ceil(cd) : "";
     b.classList.toggle("ready", cd<=0);
   });
@@ -5537,19 +5573,19 @@ function rewardsSheet(){
 
 /* ---------- Ensembles d'équipement ---------- */
 const SETS = {
-  loup:     {n:"du Loup",      ic:"§p_loup§",   b2:"+15 % d'attaque",            b4:"+40 % d'attaque et +10 % de vitesse",        e2:{atk:15},  e4:{atk:25, spd:10}},
-  templier: {n:"du Templier",  ic:"§bouclier§", b2:"+20 % de défense",           b4:"+40 % de PV et +40 % de défense",            e2:{def:20},  e4:{def:20, hp:40}},
-  ombres:   {n:"des Ombres",   ic:"§dague§",    b2:"+5 % de critique",           b4:"+10 % de critique et +5 % de vol de vie",    e2:{crit:5},  e4:{crit:5, vol:5}},
+  loup:     {n:"du Loup",      ic:"§p_loup§",   b2:"+15 % d'attaque",            b4:"+40 % d'attaque, +10 % de vitesse et 4 % de triple coup", e2:{atk:15},  e4:{atk:25, spd:10, tpl:4}},
+  templier: {n:"du Templier",  ic:"§bouclier§", b2:"+20 % de défense",           b4:"+40 % de PV, +40 % de défense et 6 % d'esquive", e2:{def:20},  e4:{def:20, hp:40, dodge:6}},
+  ombres:   {n:"des Ombres",   ic:"§dague§",    b2:"+5 % de critique et +25 % de dégâts critiques", b4:"+10 % de critique, +75 % de dégâts critiques et +5 % de vol de vie", e2:{crit:5, critd:25},  e4:{crit:5, vol:5, critd:50}},
   wyrm:     {n:"du Wyrm",      ic:"§p_dragon§", b2:"+25 % de dégâts des familiers", b4:"+60 % de dégâts des familiers et +10 % d'attaque", e2:{fam:25}, e4:{fam:35, atk:10}},
   marchand: {n:"du Marchand",  ic:"§sac§",      b2:"+20 % d'or",                 b4:"+50 % d'or et +25 % de scraps",              e2:{gold:20}, e4:{gold:30, scrap:25}},
-  berserk:  {n:"du Berserker", ic:"§hache§",    b2:"+10 % de vitesse",           b4:"+25 % de vitesse et +15 % d'attaque",        e2:{spd:10},  e4:{spd:15, atk:15}},
-  glacier:  {n:"du Glacier",   ic:"§nuage§",    b2:"+15 % de PV",                b4:"+35 % de PV et +2 % de régénération par seconde", e2:{hp:15}, e4:{hp:20, regen:2}},
-  souverain:{n:"du Souverain", ic:"§couronne§", excl:true, b2:"+30 % d'attaque et de PV", b4:"+20 % d'attaque, de PV, de défense et d'or, +10 % de vitesse", e2:{atk:30, hp:30}, e4:{atk:20, hp:20, def:20, gold:20, spd:10}},
+  berserk:  {n:"du Berserker", ic:"§hache§",    b2:"+10 % de vitesse",           b4:"+25 % de vitesse, +15 % d'attaque et 8 % de double coup", e2:{spd:10},  e4:{spd:15, atk:15, dbl:8}},
+  glacier:  {n:"du Glacier",   ic:"§nuage§",    b2:"+15 % de PV",                b4:"+35 % de PV, +2 % de régénération par seconde et 5 % d'esquive", e2:{hp:15}, e4:{hp:20, regen:2, dodge:5}},
+  souverain:{n:"du Souverain", ic:"§couronne§", excl:true, b2:"+30 % d'attaque et de PV", b4:"+20 % d'attaque, de PV, de défense et d'or, +10 % de vitesse, +40 % de dégâts critiques et 3 % de triple coup", e2:{atk:30, hp:30}, e4:{atk:20, hp:20, def:20, gold:20, spd:10, critd:40, tpl:3}},
   paladin:  {n:"du Paladin",   ic:"§coeurvert§",b2:"+4 % de vol de vie",         b4:"+8 % de vol de vie et +20 % de défense",     e2:{vol:4},   e4:{vol:4, def:20}},
 };
 function setCounts(){ const c={}; for(const k of SLOTKEYS){ const it=S.equip[k]; if(it && it.set) c[it.set]=(c[it.set]||0)+1; } return c; }
 function setBonus(){
-  const c=setCounts(), b={atk:0,def:0,hp:0,spd:0,crit:0,vol:0,fam:0,gold:0,scrap:0,regen:0};
+  const c=setCounts(), b={atk:0,def:0,hp:0,spd:0,crit:0,vol:0,fam:0,gold:0,scrap:0,regen:0,critd:0,dodge:0,dbl:0,tpl:0};
   const rb = typeof runeBonus==="function" ? runeBonus() : {}; for(const k in rb) b[k]=(b[k]||0)+rb[k];   // enchantements runiques
   for(const k in SETS){ const n=c[k]||0, d=SETS[k];
     if(n>=2) for(const x in d.e2) b[x]+=d.e2[x];
@@ -5648,17 +5684,17 @@ const Sfx = (()=>{
    et les Mythiques (2 emplacements) ; chaque niveau d'enchantement coûte autant de runes que son niveau. */
 const RUNES = {
   feu:    {n:"Feu",    ic:"flamme",   c:"#ff6b3d", st:"atk",  per:3,   d:"+{v} % d'attaque"},
-  givre:  {n:"Givre",  ic:"nuage",    c:"#74c0fc", st:"def",  per:3,   d:"+{v} % de défense"},
-  foudre: {n:"Foudre", ic:"eclair",   c:"#ffd43b", st:"spd",  per:1.5, d:"+{v} % de vitesse"},
+  givre:  {n:"Givre",  ic:"nuage",    c:"#74c0fc", st:"dodge", per:0.5, d:"+{v} % d'esquive"},
+  foudre: {n:"Foudre", ic:"eclair",   c:"#ffd43b", st:"dbl",   per:0.5, d:"+{v} % de double coup"},
   vie:    {n:"Vie",    ic:"coeurvert",c:"#40c057", st:"hp",   per:3,   d:"+{v} % de PV"},
-  ombre:  {n:"Ombre",  ic:"dague",    c:"#9b6dff", st:"crit", per:0.5, d:"+{v} % de critique"},
+  ombre:  {n:"Ombre",  ic:"dague",    c:"#9b6dff", st:"critd", per:5,  d:"+{v} % de dégâts critiques"},
   sang:   {n:"Sang",   ic:"goutte",   c:"#e03131", st:"vol",  per:0.4, d:"+{v} % de vol de vie"},
   or:     {n:"Or",     ic:"piece",    c:"#f2c94c", st:"gold", per:4,   d:"+{v} % d'or"},
 };
 const RUNE_DAY = ["or","feu","givre","foudre","vie","ombre","sang"];   // dimanche → samedi
 const JOURS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const RUNE_MAX = 10, DUNG_TRIES_BASE = 3;
-const dungTries = () => DUNG_TRIES_BASE + (hasP(2)?1:0);
+const dungTries = () => DUNG_TRIES_BASE + (hasP(3)?1:0);
 const DUNG_DIFF = [{n:"Normal", off:-10, r:2, c:"blue"}, {n:"Difficile", off:0, r:4, c:"gold"}, {n:"Héroïque", off:10, r:8, c:"red"},
   {n:"Légendaire", off:25, r:14, c:"orange"}, {n:"Mythique", off:50, r:24, c:"violet"}, {n:"Cauchemar", off:100, r:40, c:"dark"}];
 const dungOpen = i => i <= 2 || i <= ((S.chal && S.chal.dmax) ?? -1) + 1;   // Légendaire, Mythique, Cauchemar : battre la difficulté d'avant
@@ -5885,8 +5921,8 @@ function save(){
 /* Puissance : un seul nombre qui résume le chevalier (dégâts par seconde, vie et défense) */
 function heroPower(){
   if(typeof C==="undefined" || !C) return 0;
-  const dps = (C.atk||0)/(C.interval||1)*(1+(C.crit||0)/100) + (C.famDps||0);
-  return dps*10 + (C.hp||0) + (C.def||0)*5;
+  const dps = (C.atk||0)/(C.interval||1)*(1+(C.crit||0)/100*((C.critd||100)/100))*(1+((C.dbl||0)+2*(C.tpl||0))/100) + (C.famDps||0);
+  return dps*10 + (C.hp||0)/(1-Math.min(0.5,(C.dodge||0)/100)) + (C.def||0)*5;
 }
 /* ---------- Classement en ligne (Supabase) ----------
    Remplir SB_URL et SB_KEY (clé publique « anon ») pour l'activer. Sans elles, le pseudo marche hors ligne
@@ -6098,6 +6134,11 @@ function load(o){
   if(o){
     S = Object.assign(base, o);
     S.forge = Object.assign(base.forge, o.forge||{});
+    if(!o.forgeV2){   // ancienne forge (×1,1 par niveau, +4 % de vitesse) : on convertit les niveaux pour garder la même puissance
+      for(const k of ["atk","hp","def"]) S.forge[k] = Math.round((S.forge[k]||0)*Math.log(1.1)/Math.log(1.01));
+      S.forge.spd = (S.forge.spd||0)*4;
+    }
+    S.forgeV2 = true;
     S.opts  = Object.assign({autoEquip:false,qty:1,vibe:true,speed:1,showRaids:true,music:true,vol:0.6,sfx:true,notif:true,autoSkill:false}, o.opts||{}); delete S.opts.autoSell;
     const eq = Object.assign({}, o.equip||{});
     if(eq.amulette){ eq.talisman = eq.amulette; eq.amulette.slot="talisman"; } delete eq.amulette;   // ancienne version
@@ -6135,6 +6176,7 @@ function load(o){
     S.tuto.gq = S.tuto.gq || [];
     if(!o.tuto || o.tuto.intro===undefined) S.tuto.intro = S.tuto.step>0 || (S.stats && S.stats.kills>30) || S.best>2;
     S.altar = o.altar || {};
+    if(S.altar.start){ let back=0; for(let l=0;l<S.altar.start;l++) back+=3*(l+1); delete S.altar.start; S.souls=(S.souls||0)+back; }   // Départ avancé retiré : âmes rendues
     S.market = o.market || {day:"", n:{}};
     S.orbs = o.orbs ?? 0;
     S.treats = o.treats ?? 0; S.extraSlot = o.extraSlot || 0;
@@ -6183,7 +6225,7 @@ function load(o){
   Object.keys(dirty).forEach(k=>dirty[k]=true);
 }
 function offline(){
-  const el = Math.min((8+2*al("absence"))*3600, (Date.now()-(S.last||Date.now()))/1000);
+  const el = Math.min((8+al("absence"))*3600, (Date.now()-(S.last||Date.now()))/1000);
   if(el<60) return;
   let cityTxt = "";
   if(S.city){ cityTick(el); if(stockReady()) cityTxt = `<br><br>🏰 Votre fief a de la production à récolter : passez dans le Fief !`; if(S.city.exp && Date.now()>=S.city.exp.end) cityTxt += `<br>🏕️ Votre expédition est rentrée.`; }
@@ -6240,7 +6282,7 @@ const GAME_PACE = 0.85;
 let lastT = performance.now(), CATCH = 0, catchShown = 0;
 /* Jeu en arrière-plan : quand le navigateur ralentit ou endort l'onglet, le temps perdu est rattrapé
    en simulant le combat (jusqu'à la durée d'absence maximale), par tranches pour ne pas figer l'écran. */
-const CATCH_MAX = () => (8+2*al("absence"))*3600;
+const CATCH_MAX = () => (8+al("absence"))*3600;
 setInterval(()=>{
   const now = performance.now();
   let real = (now-lastT)/1000; lastT = now;
