@@ -920,7 +920,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1654";
+var BUILD_ID = "20261123-1700";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1774,7 +1774,7 @@ function makeItem(ilvl, ri, slot, forceSet){
   slot = slot || pick(SLOTKEYS);
   const sd = SLOTS[slot];
   const sc = Math.pow(ITEM_G,ilvl-1)*RAR[ri].m*(0.85+Math.random()*0.3);
-  const set = forceSet!==undefined ? forceSet : (ri>=1 && Math.random()<0.5 ? pick(Object.keys(SETS)) : null);
+  const set = forceSet!==undefined ? forceSet : (ri>=1 && Math.random()<0.5 ? pick(Object.keys(SETS).filter(k=>!SETS[k].excl)) : null);   // le Souverain ne tombe jamais au hasard
   const it = {id:uid(), slot, ri, ilvl, name: pick(sd.names)+(set?" "+SETS[set].n:(ri>=1?" "+pick(SUFFIX):""))};
   if(set) it.set = set;
   for(const k in sd.base) it[k] = sd.base[k]*sc;
@@ -2306,6 +2306,7 @@ const ART_PAL = {   // métal, ombre, accent, gemme
   berserk:  ["#6b5a52","#3a2c26","#e03131","#ff8787"],
   glacier:  ["#bfe3ff","#5c9bd1","#ffffff","#74c0fc"],
   paladin:  ["#fff4d6","#c9a64a","#40c057","#ffd43b"],
+  souverain:["#8f5cf6","#4c1d95","#f2c94c","#ffd43b"],
 };
 const RAR_PAL = [["#b8c0c8","#6b7480","#8a6a48","#9aa5b1"],["#9fd8a8","#3f8f50","#8a6a48","#22b455"],["#9cc3f5","#3866b8","#c9a24a","#3b82f6"],
   ["#c9a8f5","#7243c0","#f2c94c","#a855f7"],["#ffd76b","#c08a12","#fff1a8","#ff9f1c"],["#ff8a8a","#b3262f","#ffd43b","#ff3b3b"]];
@@ -2319,6 +2320,7 @@ function artEmblem(set, x, y, r, col){
     case "marchand": return `<path d="M${x} ${y-r} l${r*.8} ${r} l${-r*.8} ${r} l${-r*.8} ${-r}z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/><path d="M${x} ${y-r*.5} l${r*.4} ${r*.5} l${-r*.4} ${r*.5}" fill="#fff" opacity=".55"/>`;
     case "berserk":  return `<path d="M${x-r} ${y-r} L${x+r} ${y+r} M${x+r} ${y-r} L${x-r} ${y+r}" stroke="${col}" stroke-width="3.2" stroke-linecap="round"/>`;
     case "glacier":  return `<g stroke="${col}" stroke-width="2.2" stroke-linecap="round"><path d="M${x} ${y-r} V${y+r} M${x-r*.87} ${y-r*.5} L${x+r*.87} ${y+r*.5} M${x+r*.87} ${y-r*.5} L${x-r*.87} ${y+r*.5}"/></g>`;
+    case "souverain":return `<path d="M${x-r} ${y+r*.6} L${x-r} ${y-r*.5} L${x-r*.5} ${y} L${x} ${y-r} L${x+r*.5} ${y} L${x+r} ${y-r*.5} L${x+r} ${y+r*.6} Z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/><circle cx="${x}" cy="${y+r*.15}" r="${r*.22}" fill="#e03131"/>`;
     case "paladin":  return `<path d="M${x} ${y+r*.9} C${x-r*1.4} ${y-r*.1} ${x-r*.6} ${y-r*1.2} ${x} ${y-r*.35} C${x+r*.6} ${y-r*1.2} ${x+r*1.4} ${y-r*.1} ${x} ${y+r*.9}z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/>`;
   }
   return `<circle cx="${x}" cy="${y}" r="${r*.55}" fill="${col}" stroke="#2d2216" stroke-width="1.4"/>`;
@@ -2351,6 +2353,7 @@ function artSVG(slot, set, ri){
       if(set==="paladin") top=`<path d="M14 28 Q2 22 4 10 Q12 20 18 22 Z M50 28 Q62 22 60 10 Q52 20 46 22 Z" fill="#fff" ${OL}/>`;
       if(set==="glacier") top=`<path d="M22 14 L24 2 L28 12 M32 12 L32 0 L36 12 M40 12 L44 2 L42 14" fill="${a}" ${OL}/>`;
       if(set==="ombres") top=`<path d="M10 40 Q8 8 32 6 Q56 8 54 40 Q48 26 32 24 Q16 26 10 40 Z" fill="${d}" ${OL}/>`;
+      if(set==="souverain") top=`<path d="M16 18 L16 6 L24 13 L32 3 L40 13 L48 6 L48 18 Z" fill="${a}" ${OL}/><circle cx="32" cy="9" r="2.6" fill="#e03131"/>`;
       if(set==="marchand") top=`<path d="M18 16 L22 6 L28 14 L32 4 L36 14 L42 6 L46 16 Z" fill="${a}" ${OL}/>`;
       body = top+`<path d="M12 40 Q12 12 32 12 Q52 12 52 40 L52 50 Q32 56 12 50 Z" fill="${m}" ${OL}/><path d="M18 32 H46 V38 H18 Z" fill="#2d2216"/>
         ${set==="templier"?`<path d="M30 26 h4 v20 h-4 z" fill="${g}"/>`:""}<path d="M18 20 Q32 14 46 20" stroke="#fff" stroke-width="2" opacity=".5" fill="none"/>${set&&set!=="templier"?e(32,46,3.5):""}`;
@@ -2717,9 +2720,9 @@ function updateDots(){
 
   $("#dot-city").classList.toggle("on", !!S.city && view!=="city" && (S.city.pending || BLD.some(b=>affordC(bldCost(b)))));
 }
-const soulCurve = st => st>80 ? Math.pow((st-80)/6,2) : 0;   // 100 → 11, 110 → 25, 130 → 69
+const soulCurve = st => st>80 ? Math.pow((st-80)/7.5,2) : 0;   // 100 → 7, 110 → 16, 130 → 44
 function soulGain(){ if(S.maxStage<prestMin()) return 0; return Math.max(0, Math.floor((soulCurve(S.maxStage)-soulCurve(S.runStart||1))*(hasP(15)?1.25:1))); }
-const runClimb = () => S.maxStage - (S.runStart||1);   // 100 → 11 âmes, 110 → 25, 130 → 69
+const runClimb = () => S.maxStage - (S.runStart||1);
 const chestOf = st => ({crystals: 20 + st, orbs: 3 + Math.floor(st/10), scraps: Math.ceil(craftScrap(st)*0.4)*15});
 let prestTab = "reb";
 function renderPrest(){
@@ -3835,7 +3838,7 @@ const PRODUCTS = [
   {id:"gold_l",   ic:"🏆", n:"Trésor du roi",       d:"Or pour environ 1 h 30 de combat", price:"9,99 €", gold:5000},
   {id:"speed",    ic:"⚡", n:"Vitesse illimitée",   d:"Vitesse ×2 et ×3 débloquées pour toujours", price:"3,99 €", perm:true},
   {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier du passe de combat pour cette saison", price:"4,99 €", bp:true},
-  {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale, 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
+  {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
   {id:"pass_up",  ic:"⬆️", n:"Passer au Passe Royal", d:"Ajoute la piste Royale, 10 paliers d'avance et l'Armure royale", price:"4,99 €", bp:true},
   {id:"noads",    ic:"🚫", n:"Sans publicités",     d:"Toutes les récompenses « pub » sont données sans pub", price:"4,99 €", perm:true},
 ];
@@ -3954,7 +3957,9 @@ const bpLevel = () => Math.min(BP_TIERS, Math.floor((S.bp?S.bp.xp:0)/BP_XP));
 function bpReward(track, i){
   if(track==="f") return i%10===0 ? {crystals:30, orbs:5} : i%5===0 ? {crystals:15} : i%3===0 ? {orbs:3} : i%2===0 ? {gold:0.6} : {treats:5};
   if(track==="c") return i===30 ? {skin:"champion", crystals:100} : i===20 ? {fav:"skl"} : i===10 ? {fav:"pet"} : i%5===0 ? {crystals:60} : i%2===0 ? {orbs:6} : {treats:12, scraps:1};
-  return i%10===0 ? {crystals:200} : i%2===0 ? {crystals:25} : {orbs:5};
+  const SOV=["arme","casque","armure","bottes","bouclier","talisman"];
+  if(i%5===0) return Object.assign({item:SOV[i/5-1]}, i%10===0 ? {crystals:200} : {});
+  return i%2===0 ? {crystals:25} : {orbs:5};
 }
 const bpOwns = tr => tr==="f" || (tr==="c" && !!S.bp.tier) || (tr==="r" && S.bp.tier==="r");
 const bpReady = (tr,i) => bpOwns(tr) && i<=bpLevel() && !S.bp.cl[tr][i];
@@ -3963,6 +3968,7 @@ function bpCanBuy(id){ bpCheck(); return id==="pass_c" ? !S.bp.tier : id==="pass
 function bpMini(r){
   const p=[];
   if(r.skin){ const k=SKINS.find(x=>x.id===r.skin); p.push(`<span class="bpsk">${knightSVG(k.pal)}</span>`); }
+  if(r.item) p.push(`<span class="bpsk">${artSVG(r.item,"souverain",5)}</span>`);
   if(r.fav) p.push(r.fav==="pet" ? "🐾 Faveur" : "📜 Faveur");
   if(r.crystals) p.push("💎 "+r.crystals);
   if(r.orbs) p.push("🔮 "+r.orbs);
@@ -3973,6 +3979,7 @@ function bpMini(r){
 }
 function bpGive(r){
   if(r.skin) S.skins.owned[r.skin]=1;
+  if(r.item){ const it=makeItem(1,5,r.item,"souverain"); it.name=SLOTS[r.item].names[0]+" du Souverain"; placeItem(it); dirty.loot=true; r._it=it; }
   if(r.fav==="pet") S.favPet=1;
   if(r.fav==="skl") S.favSkl=1;
   const g={}; for(const k of ["crystals","orbs","treats","gold","scraps"]) if(r[k]) g[k]=r[k]; grant(g);
@@ -3981,14 +3988,18 @@ function bpClaim(key){
   bpCheck(); const [tr,is]=key.split(":"), i=+is; if(!bpReady(tr,i)) return;
   const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); Sfx.play(r.skin||r.fav?"legend":"success"); vibe(12);
   if(r.skin){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===r.skin).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
+  else if(r._it){ lastPull=0; showReveal([{ic:SLOTS[r.item].ic, n:r._it.name, ri:5, rn:"Ensemble du Souverain", tag:"Mythique exclusif du Passe Royal · dans l'Inventaire"}]); revealCb=()=>renderShop(); }
   else toast(`⚔️ Palier ${i} : ${bpMini(r).replace(/<br>/g," · ").replace(/<span.*?<\/span>/g,"")}`);
   save(); renderShop();
 }
 function bpClaimAll(){
   bpCheck(); let n=0, sk=null;
-  for(let i=1;i<=bpLevel();i++) for(const tr of ["f","c","r"]) if(bpReady(tr,i)){ const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); n++; if(r.skin) sk=r.skin; }
+  const its=[];
+  for(let i=1;i<=bpLevel();i++) for(const tr of ["f","c","r"]) if(bpReady(tr,i)){ const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); n++; if(r.skin) sk=r.skin; if(r._it) its.push(r._it); }
   if(!n) return; Sfx.play("legend"); toast(`⚔️ ${n} récompense${n>1?"s":""} du passe récupérée${n>1?"s":""} !`);
-  if(sk){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===sk).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
+  const cards=its.map(it=>({ic:SLOTS[it.slot].ic, n:it.name, ri:5, rn:"Ensemble du Souverain", tag:"Mythique exclusif"}));
+  if(sk) cards.unshift({ic:"🛡️", n:SKINS.find(x=>x.id===sk).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"});
+  if(cards.length){ lastPull=0; showReveal(cards); revealCb=()=>renderShop(); }
   save(); renderShop();
 }
 function bpHTML(){
@@ -4374,7 +4385,7 @@ const GUIDES = {
     ["⭐","Gagnez de l'expérience de passe en jouant : connexion du jour, quêtes du jour et de la semaine, boss et étages de la Tour."],
     ["🎁","Chaque palier débloque une récompense gratuite. Touchez-la pour la récupérer."],
     ["⚔️","Le Passe du Chevalier (4,99 €) ajoute une 2e récompense à chaque palier : orbes, cristaux, faveurs légendaires et l'Armure du champion au palier 30."],
-    ["👑","Le Passe Royal (9,99 €) ajoute en plus une 3e piste pleine de cristaux, 10 paliers d'avance et l'Armure royale tout de suite."],
+    ["👑","Le Passe Royal (9,99 €) ajoute une 3e piste : cristaux et les 6 pièces Mythiques de l'ensemble exclusif du Souverain (une tous les 5 paliers), plus 10 paliers d'avance et l'Armure royale tout de suite."],
     ["📅","Une nouvelle saison commence tous les 30 jours : récupérez vos récompenses avant la fin, le passe repart de zéro."]]},
   defis: {ic:"⚔️", t:"Les Défis sont débloqués", s:"Les Défis", go:"defis", go_t:"Voir les Défis", l:[
     ["🗼","La Tour des épreuves : chaque étage cache un gardien à battre en 30 secondes. Chaque étage conquis rapporte des cristaux et des scraps, avec un gros bonus tous les 5 étages."],
@@ -5112,6 +5123,7 @@ const SETS = {
   marchand: {n:"du Marchand",  ic:"§sac§",      b2:"+20 % d'or",                 b4:"+50 % d'or et +25 % de scraps",              e2:{gold:20}, e4:{gold:30, scrap:25}},
   berserk:  {n:"du Berserker", ic:"§hache§",    b2:"+10 % de vitesse",           b4:"+25 % de vitesse et +15 % d'attaque",        e2:{spd:10},  e4:{spd:15, atk:15}},
   glacier:  {n:"du Glacier",   ic:"§nuage§",    b2:"+15 % de PV",                b4:"+35 % de PV et +2 % de régénération par seconde", e2:{hp:15}, e4:{hp:20, regen:2}},
+  souverain:{n:"du Souverain", ic:"§couronne§", excl:true, b2:"+30 % d'attaque et de PV", b4:"+20 % d'attaque, de PV, de défense et d'or, +10 % de vitesse", e2:{atk:30, hp:30}, e4:{atk:20, hp:20, def:20, gold:20, spd:10}},
   paladin:  {n:"du Paladin",   ic:"§coeurvert§",b2:"+4 % de vol de vie",         b4:"+8 % de vol de vie et +20 % de défense",     e2:{vol:4},   e4:{vol:4, def:20}},
 };
 function setCounts(){ const c={}; for(const k of SLOTKEYS){ const it=S.equip[k]; if(it && it.set) c[it.set]=(c[it.set]||0)+1; } return c; }
