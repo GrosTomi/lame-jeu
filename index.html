@@ -729,7 +729,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 #view-combat #arena{flex:1 0 300px;margin-bottom:6px}
 #view-combat .goal{flex:none;margin-bottom:6px}
 #view-combat .hpanel{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;margin-bottom:0;overflow:hidden}
-.hpanel .pgsrc.list>*{margin-bottom:5px}.hpanel .pgsrc.list>*:last-child{margin-bottom:0}
+.hpanel .list>*{margin-bottom:5px}.hpanel .list>*:last-child{margin-bottom:0}
 @media (max-height:740px){
   header{padding-top:calc(var(--st) + 4px);padding-bottom:5px}.pill{font-size:14px;padding:3px 8px 3px 6px}
   .vtitle{display:none}
@@ -828,6 +828,16 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 #view-city .villagewrap{flex:1;min-height:0}
 .threat-c.soon{border-color:var(--red);background:#ffe9e4}
 #tab-city .reschips{margin-bottom:6px}
+
+/* filet de sécurité : si un bloc est plus haut qu'une page, la page défile au lieu de couper */
+.pgpage{overflow-y:auto;scrollbar-width:none}.pgpage::-webkit-scrollbar{display:none}
+.pager>.pgsrc{overflow-y:auto;scrollbar-width:none}
+@media (max-height:620px){
+  .bandft{display:none}.band .crys{font-size:18px;padding:2px 8px}.bandtop{margin-bottom:4px}.band{padding:6px 8px}
+  .teamrow .tile{height:44px}.teamrow .tile .ti{font-size:22px}.teamcard .chead{margin-bottom:3px}.teamcard .chead .btn{padding:4px 8px;font-size:12px}
+  .card{padding:7px;margin-bottom:6px}.seg{margin-bottom:6px}
+  .titanhero .titart{display:none}.titanhero{padding:8px}
+}
 </style>
 </head>
 <body>
@@ -843,7 +853,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261120-1535";
+var BUILD_ID = "20261123-0952";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1262,6 +1272,16 @@ const SPR = (()=>{
   P.p_lapin = `<ellipse cx="22" cy="16" rx="6" ry="15" fill="#f4f4f8" ${S}/><ellipse cx="42" cy="16" rx="6" ry="15" fill="#f4f4f8" ${S}/><ellipse cx="22" cy="16" rx="2.5" ry="10" fill="#f6b6c8"/><ellipse cx="42" cy="16" rx="2.5" ry="10" fill="#f6b6c8"/>
     <path d="M10 42 Q10 24 32 24 Q54 24 54 42 Q52 60 32 60 Q12 60 10 42 Z" fill="#fbfbff" ${S}/>${cute(24,40,5)}${cute(40,40,5)}<path d="M29 48 h6 l-3 3 z" fill="#f38fa9" ${s2}/><path d="M32 51 q-3 4 -6 2 M32 51 q3 4 6 2" fill="none" ${s2}/>
     <ellipse cx="17" cy="49" rx="4" ry="2.5" fill="#ffc8d6"/><ellipse cx="47" cy="49" rx="4" ry="2.5" fill="#ffc8d6"/>`;
+  P.p_herisson = `<path d="M6 46 Q4 22 30 16 Q50 14 58 34 L60 46 Z" fill="#7a5230" ${S}/><path d="M10 30 l-6 -6 M16 22 l-4 -9 M26 17 l0 -10 M36 16 l4 -9 M46 20 l7 -7 M53 28 l8 -4" stroke="#4a2f17" stroke-width="4" stroke-linecap="round"/>
+    <path d="M34 46 Q34 30 48 30 Q60 32 60 44 Q58 54 46 54 Q36 54 34 46 Z" fill="#f2d2a4" ${S}/>${cute(44,40,3.6)}${cute(54,40,3)}<circle cx="61" cy="46" r="3" fill="#3a2a1a"/><path d="M46 48 q4 3 8 0" fill="none" ${s2}/>
+    <ellipse cx="16" cy="56" rx="5" ry="3" fill="#f2d2a4" ${s2}/><ellipse cx="34" cy="56" rx="5" ry="3" fill="#f2d2a4" ${s2}/>`;
+  P.p_crapaud = `<path d="M6 48 Q6 26 32 26 Q58 26 58 48 Q56 60 32 60 Q8 60 6 48 Z" fill="#5fae3a" ${S}/><circle cx="20" cy="24" r="10" fill="#6cc246" ${S}/><circle cx="44" cy="24" r="10" fill="#6cc246" ${S}/>
+    ${cute(20,24,5)}${cute(44,24,5)}<path d="M16 44 Q32 54 48 44" fill="none" stroke="#2f5e1c" stroke-width="3" stroke-linecap="round"/><circle cx="14" cy="38" r="2.5" fill="#3f8a25"/><circle cx="50" cy="36" r="3" fill="#3f8a25"/><circle cx="40" cy="52" r="2" fill="#3f8a25"/>
+    <ellipse cx="22" cy="49" rx="4" ry="2.4" fill="#ffb3a7" opacity=".8"/><ellipse cx="42" cy="49" rx="4" ry="2.4" fill="#ffb3a7" opacity=".8"/>`;
+  P.p_bouc = `<path d="M16 22 Q4 18 6 4 Q14 14 22 16 Z" fill="#c9b27a" ${S}/><path d="M48 22 Q60 18 58 4 Q50 14 42 16 Z" fill="#c9b27a" ${S}/>
+    <path d="M12 26 Q32 10 52 26 Q54 44 44 54 Q32 62 20 54 Q10 44 12 26 Z" fill="#f1ece0" ${S}/><path d="M6 30 Q12 26 16 32 Q12 36 6 30 Z M58 30 Q52 26 48 32 Q52 36 58 30 Z" fill="#e2dccb" ${s2}/>
+    ${cute(24,34,4)}${cute(40,34,4)}<ellipse cx="32" cy="46" rx="8" ry="5" fill="#f7c9b8" ${s2}/><circle cx="29" cy="46" r="1.4" fill="#3a2a1a"/><circle cx="35" cy="46" r="1.4" fill="#3a2a1a"/>
+    <path d="M28 56 Q32 64 36 56" fill="#ddd3bd" ${s2}/>`;
   P.p_tortue = `<path d="M8 48 Q8 22 32 20 Q56 22 56 48 Z" fill="#6aa84f" ${S}/><path d="M18 46 L22 32 L32 28 L42 32 L46 46 M22 32 L32 40 L42 32 M32 40 V46" fill="none" stroke="#3d7a2a" stroke-width="2.5"/>
     <path d="M6 48 H58 Q60 54 54 54 H10 Q4 54 6 48 Z" fill="#c9b27a" ${S}/><circle cx="32" cy="14" r="11" fill="#9ccc65" ${S}/>${cute(27,13,3.6)}${cute(37,13,3.6)}<path d="M28 19 q4 3 8 0" fill="none" ${s2}/>
     <ellipse cx="12" cy="58" rx="5" ry="3.5" fill="#9ccc65" ${s2}/><ellipse cx="52" cy="58" rx="5" ry="3.5" fill="#9ccc65" ${s2}/>`;
@@ -1315,9 +1335,10 @@ const INV_MAX = 40;
 
 const RAR = [
   {n:"Commun",     c:"#9aa5b1", m:1},
-  {n:"Rare",       c:"#3b82f6", m:1.6},
-  {n:"Épique",     c:"#a855f7", m:2.6},
-  {n:"Légendaire", c:"#f59e0b", m:4.2},
+  {n:"Peu commun", c:"#22b455", m:1.3},
+  {n:"Rare",       c:"#3b82f6", m:1.8},
+  {n:"Épique",     c:"#a855f7", m:2.8},
+  {n:"Légendaire", c:"#f59e0b", m:4.4},
   {n:"Mythique",   c:"#ef4444", m:7},
 ];
 const SLOTS = {
@@ -1336,7 +1357,7 @@ const MATS = {
   gemme: {n:"Gemme", ic:"💠"},
 };
 const MATKEYS = Object.keys(MATS);
-const CRAFT_RATES = [60, 28, 9, 2.5, 0.5];   // même logique que les invocations
+const CRAFT_RATES = [60, 25, 12, 3, 0, 0];   // même logique que les invocations
 const SLOTKEYS = Object.keys(SLOTS);
 const SUFFIX = ["du Soldat","du Roi déchu","de l'Aube","du Givre","des Braises","de la Couronne","du Dragon","des Anciens","de la Tempête"];
 
@@ -1371,9 +1392,22 @@ const CLASSES = [
   {id:"forgeron", n:"Forgeron",          ic:"⚒️", st:"loot",  b:25, pl:12,  d:"{v} % de scraps"},
 ];
 /* Niveau d'invocation : chaque invocation donne 1 point. Plus le niveau monte, plus les raretés hautes sortent.
-   Niv. 1 : 70/25/5/0/0 %  →  niv. 20 : 10/35/25/15/15 % (Commun → Mythique), interpolé entre les deux. */
-const SUM_MAX = 20, SUM_R0 = [70,25,5,0,0], SUM_R1 = [10,35,25,15,15];
-const sumNeed = lv => 10 + 15*(lv-1);
+   Commun, Peu commun et Rare dès le départ ; Épique au niveau 5, Légendaire au niveau 10, Mythique au niveau 15 (taux très bas).
+   Taux par palier (Commun, Peu commun, Rare, Épique, Légendaire, Mythique), interpolés entre les paliers. */
+const SUM_MAX = 20;
+const RAR_UNLOCK = [1, 1, 1, 5, 10, 15];
+const RATE_KEYS = [
+  [1,  [72, 23,  5,  0,  0,   0  ]],
+  [4,  [56, 31, 13,  0,  0,   0  ]],
+  [5,  [52, 32, 14,  2,  0,   0  ]],
+  [9,  [40, 33, 20,  7,  0,   0  ]],
+  [10, [37, 33, 21,  8,  1,   0  ]],
+  [14, [28, 32, 25, 12,  3,   0  ]],
+  [15, [25, 32, 26, 13,  3.5, 0.5]],
+  [20, [15, 28, 30, 18,  6,   3  ]],
+];
+const rarOpen = (lv, ri) => lv >= RAR_UNLOCK[ri];
+const sumNeed = lv => 6 + 8*(lv-1);
 const pityMax = skl => (skl ? S.skl.firstLeg : S.firstLeg) ? PITY : 10;   // la première Légendaire arrive vite          // invocations pour passer du niveau lv au suivant
 function sumLevel(pulls){
   let lv=1, left = pulls ?? (S.pulls||0);
@@ -1381,8 +1415,19 @@ function sumLevel(pulls){
   return {lv, cur:left, need: lv<SUM_MAX ? sumNeed(lv) : 0};
 }
 function petRates(lv){
-  const t=(lv-1)/(SUM_MAX-1);
-  return SUM_R0.map((a,i)=>Math.round((a+(SUM_R1[i]-a)*t)*10)/10);
+  lv=Math.max(1, Math.min(SUM_MAX, lv));
+  let k=0; while(k<RATE_KEYS.length-1 && RATE_KEYS[k+1][0]<=lv) k++;
+  const [l0,a]=RATE_KEYS[k], nx=RATE_KEYS[k+1];
+  if(!nx || l0===lv) return a.slice();
+  const [l1,b]=nx, t=(lv-l0)/(l1-l0);
+  return a.map((v,i)=>{ if(!rarOpen(lv,i)) return 0; return Math.round((v+(b[i]-v)*t)*10)/10; });
+}
+/* Texte sous les boutons d'invocation : prochain déblocage ou garantie */
+function sumNextTxt(lv, pity, skl){
+  if(lv<RAR_UNLOCK[3]) return `<b style="color:${RAR[3].c}">Épiques</b> au niveau ${RAR_UNLOCK[3]}`;
+  if(lv<RAR_UNLOCK[4]) return `<b style="color:#ffd27a">Légendaires</b> au niveau ${RAR_UNLOCK[4]}`;
+  const g=`${skl?"Légendaire garantie":"Légendaire garanti"} dans ${pityMax(skl)-pity}`;
+  return lv<RAR_UNLOCK[5] ? `${g} · <b style="color:#ff9a9a">Mythiques</b> au niv. ${RAR_UNLOCK[5]}` : g;
 }
 const PETS = [
   {id:"rat",      n:"Rat d'égout",       ic:"🐀", r:0, dps:6,  ps:"gold",  pv:5},
@@ -1406,6 +1451,12 @@ const PETS = [
   {id:"wyverne",  n:"Wyverne",           ic:"§p_wyverne§", r:3, dps:62,  ps:"crit",  pv:8, event:true},
   {id:"spectre",  n:"Spectre des Âmes",  ic:"§ame§",       r:4, dps:140, ps:"atk",   pv:20, event:true},
 ];
+PETS.forEach(p=>{ if(p.r>=1) p.r++; });   // insertion de la rareté Peu commun (vert)
+PETS.push(
+  {id:"herisson", n:"Hérisson piquant",  ic:"§p_herisson§",  r:1, dps:10, ps:"def",   pv:8},
+  {id:"crapaud",  n:"Crapaud des marais",ic:"§p_crapaud§",   r:1, dps:11, ps:"regen", pv:1},
+  {id:"bouc",     n:"Bouc des cimes",    ic:"§p_bouc§",      r:1, dps:10, ps:"hp",    pv:12},
+);
 const PS_TXT = {gold:"+{v} % d'or", crit:"+{v} % de critique", hp:"+{v} % de PV max", loot:"+{v} % de scraps", atk:"+{v} % d'attaque", vol:"+{v} % de vol de vie", regen:"+{v} % de PV régénérés / s", def:"+{v} % de défense"};
 const STAR_NEED = [1,2,3,4];   // copies pour passer 1★→2★, 2★→3★…
 const TEAM_MAX = 3, PULL_COST = 1, PULL10_COST = 9, PULL100_COST = 90, PITY = 50, START_CRYS = 30;   // invocations payées en Orbes 🔮
@@ -1431,7 +1482,7 @@ const uid = () => (uidc++).toString(36);
 let S;
 function newState(keep){
   const s = {
-    gold:500, souls:0, soulsV2:true, matsGone:true, prestiges:0, best:1,
+    gold:500, souls:0, soulsV2:true, matsGone:true, rar6:true, favPet:0, favSkl:0, prestiges:0, best:1,
     stage:1, kills:0, maxStage:1, auto:true, hp:null,
     forge:{atk:0,hp:0,def:0,spd:0},
     pets:{}, team:[], crystals:START_CRYS, pity:0, pulls:0,
@@ -1443,7 +1494,7 @@ function newState(keep){
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{coup:{stars:1,copies:0}, bandage:{stars:1,copies:0}, cri:{stars:1,copies:0}}, eq:["coup","cri","bandage"], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -1550,13 +1601,13 @@ const hasP = n => (S.prestiges||0) >= n;
 const teamMax = () => 3 + (hasP(1)?1:0) + (hasP(10)?1:0) + (S.extraSlot?1:0);
 const sklMax  = () => 3 + (hasP(3)?1:0);
 /* --- Bonus de collection : toute une rareté réunie = bonus permanent --- */
-const COLL_P = [{atk:10},{hp:15},{atk:20},{atk:30},{atk:50,hp:50}];
+const COLL_P = [{atk:10},{hp:10},{hp:15},{atk:20},{atk:30},{atk:50,hp:50}];
 function collDone(kind, ri){
   return kind==="pet" ? PETS.filter(p=>p.r===ri && !p.event).every(p=>S.pets[p.id])
                       : SKILLS.filter(x=>x.r===ri).every(x=>S.skl && S.skl.owned[x.id]);
 }
 function collBonus(){ const b={atk:0,hp:0}; COLL_P.forEach((c,i)=>{ if(collDone("pet",i)){ b.atk+=c.atk||0; b.hp+=c.hp||0; } }); return b; }
-const sklCollMult = () => 1 + 0.1*[0,1,2,3,4].filter(i=>collDone("skl",i)).length;   // +10 % d'effet des compétences par rareté complète
+const sklCollMult = () => 1 + 0.1*[0,1,2,3,4,5].filter(i=>collDone("skl",i)).length;   // +10 % d'effet des compétences par rareté complète
 const collTxt = c => [c.atk&&`+${c.atk} % ATK`, c.hp&&`+${c.hp} % PV`].filter(Boolean).join(" ");
 
 let C = null;
@@ -1617,7 +1668,7 @@ function makeItem(ilvl, ri, slot, forceSet){
   if(set) it.set = set;
   for(const k in sd.base) it[k] = sd.base[k]*sc;
   if(slot==="talisman") it.crit = (1+ri)*(0.8+Math.random()*0.4);
-  if(ri>=2){
+  if(ri>=3){
     const af = pick(["crit","vol","or"]);
     it[af] = (it[af]||0) + ({crit:1.5,vol:1,or:6}[af])*ri;
   }
@@ -1641,7 +1692,7 @@ function itemStats(it){
 const sellValue = it => goldFor(it.ilvl)*3*(1+it.ri*it.ri);
 function rollCraftRarity(){
   let r=Math.random()*100, acc=0;
-  for(let i=0;i<5;i++){ acc+=CRAFT_RATES[i]; if(r<acc) return i; }
+  for(let i=0;i<6;i++){ acc+=CRAFT_RATES[i]; if(r<acc) return i; }
   return 0;
 }
 /* Coûts — le niveau de fabrication est celui de votre étape max (la zone) */
@@ -1655,7 +1706,7 @@ function canAfford(scr, mat, mn){ return S.scraps>=scr && (!mat || S.mats[mat]>=
 /* Renforcement : uniquement des scraps */
 const upMat = lv => 0;   // les matériaux ont été retirés du jeu
 /* Forge d'équipement : un objet au hasard parmi les 6, rareté selon le niveau de forge (même tableau que les invocations) */
-const FORGE_NEED = lv => 20 + 30*(lv-1);
+const FORGE_NEED = lv => 12 + 18*(lv-1);
 function forgeLevel(n){
   let lv=1, left = n ?? (S.stats.craft||0);
   while(lv<SUM_MAX && left>=FORGE_NEED(lv)){ left-=FORGE_NEED(lv); lv++; }
@@ -1683,7 +1734,7 @@ function forgeItems(n){
       dism++;
     }
     out.push({it, placed});
-    if(it.ri>=3) log(`🌟 Forge <b style="color:${RAR[it.ri].c}">${RAR[it.ri].n}</b> : ${it.name} !`, "boss");
+    if(it.ri>=4) log(`🌟 Forge <b style="color:${RAR[it.ri].c}">${RAR[it.ri].n}</b> : ${it.name} !`, "boss");
   }
   S.scraps+=back;
   return {out, dism, back};
@@ -1739,7 +1790,7 @@ function craft(slot){
   S.scraps-=sc; S.mats[mat]-=mn;
   const it = makeItem(1, rollCraftRarity(), slot);   // un objet fabriqué sort toujours niveau 1
   const placed = placeItem(it); track("craft"); Sfx.play("craft");
-  if(it.ri>=3) log(`🌟 Fabrication <b style="color:${RAR[it.ri].c}">${RAR[it.ri].n}</b> : ${it.name} !`, "boss");
+  if(it.ri>=4) log(`🌟 Fabrication <b style="color:${RAR[it.ri].c}">${RAR[it.ri].n}</b> : ${it.name} !`, "boss");
   showReveal([{ic:SLOTS[slot].ic, n:it.name, ri:it.ri, tag: placed==="equip" ? "Équipé !" : "Niv. "+it.ilvl}]);
 }
 /* Équipe automatiquement si meilleur (option), sinon range dans l'inventaire */
@@ -1749,13 +1800,13 @@ function placeItem(it){
 }
 function fusionGroups(){
   const g={};
-  for(const it of S.inv){ if(it.ri>=4) continue; const k=it.slot+"|"+it.ri; (g[k]=g[k]||[]).push(it); }
+  for(const it of S.inv){ if(it.ri>=5) continue; const k=it.slot+"|"+it.ri; (g[k]=g[k]||[]).push(it); }
   return Object.entries(g).filter(([k,v])=>v.length>=3).map(([k,v])=>({slot:v[0].slot, ri:v[0].ri, items:v}));
 }
 function fuse(slot, ri){
   lastPull = 0;
   const pool = S.inv.filter(it=>it.slot===slot && it.ri===ri).sort((a,b)=>b.ilvl-a.ilvl).slice(0,3);
-  if(pool.length<3 || ri>=4) return;
+  if(pool.length<3 || ri>=5) return;
   const ids = new Set(pool.map(x=>x.id));
   S.inv = S.inv.filter(x=>!ids.has(x.id));
   const sets = pool.map(x=>x.set).filter(Boolean), fset = sets.length ? sets.sort((a,b)=>sets.filter(v=>v===b).length-sets.filter(v=>v===a).length)[0] : undefined;
@@ -1818,10 +1869,11 @@ function addPet(p){
   return {p, kind:"copy", have:o.copies, need};
 }
 function summonOne(minR){
-  let ri;
-  if(S.pity>=pityMax(false)-1) ri = Math.random()<0.83 ? 3 : 4;   // garantie Légendaire+ (10 la toute première fois)
+  let ri; const lv=Math.min(SUM_MAX, sumLevel().lv+al("faveur"));
+  if(S.favPet){ S.favPet=0; ri = rarOpen(lv,5) && Math.random()<0.17 ? 5 : 4; }               // faveur achetée : Légendaire ou mieux, toujours
+  else if(rarOpen(lv,4) && S.pity>=pityMax(false)-1) ri = rarOpen(lv,5) && Math.random()<0.1 ? 5 : 4;   // garantie gratuite, après le déblocage des Légendaires
   else { ri = rollPetRarity(); if(ri<minR) ri = minR; }
-  if(ri>=3){ S.pity = 0; S.firstLeg = true; } else S.pity++;
+  if(ri>=4){ S.pity = 0; S.firstLeg = true; } else if(rarOpen(lv,4)) S.pity++;
   S.pulls++;
   return addPet(pick(PETS.filter(p=>p.r===ri && (!p.event || (p.id==="spectre" && hasP(7))))));
 }
@@ -1833,11 +1885,11 @@ function summon(n){
   const lv0 = sumLevel().lv;
   const res = [];
   for(let i=0;i<n;i++){
-    const guarantee = n>=10 && i%10===9 && res.slice(i-9).every(r=>r.p.r===0);   // chaque série de 10 : au moins un Rare
-    res.push(summonOne(guarantee?1:0));
+    const guarantee = n>=10 && i%10===9 && res.slice(i-9).every(r=>r.p.r<2);   // chaque série de 10 : au moins un Rare
+    res.push(summonOne(guarantee?2:0));
   }
   track("summon", n);
-  res.filter(r=>r.p.r>=3).forEach(r=>log(`🌟 Invocation <b style="color:${RAR[r.p.r].c}">${RAR[r.p.r].n}</b> : ${r.p.ic} <b>${r.p.n}</b> !`,"boss"));
+  res.filter(r=>r.p.r>=4).forEach(r=>log(`🌟 Invocation <b style="color:${RAR[r.p.r].c}">${RAR[r.p.r].n}</b> : ${r.p.ic} <b>${r.p.n}</b> !`,"boss"));
   calc(); dirty.fams = dirty.stats = true;
   const lv1 = sumLevel().lv;
   RV.lvUp = lv1>lv0 ? lv1 : 0; RV.lvName = "Niveau d'invocation";
@@ -2139,7 +2191,7 @@ function renderFams(){
   const L=sumLevel(), pct=L.need?L.cur/L.need*100:100;
   $("#tab-fams").innerHTML = sumBand({cid:"crys2", val:S.orbs, lvT:`Invocation niv. ${L.lv}`, lvR:L.need?`${L.cur} / ${L.need}`:"Max", pct,
       btns:`<button class="btn gold" id="pull1">×1<small>🔮 ${PULL_COST}</small></button><button class="btn gold" id="pull10">×10<small>🔮 ${PULL10_COST} · Rare</small></button><button class="btn violet" id="pull100">×100<small>🔮 ${PULL100_COST}</small></button>`,
-      ft:`Légendaire garanti dans ${pityMax(false)-S.pity} · <button class="linkbtn" id="rates">Taux</button> · <button class="linkbtn" id="btnShop2">Gagner des orbes</button>`})
+      ft:`${sumNextTxt(L.lv, S.pity, false)} · <button class="linkbtn" id="rates">Taux</button> · <button class="linkbtn" id="btnShop2">Gagner des orbes</button>`})
     + `<div class="card teamcard"><div class="chead"><h2>Équipe<small>${Math.round(C.famPct)} % de vos dégâts · 🍖 ${S.treats}</small></h2><button class="btn blue sm" id="autoTeam">✨ Les plus forts</button></div>
         <div class="teamrow" style="grid-template-columns:repeat(${tm},1fr)">${slots}</div></div>
       <div class="card grow"><div class="chead"><h2>Collection<small>${owned}/${PETS.length}</small></h2><button class="linkbtn" id="collInfo">Bonus de collection</button></div>
@@ -2183,35 +2235,54 @@ window.addEventListener("blur", ()=>{ ptrDown = false; });
 
 /* ---------- Pages horizontales (remplacent le défilement vertical) ---------- */
 const PGI = {};
+function pgCollapse(pager){
+  const track=pager.querySelector(":scope>.pgtrack"); if(!track) { pager.classList.remove("pgok"); return; }
+  const first=track.querySelector(".pgpage>*"); const src=first.cloneNode(false); src.classList.add("pgsrc");
+  track.querySelectorAll(".pgpage>*").forEach(inner=>{ while(inner.firstChild) src.appendChild(inner.firstChild); });
+  track.replaceWith(src); const d=pager.querySelector(":scope>.pgdots"); if(d) d.remove(); pager.classList.remove("pgok");
+}
 function pgBuild(pager){
   const src=pager.querySelector(":scope>.pgsrc"); if(!src){ pager.classList.add("pgok"); return; }
   const H=pager.clientHeight, W=pager.clientWidth; if(H<20 || W<20) return;   // vue cachée : on recommence plus tard
   pager.classList.add("pgok");
   if(src.scrollHeight <= H+1) return;                                       // tout tient : rien à faire
-  const key=pager.dataset.pg||"x", items=[...src.children], HP=H-18;
-  const cs=getComputedStyle(src), chunks=[];
-  if(cs.display==="grid"){
-    const cols=cs.gridTemplateColumns.split(" ").filter(Boolean).length||1, gap=parseFloat(cs.rowGap)||0;
-    let ih=0; items.forEach(e=>ih=Math.max(ih,e.offsetHeight));
-    const rows=Math.max(1, Math.floor((HP+gap)/(ih+gap))), per=rows*cols;
-    for(let i=0;i<items.length;i+=per) chunks.push(items.slice(i,i+per));
-  } else {
-    let cur=[], h=0;
-    for(const e of items){ const m=parseFloat(getComputedStyle(e).marginBottom)||0, eh=e.offsetHeight+m;
-      if(cur.length && h+eh>HP+m){ chunks.push(cur); cur=[]; h=0; } cur.push(e); h+=eh; }
-    if(cur.length) chunks.push(cur);
+  const key=pager.dataset.pg||"x", items=[...src.children];
+  const cs=getComputedStyle(src), isGrid=cs.display==="grid";
+  const cols=isGrid ? (cs.gridTemplateColumns.split(" ").filter(Boolean).length||1) : 1, gap=isGrid ? (parseFloat(cs.rowGap)||0) : 0;
+  const heights=items.map(e=>e.offsetHeight + (isGrid ? 0 : (parseFloat(getComputedStyle(e).marginBottom)||0)));
+  let HP=H-20, rowsCap=Infinity, track=null, dots=null;
+  for(let attempt=0; attempt<6; attempt++){
+    const chunks=[];
+    if(isGrid){
+      const ih=Math.max(...heights);
+      const rows=Math.max(1, Math.min(rowsCap, Math.floor((HP+gap)/(ih+gap)))), per=rows*cols; rowsCap=rows;
+      for(let i=0;i<items.length;i+=per) chunks.push(items.slice(i,i+per));
+    } else {
+      let cur=[], h=0;
+      items.forEach((e,k)=>{ const eh=heights[k]; if(cur.length && h+eh>HP){ chunks.push(cur); cur=[]; h=0; } cur.push(e); h+=eh; });
+      if(cur.length) chunks.push(cur);
+    }
+    track=document.createElement("div"); track.className="pgtrack";
+    for(const ch of chunks){ const pgd=document.createElement("div"); pgd.className="pgpage"; const inner=src.cloneNode(false); inner.classList.remove("pgsrc"); ch.forEach(e=>inner.appendChild(e)); pgd.appendChild(inner); track.appendChild(pgd); }
+    if(src.isConnected) src.replaceWith(track); else pager.querySelector(":scope>.pgtrack").replaceWith(track);
+    if(!dots){ dots=document.createElement("div"); dots.className="pgdots"; pager.appendChild(dots); }
+    // vérification : aucune page ne doit déborder (polices chargées tard, textes plus longs…)
+    const over=[...track.children].some(p=>p.firstElementChild.scrollHeight > p.clientHeight+1);
+    if(!over || (isGrid && rowsCap<=1)) break;
+    if(isGrid) rowsCap--; else HP*=0.9;
   }
-  if(chunks.length<2) return;
-  const track=document.createElement("div"); track.className="pgtrack";
-  for(const ch of chunks){ const pgd=document.createElement("div"); pgd.className="pgpage"; const inner=src.cloneNode(false); ch.forEach(e=>inner.appendChild(e)); pgd.appendChild(inner); track.appendChild(pgd); }
-  const dots=document.createElement("div"); dots.className="pgdots";
-  chunks.forEach((_,i)=>{ const d=document.createElement("span"); d.addEventListener("click", ev=>{ ev.stopPropagation(); track.scrollTo({left:i*track.clientWidth, behavior:"smooth"}); }); dots.appendChild(d); });
-  src.replaceWith(track); pager.appendChild(dots);
-  const idx=Math.min(PGI[key]||0, chunks.length-1);
+  const n=track.children.length;
+  if(n<2){ dots.remove(); return; }
+  dots.innerHTML="";
+  for(let i=0;i<n;i++){ const d=document.createElement("span"); d.addEventListener("click", ev=>{ ev.stopPropagation(); track.scrollTo({left:i*track.clientWidth, behavior:"smooth"}); }); dots.appendChild(d); }
+  const idx=Math.min(PGI[key]||0, n-1);
   const mark=i=>[...dots.children].forEach((d,j)=>d.classList.toggle("on", j===i));
   track.scrollLeft = idx*track.clientWidth; mark(idx);
   track.addEventListener("scroll", ()=>{ const i=Math.round(track.scrollLeft/Math.max(1,track.clientWidth)); if(PGI[key]!==i){ PGI[key]=i; mark(i); } }, {passive:true});
 }
+function pgRefreshAll(){ document.querySelectorAll(".pager.pgok").forEach(pgCollapse); pgSchedule(); }
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(pgRefreshAll);
+
 function applyPagers(){
   document.querySelectorAll("[data-autopg]").forEach(box=>{
     if(box.firstElementChild && box.firstElementChild.classList.contains("pager")) return;
@@ -2225,7 +2296,7 @@ function applyPagers(){
 let pgQueued=false;
 function pgSchedule(){ if(pgQueued) return; pgQueued=true; requestAnimationFrame(()=>{ pgQueued=false; applyPagers(); }); }
 new MutationObserver(pgSchedule).observe(document.getElementById("main"), {childList:true, subtree:true});
-window.addEventListener("resize", ()=>{ document.querySelectorAll(".pager.pgok").forEach(p=>{ if(!p.querySelector(".pgtrack")) p.classList.remove("pgok"); }); pgSchedule(); });
+window.addEventListener("resize", ()=>{ clearTimeout(window.__pgR); window.__pgR=setTimeout(pgRefreshAll, 150); });
 function setH(el, html){ if(el && el.dataset.h!==html){ el.dataset.h=html; el.innerHTML=html; } }
 function updateAtelier(){
   if(view!=="loot") return;
@@ -2395,8 +2466,8 @@ function renderOpts(){
     ${tg("autoEquip","Équiper automatiquement","Porte un objet forgé s'il est meilleur.")}
     ${hasP(2)?tg("autoForge","Forge automatique","Forge un objet toutes les 15 s (palier de Renaissance 2).") : ""}
     ${tg("vibe","Vibrations","Retour au toucher sur mobile.")}
-    ${tg("showRaids","Animation des assauts","Montre le combat quand vous défendez votre fief.")}
-    ${tg("music","Musique","Thème médiéval original, composé pour le jeu.")}
+    ${tg("showRaids","Animation des assauts","Montre le combat quand vous défendez votre fief.")}</div>
+    <div class="card">${tg("music","Musique","Thème médiéval original, composé pour le jeu.")}
     ${tg("sfx","Bruitages","Coups, butin, invocations…")}
     ${tg("notif","Notifications","Rappels quand le butin ou la récompense du jour vous attend (application).")}
     <div class="opt"><div><b>Volume</b><div class="small">De la musique.</div></div><input type="range" id="volRange" min="0" max="1" step="0.05" value="${S.opts.vol ?? 0.6}" style="width:130px;accent-color:#3557d6"></div></div>
@@ -2646,9 +2717,9 @@ function rvFrame(now){
   const dt=Math.min(50, now-(RV.last||now)); RV.last=now; const t=now-RV.t0;
   if(RV.phase==="charge" || RV.phase==="implode"){
     for(const st of RV.steps) if(!st.done && t>=st.t){
-      st.done=true; rvSetC(rvCol(st.r)); rvShock(st.r>=3?3:2.2);
+      st.done=true; rvSetC(rvCol(st.r)); rvShock(st.r>=4?3:2.2);
       rvBurst(RV.cx, RV.cy, 14+st.r*6, [rvCol(st.r),"#fff"], 4);
-      if(st.r>=2) Sfx.play("up"); vibe(st.r>=3?30:12);
+      if(st.r>=3) Sfx.play("up"); vibe(st.r>=4?30:12);
     }
     RV.acc += dt*(0.03+Math.min(1,t/RV.burstAt)*0.09); const n=Math.floor(RV.acc); if(n){ RV.acc-=n; if(RV.phase==="charge") rvIn(n); }
     if(RV.phase==="charge" && t>=RV.burstAt-300){ RV.phase="implode"; $("#orb").className="orb implode"; }
@@ -2667,13 +2738,13 @@ function rvExplode(fast){
   $("#orb").className="orb";
   $("#sCircle").classList.add("blast");
   const fl=$("#sFlash"); fl.classList.remove("go"); void fl.offsetWidth; fl.classList.add("go");
-  if(MOTION){ rvShock(5); rvShock(7, 120); if(best>=3) rvShock(9, 240); }
+  if(MOTION){ rvShock(5); rvShock(7, 120); if(best>=4) rvShock(9, 240); }
   $("#sRays").className = "on" + (best>=2 ? " hi" : "");
   RV.parts = RV.parts.filter(p=>p.k!=="i");
-  rvBurst(RV.cx, RV.cy, 70+best*30, [col, col, "#ffffff", best>=3?"#ffe27a":col], 9, 2.6);
-  if(best>=3 && MOTION){ const sg=$("#sStage"); sg.classList.remove("shake"); void sg.offsetWidth; sg.classList.add("shake"); }
-  Sfx.play(best>=3?"legend":"reveal");
-  vibe(best>=3 ? [40,60,40,60,160] : 25);
+  rvBurst(RV.cx, RV.cy, 70+best*30, [col, col, "#ffffff", best>=4?"#ffe27a":col], 9, 2.6);
+  if(best>=4 && MOTION){ const sg=$("#sStage"); sg.classList.remove("shake"); void sg.offsetWidth; sg.classList.add("shake"); }
+  Sfx.play(best>=4?"legend":"reveal");
+  vibe(best>=4 ? [40,60,40,60,160] : 25);
   $("#sSkip").hidden=true;
   rvCards(fast);
 }
@@ -2684,10 +2755,10 @@ function rvCards(fast){
   cards.innerHTML = list.map((r,i)=>`<div class="pcard r${r.ri}" style="--c:${RAR[r.ri].c};--d:${fast?0:(0.12+i*0.11).toFixed(2)}s"><div class="pi">${r.ic}</div><div class="pn">${r.n}</div><div class="pr">${r.rn||RAR[r.ri].n}</div><div class="tag">${r.tag}</div></div>`).join("");
   if(!fast){
     // éclat de lumière au moment où une carte rare se retourne
-    list.forEach((r,i)=>{ if(r.ri<2) return; rvLater(()=>{
+    list.forEach((r,i)=>{ if(r.ri<3) return; rvLater(()=>{
       const el=cards.children[i]; if(!el) return; const b=el.getBoundingClientRect();
-      rvBurst(b.left+b.width/2, b.top+b.height/2, r.ri>=3?34:16, [RAR[r.ri].c,"#fff"], r.ri>=3?6:4, 2);
-      if(r.ri>=3) Sfx.play("success");
+      rvBurst(b.left+b.width/2, b.top+b.height/2, r.ri>=4?34:16, [RAR[r.ri].c,"#fff"], r.ri>=4?6:4, 2);
+      if(r.ri>=4) Sfx.play("success");
     }, (0.12+i*0.11+0.6)*1000); });
     rvLater(rvReady, (0.12+(list.length-1)*0.11+0.95)*1000);
   } else rvLater(rvReady, 250);
@@ -2766,9 +2837,9 @@ function rebirth(){
   const openPicker = ()=>classPicker(played, unlocked && unlocked.id);
   if(st>=10) log(`⏩ Départ avancé : vous reprenez à l'étape ${S.stage}.`, "good");
   if(mile) log(`🏅 Palier de Renaissance ${mile.p} : ${mile.t} !`, "boss");
-  const cards = [{ic:"🎁", n:"Coffre de Renaissance", ri:3, rn:"Récompense", tag:`+${chest.crystals} 💎 · +${chest.orbs} 🔮 · +${fmt(chest.scraps)} 🔩`}];
-  if(mile) cards.push({ic:mile.ic, n:"Palier "+mile.p, ri:4, rn:"Débloqué", tag:mile.t});
-  if(unlocked) cards.push({ic:unlocked.ic, n:unlocked.n, ri:3, rn:"Classe", tag:"Nouvelle classe !"});
+  const cards = [{ic:"🎁", n:"Coffre de Renaissance", ri:4, rn:"Récompense", tag:`+${chest.crystals} 💎 · +${chest.orbs} 🔮 · +${fmt(chest.scraps)} 🔩`}];
+  if(mile) cards.push({ic:mile.ic, n:"Palier "+mile.p, ri:5, rn:"Débloqué", tag:mile.t});
+  if(unlocked) cards.push({ic:unlocked.ic, n:unlocked.n, ri:4, rn:"Classe", tag:"Nouvelle classe !"});
   if(unlocked) log(`🎭 Nouvelle classe : ${unlocked.ic} <b>${unlocked.n}</b> !`, "boss");
   lastPull = 0; revealCb = openPicker; showReveal(cards);
 }
@@ -2805,7 +2876,7 @@ function PETS_RATES_HTML(){
     <table class="rtab"><tr><th></th><th>Maintenant</th>${nx?`<th>Niv. ${L.lv+1}</th>`:""}<th>Niv. ${SUM_MAX}</th></tr>
     ${RAR.map((r,i)=>`<tr><td style="color:${r.c}">${r.n}</td><td><b>${cell(now[i])}</b></td>${nx?`<td>${cell(nx[i])}</td>`:""}<td>${cell(mx[i])}</td></tr>`).join("")}</table>` +
   RAR.map((r,i)=>`<div style="margin:7px 0"><b style="color:${r.c};font-family:var(--disp);font-weight:400;font-size:15px">${r.n}</b><br><span class="small">${PETS.filter(p=>p.r===i && !p.event).map(p=>p.ic+" "+p.n).join(", ")}</span></div>`).join("") +
-  `<div class="small" style="margin-top:10px">Légendaire garanti au plus tard à la ${PITY}<sup>e</sup> invocation. Un ×10 contient au moins un Rare. Un doublon fait gagner des étoiles (+50 % de puissance chacune, 5★ max).</div></div>`;
+  `<div class="small" style="margin-top:10px">Au départ : Commun, Peu commun et Rare. Les Épiques arrivent au niveau ${RAR_UNLOCK[3]}, les Légendaires au niveau ${RAR_UNLOCK[4]}, les Mythiques au niveau ${RAR_UNLOCK[5]} (très rares). Une fois les Légendaires débloqués, un Légendaire est garanti au plus tard à la ${PITY}<sup>e</sup> invocation. Un ×10 contient au moins un Rare. Un doublon fait gagner des étoiles (+50 % de puissance chacune, 5★ max).</div></div>`;
 }
 function modal(title, body, acts){
   sheet = null;
@@ -3117,7 +3188,7 @@ function renderCity(){
     <div class="card"><h2>👥 Habitants et armée</h2>
       <div class="cstats"><div><span>👥</span><b>${pop}</b><small>Population</small></div><div><span>🏹</span><b>${Math.floor(c.soldiers)}/${pop}</b><small>Soldats</small></div><div><span>⚔️</span><b>${fmt(mil)}</b><small>Puissance</small></div></div></div>
     <div class="card"><h2>📦 Ressources</h2><div class="reschips" id="cityRes"></div><div class="small">Produites en continu, même jeu fermé. Améliorez la mine, la scierie et la carrière pour en produire plus.</div></div>
-    <div class="card"><h2>🏗️ Bâtiments</h2>${blds}</div>
+    <h2 class="mgrp" style="margin-top:4px">🏗️ Bâtiments</h2>${blds}
   </div></div>`;
   renderCityRes();
 }
@@ -3168,13 +3239,13 @@ const MAIL = [
 ];
 /* Calendrier de 7 jours : la progression ne repart pas à zéro si vous manquez un jour */
 const DAILY = [
-  {ic:"💎", n:"20 cristaux",      r:{crystals:20},  ri:1},
-  {ic:"🪙", n:"Bourse d'or",      r:{gold:60},      ri:1},
-  {ic:"🔩", n:"Scraps",           r:{scraps:40},    ri:1},
-  {ic:"🔮", n:"3 orbes",          r:{orbs:3},       ri:2},
-  {ic:"🔩", n:"Scraps",           r:{mats:8},       ri:2},
-  {ic:"🏰", n:"Coffre du fief",   r:{city:250, gold:40}, ri:2},
-  {ic:"👑", n:"Grand coffre",     r:{crystals:50, orbs:10}, ri:4},
+  {ic:"💎", n:"20 cristaux",      r:{crystals:20},  ri:2},
+  {ic:"🪙", n:"Bourse d'or",      r:{gold:60},      ri:2},
+  {ic:"🔩", n:"Scraps",           r:{scraps:40},    ri:2},
+  {ic:"🔮", n:"3 orbes",          r:{orbs:3},       ri:3},
+  {ic:"🔩", n:"Scraps",           r:{mats:8},       ri:3},
+  {ic:"🏰", n:"Coffre du fief",   r:{city:250, gold:40}, ri:3},
+  {ic:"👑", n:"Grand coffre",     r:{crystals:50, orbs:10}, ri:5},
 ];
 const today = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 const dailyReady = () => S.daily.last !== today();
@@ -3515,7 +3586,7 @@ async function adForGems(){
   const ok = await Monet.showRewarded("gems"); if(!ok) return;
   S.ads.gems++; S.crystals+=AD_GEMS; save();
   log(`📺 Merci ! +${AD_GEMS} 💎`, "good");
-  showReveal([{ic:"💎", n:AD_GEMS+" cristaux", ri:2, rn:"Récompense", tag:`Pub ${S.ads.gems}/${AD_LIMITS.gems} aujourd'hui`}]);
+  showReveal([{ic:"💎", n:AD_GEMS+" cristaux", ri:3, rn:"Récompense", tag:`Pub ${S.ads.gems}/${AD_LIMITS.gems} aujourd'hui`}]);
   revealCb = ()=>{ if(view!=="shop") showView("shop"); else renderShop(); };
 }
 async function adForBoost(){
@@ -3575,14 +3646,14 @@ function bpMini(r){
 }
 function bpGive(r){
   if(r.skin) S.skins.owned[r.skin]=1;
-  if(r.fav==="pet") S.pity=Math.max(S.pity, pityMax(false)-1);
-  if(r.fav==="skl") S.skl.pity=Math.max(S.skl.pity, pityMax(true)-1);
+  if(r.fav==="pet") S.favPet=1;
+  if(r.fav==="skl") S.favSkl=1;
   const g={}; for(const k of ["crystals","orbs","treats","gold","scraps"]) if(r[k]) g[k]=r[k]; grant(g);
 }
 function bpClaim(key){
   bpCheck(); const [tr,is]=key.split(":"), i=+is; if(!bpReady(tr,i)) return;
   const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); Sfx.play(r.skin||r.fav?"legend":"success"); vibe(12);
-  if(r.skin){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===r.skin).n, ri:4, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
+  if(r.skin){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===r.skin).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
   else toast(`⚔️ Palier ${i} : ${bpMini(r).replace(/<br>/g," · ").replace(/<span.*?<\/span>/g,"")}`);
   save(); renderShop();
 }
@@ -3590,7 +3661,7 @@ function bpClaimAll(){
   bpCheck(); let n=0, sk=null;
   for(let i=1;i<=bpLevel();i++) for(const tr of ["f","c","r"]) if(bpReady(tr,i)){ const r=bpReward(tr,i); S.bp.cl[tr][i]=1; bpGive(r); n++; if(r.skin) sk=r.skin; }
   if(!n) return; Sfx.play("legend"); toast(`⚔️ ${n} récompense${n>1?"s":""} du passe récupérée${n>1?"s":""} !`);
-  if(sk){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===sk).n, ri:4, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
+  if(sk){ lastPull=0; showReveal([{ic:"🛡️", n:SKINS.find(x=>x.id===sk).n, ri:5, rn:"Passe de combat", tag:"Équipez-la dans Boutique, Marché, Apparences"}]); revealCb=()=>renderShop(); }
   save(); renderShop();
 }
 function bpHTML(){
@@ -3629,8 +3700,8 @@ const SKINS = [
 const PREMIUM = [
   {id:"bgold",  ic:"🪙", n:"Or ×2 pendant 24 h",       d:()=>boostOn("gold") ? `Actif encore ${fmtLeft(S.boosts.gold-Date.now())}` : "Double tout l'or gagné", cost:60, max:3, give:()=>{ S.boosts.gold=Math.max(Date.now(),S.boosts.gold)+864e5; calc(); }},
   {id:"bscrap", ic:"🔩", n:"Scraps ×2 pendant 24 h",   d:()=>boostOn("scraps") ? `Actif encore ${fmtLeft(S.boosts.scraps-Date.now())}` : "Double tous les scraps gagnés", cost:60, max:3, give:()=>{ S.boosts.scraps=Math.max(Date.now(),S.boosts.scraps)+864e5; calc(); }},
-  {id:"lpet",   ic:"🐾", n:"Faveur légendaire",        d:()=>"Votre prochaine invocation de familier sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("fams"), give:()=>{ S.pity=Math.max(S.pity, pityMax(false)-1); }},
-  {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.skl.pity=Math.max(S.skl.pity, pityMax(true)-1); }},
+  {id:"lpet",   ic:"🐾", n:"Faveur légendaire",        d:()=>"Votre prochaine invocation de familier sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("fams"), give:()=>{ S.favPet=1; }, once:()=>!!S.favPet},
+  {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.favSkl=1; }, once:()=>!!S.favSkl},
   {id:"slot",   ic:"➕", n:"Place de familier en plus", d:()=>S.extraSlot ? "Déjà achetée" : "Une place de plus dans l'équipe, pour toujours", cost:500, max:1, ok:()=>unlocked("fams"), once:()=>S.extraSlot>0, give:()=>{ S.extraSlot=1; calc(); dirty.fams=true; }},
   {id:"cls",    ic:"🎭", n:"Changer de classe",         d:()=>"Choisissez une autre classe déjà débloquée, sans attendre la Renaissance", cost:100, max:3, ok:()=>Object.keys(S.classes||{}).length>1, give:()=>{ setTimeout(()=>classPicker(null,null), 200); }},
 ];
@@ -3934,10 +4005,11 @@ const GUIDES = {
     ["⚔️","Vos 3 meilleurs familiers forment votre équipe : vous les voyez combattre à côté de votre chevalier, même quand vous ne jouez pas."],
     ["🍖","Nourrissez-les avec des friandises (lâchées par les monstres et les boss) : chaque niveau donne +10 % de dégâts. Touchez un familier pour le nourrir."],
     ["🌟","Obtenir un familier en double lui fait gagner des étoiles : +50 % de puissance par étoile, jusqu'à 5."],
-    ["🔮","Chaque invocation fait monter votre niveau d'invocation. Plus il est haut, plus les Épiques, Légendaires et Mythiques sortent souvent. Un Légendaire est garanti au plus tard à la "+PITY+"e invocation."]]},
+    ["🔮","Chaque invocation fait monter votre niveau d'invocation. Au départ, vous n'obtenez que des Communs (gris), des Peu communs (verts) et des Rares (bleus)."],
+    ["⭐","Les Épiques (violets) se débloquent au niveau d'invocation "+RAR_UNLOCK[3]+", les Légendaires (orange) au niveau "+RAR_UNLOCK[4]+" et les Mythiques (rouges) au niveau "+RAR_UNLOCK[5]+", avec un taux très bas. Une fois les Légendaires débloqués, un Légendaire est garanti au plus tard à la "+PITY+"e invocation."]]},
   loot:  {ic:"🔨", t:"L'Atelier est ouvert", s:"L'Atelier", go:"loot", go_t:"Fabriquer", l:[
     ["🔩","Les monstres laissent des scraps. À la Forge d'équipement, dépensez-les pour obtenir un objet au hasard parmi les 6 (arme, casque, armure, bottes, bouclier, talisman), en ×1, ×10 ou ×100."],
-    ["🔨","Chaque objet forgé fait monter votre niveau de forge : plus il est haut, plus les Épiques, Légendaires et Mythiques sortent souvent."],
+    ["🔨","Chaque objet forgé fait monter votre niveau de forge. Comme pour les invocations : Communs, Peu communs et Rares au départ, Épiques au niveau "+RAR_UNLOCK[3]+", Légendaires au niveau "+RAR_UNLOCK[4]+", Mythiques au niveau "+RAR_UNLOCK[5]+"."],
     ["⬆️","Les objets sortent au niveau 1. S'ils sont meilleurs que les vôtres, ils sont équipés tout seuls. Renforcez-les avec des scraps en touchant un objet porté."],
     ["♻️","3 objets identiques de même rareté se fusionnent en un objet de la rareté au-dessus. Les autres peuvent être gardés, démontés ou vendus."],
     ["✨","Certains objets appartiennent à un ensemble (Loup, Templier, Ombres) : porter 2 ou 4 pièces du même donne un gros bonus."]]},
@@ -4360,6 +4432,12 @@ const SKILLS = [
   {id:"avatar",    r:4, n:"Avatar de guerre",  ic:"§epees§",      cd:75, t:"buff",  atk:4, spd:2, dur:12},
   {id:"execution", r:4, n:"Exécution",         ic:"§crane§",      cd:45, t:"exec",  p:0.25},
 ];
+SKILLS.forEach(x=>{ if(x.r>=1) x.r++; });   // insertion de la rareté Peu commun (vert)
+SKILLS.push(
+  {id:"bouclierc", r:1, n:"Coup de bouclier", ic:"§bouclier§", cd:18, t:"dmg",  m:9},
+  {id:"potion",    r:1, n:"Potion",           ic:"§fiole§",    cd:28, t:"heal", p:0.4},
+  {id:"hate",      r:1, n:"Hâte",             ic:"§sablier§",  cd:35, t:"buff", spd:1.6, dur:8},
+);
 const sklDef = id => SKILLS.find(x=>x.id===id);
 const sklPow = id => (1 + 0.25*(((S.skl.owned[id]||{}).stars||1)-1))*sklCollMult();   // +25 % d'effet par étoile, + bonus de collection
 const pctTxt = v => String(Math.round(v*100)/100).replace(".",",");
@@ -4441,11 +4519,13 @@ function addSkill(sk){
 }
 function sklRoll(minR){
   let ri;
-  if(S.skl.pity>=pityMax(true)-1) ri = Math.random()<0.83 ? 3 : 4;
-  else { const rates=petRates(Math.min(SUM_MAX, sumLevel(S.skl.pulls).lv+al("faveur"))), tot=rates.reduce((a,b)=>a+b,0); let r=Math.random()*tot, acc=0; ri=0;
+  const slv=Math.min(SUM_MAX, sumLevel(S.skl.pulls).lv+al("faveur"));
+  if(S.favSkl){ S.favSkl=0; ri = rarOpen(slv,5) && Math.random()<0.17 ? 5 : 4; }
+  else if(rarOpen(slv,4) && S.skl.pity>=pityMax(true)-1) ri = rarOpen(slv,5) && Math.random()<0.1 ? 5 : 4;
+  else { const rates=petRates(slv), tot=rates.reduce((a,b)=>a+b,0); let r=Math.random()*tot, acc=0; ri=0;
     for(let i=0;i<rates.length;i++){ acc+=rates[i]; if(r<acc){ ri=i; break; } }
     if(ri<minR) ri=minR; }
-  if(ri>=3){ S.skl.pity=0; S.skl.firstLeg=true; } else S.skl.pity++;
+  if(ri>=4){ S.skl.pity=0; S.skl.firstLeg=true; } else if(rarOpen(slv,4)) S.skl.pity++;
   S.skl.pulls++;
   return addSkill(pick(SKILLS.filter(x=>x.r===ri)));
 }
@@ -4453,9 +4533,9 @@ function summonSkill(n){
   const cost=pullCost(n); if(S.orbs<cost) return;
   S.orbs-=cost;
   const lv0=sumLevel(S.skl.pulls).lv, res=[];
-  for(let i=0;i<n;i++){ const g = n>=10 && i%10===9 && res.slice(i-9).every(r=>r.sk.r===0); res.push(sklRoll(g?1:0)); }
+  for(let i=0;i<n;i++){ const g = n>=10 && i%10===9 && res.slice(i-9).every(r=>r.sk.r<2); res.push(sklRoll(g?2:0)); }
   track("summon", n);
-  res.filter(r=>r.sk.r>=3).forEach(r=>log(`🌟 Compétence <b style="color:${RAR[r.sk.r].c}">${RAR[r.sk.r].n}</b> : <b>${r.sk.n}</b> !`,"boss"));
+  res.filter(r=>r.sk.r>=4).forEach(r=>log(`🌟 Compétence <b style="color:${RAR[r.sk.r].c}">${RAR[r.sk.r].n}</b> : <b>${r.sk.n}</b> !`,"boss"));
   const lv1=sumLevel(S.skl.pulls).lv;
   RV.lvUp = lv1>lv0 ? lv1 : 0; RV.lvName = "Niveau des compétences";
   if(RV.lvUp) log(`📜 Niveau d'invocation des compétences <b>${lv1}</b> ! Les compétences rares sortent plus souvent.`, "boss");
@@ -4497,7 +4577,7 @@ function SKILL_RATES_HTML(){
     <table class="rtab"><tr><th></th><th>Maintenant</th>${nx?`<th>Niv. ${L.lv+1}</th>`:""}<th>Niv. ${SUM_MAX}</th></tr>
     ${RAR.map((r,i)=>`<tr><td style="color:${r.c}">${r.n}</td><td><b>${cell(now[i])}</b></td>${nx?`<td>${cell(nx[i])}</td>`:""}<td>${cell(mx[i])}</td></tr>`).join("")}</table>` +
     RAR.map((r,i)=>`<div style="margin:7px 0"><b style="color:${r.c};font-family:var(--disp);font-weight:400;font-size:15px">${r.n}</b><br><span class="small">${SKILLS.filter(x=>x.r===i).map(x=>x.n).join(", ")}</span></div>`).join("") +
-    `<div class="small" style="margin-top:10px">Légendaire garanti au plus tard à la ${PITY}<sup>e</sup> invocation. Un ×10 contient au moins une Rare. Un doublon fait gagner des étoiles (+25 % d'effet chacune, 5★ max).</div></div>`;
+    `<div class="small" style="margin-top:10px">Au départ : Commun, Peu commun et Rare. Les Épiques arrivent au niveau ${RAR_UNLOCK[3]}, les Légendaires au niveau ${RAR_UNLOCK[4]}, les Mythiques au niveau ${RAR_UNLOCK[5]} (très rares). Une fois les Légendaires débloquées, une Légendaire est garantie au plus tard à la ${PITY}<sup>e</sup> invocation. Un ×10 contient au moins une Rare. Un doublon fait gagner des étoiles (+25 % d'effet chacune, 5★ max).</div></div>`;
 }
 function renderSkillsTab(){
   if(!unlocked("skills")) return `<div class="card" style="text-align:center"><div class="sheeticon">${spr("cadenas")}</div><h2>Compétences verrouillées</h2><div class="small">Atteignez l'étape ${UNLOCK.skills} pour débloquer les compétences et leurs invocations (record actuel : ${S.best}).</div></div>`;
@@ -4510,7 +4590,7 @@ function renderSkillsTab(){
              : `<button class="tile unk" data-shskl="${sk.id}"><span class="ti">${spr("question")}</span></button>`; };
   return sumBand({cid:"crys3", val:S.orbs, lvT:`${spr("parchemin")} Compétences niv. ${L.lv}`, lvR:L.need?`${L.cur} / ${L.need}`:"Max", pct,
       btns:`<button class="btn gold" id="spull1">×1<small>🔮 ${PULL_COST}</small></button><button class="btn gold" id="spull10">×10<small>🔮 ${PULL10_COST} · Rare</small></button><button class="btn violet" id="spull100">×100<small>🔮 ${PULL100_COST}</small></button>`,
-      ft:`Légendaire garantie dans ${pityMax(true)-S.skl.pity} · <button class="linkbtn" id="sklRates">Taux</button> · <button class="linkbtn" id="btnShop2">Gagner des orbes</button>`})
+      ft:`${sumNextTxt(L.lv, S.skl.pity, true)} · <button class="linkbtn" id="sklRates">Taux</button> · <button class="linkbtn" id="btnShop2">Gagner des orbes</button>`})
     + `<div class="card teamcard"><div class="chead"><h2>Équipées<small>sous le combat</small></h2><button class="btn blue sm" id="sklAuto">✨ Les plus fortes</button></div>
         <div class="teamrow" style="grid-template-columns:repeat(${sm},1fr)">${slots}</div></div>
       <div class="card grow"><div class="chead"><h2>Collection<small>${owned}/${SKILLS.length}</small></h2><button class="linkbtn" id="collInfoS">Bonus de collection</button></div>
@@ -4561,7 +4641,7 @@ function wqBody(){
     ${S.wq.bonus?`<span class="badge bup">Fait</span>`:`<button class="btn violet sm" data-act="wqbonus" ${all?"":"disabled"}>Ouvrir</button>`}</div>`;
 }
 function claimWQ(i){ const q=S.wq.list[i]; if(!q || q.claimed || q.prog<q.goal) return; q.claimed=true; grant(WQ_REWARD); bpXP(120); Sfx.play("success"); toast(`${spr("coche")} Quête de la semaine : ${rewardTxt(WQ_REWARD)}`); save(); }
-function claimWQBonus(){ if(S.wq.bonus || !S.wq.list.every(q=>q.claimed)) return; S.wq.bonus=true; grant(WQ_BONUS); bpXP(200); Sfx.play("legend"); lastPull=0; showReveal([{ic:"🎁", n:"Coffre de la semaine", ri:4, rn:"Quêtes de la semaine", tag:rewardTxt(WQ_BONUS)}]); save(); }
+function claimWQBonus(){ if(S.wq.bonus || !S.wq.list.every(q=>q.claimed)) return; S.wq.bonus=true; grant(WQ_BONUS); bpXP(200); Sfx.play("legend"); lastPull=0; showReveal([{ic:"🎁", n:"Coffre de la semaine", ri:5, rn:"Quêtes de la semaine", tag:rewardTxt(WQ_BONUS)}]); save(); }
 function claimQuest(i){
   const q=S.quests.list[i]; if(!q || q.claimed || q.prog<q.goal) return;
   q.claimed=true; const r=questReward(q); grant(r); bpXP(40); Sfx.play("success");
@@ -4570,7 +4650,7 @@ function claimQuest(i){
 function claimQuestBonus(){
   if(S.quests.bonus || !S.quests.list.every(q=>q.claimed)) return;
   S.quests.bonus=true; const r={crystals:20, orbs:3, mats:5}; grant(r); bpXP(60); Sfx.play("legend");
-  showReveal([{ic:"🎁", n:"Coffre des quêtes", ri:3, rn:"Bonus du jour", tag:rewardTxt(r)}]);
+  showReveal([{ic:"🎁", n:"Coffre des quêtes", ri:4, rn:"Bonus du jour", tag:rewardTxt(r)}]);
 }
 function questsBody(){
   const list=S.quests.list.map((q,i)=>{ const d=QUEST_POOL.find(x=>x.id===q.id), r=questReward(q), done=q.prog>=q.goal;
@@ -4596,7 +4676,7 @@ const ACH = [
   {id:"b2",    n:"Briseur de couronnes", d:"Terrasser 50 boss",           v:()=>S.stats.bosses||0, g:50, r:50},
   {id:"p1",    n:"Invocateur",        d:"Invoquer 10 fois",               v:()=>S.pulls||0, g:10, r:15},
   {id:"p2",    n:"Grand invocateur",  d:"Invoquer 100 fois",              v:()=>S.pulls||0, g:100, r:50},
-  {id:"leg",   n:"Compagnon légendaire", d:"Obtenir un familier Légendaire", v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=3).length, g:1, r:25},
+  {id:"leg",   n:"Compagnon légendaire", d:"Obtenir un familier Légendaire", v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=4).length, g:1, r:25},
   {id:"myth",  n:"Mythique !",        d:"Obtenir un familier Mythique",   v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=4).length, g:1, r:50},
   {id:"coll",  n:"Collectionneur",    d:"Obtenir tous les familiers d'invocation", v:()=>PETS.filter(p=>!p.event && S.pets[p.id]).length, g:()=>PETS.filter(p=>!p.event).length, r:100},
   {id:"c1",    n:"Apprenti forgeron", d:"Forger 10 objets",            v:()=>S.stats.craft||0, g:10, r:15},
@@ -4677,7 +4757,7 @@ function eventBuy(id){
   const it=EVENT_SHOP.find(x=>x.id===id), bought=S.event.bought[id]||0;
   if(!it || S.event.tokens<it.cost || (it.once && S.pets.wyverne) || (it.max && bought>=it.max)) return;
   S.event.tokens-=it.cost; S.event.bought[id]=bought+1;
-  if(id==="wyverne"){ const res=addPet(petDef("wyverne")); calc(); showReveal([{ic:"§p_wyverne§", n:"Wyverne", ri:3, rn:"Exclusif", tag: res.kind==="new"?"Nouveau !":"Copie"}]); revealCb=()=>openSheet("event"); }
+  if(id==="wyverne"){ const res=addPet(petDef("wyverne")); calc(); showReveal([{ic:"§p_wyverne§", n:"Wyverne", ri:4, rn:"Exclusif", tag: res.kind==="new"?"Nouveau !":"Copie"}]); revealCb=()=>openSheet("event"); }
   if(id==="gems") grant({crystals:20});
   if(id==="mats") grant({mats:10});
   if(id==="orbs") grant({orbs:3});
@@ -4881,6 +4961,13 @@ function load(o){
     if(eq.amulette){ eq.talisman = eq.amulette; eq.amulette.slot="talisman"; } delete eq.amulette;   // ancienne version
     S.equip = Object.assign({arme:null,casque:null,armure:null,bottes:null,bouclier:null,talisman:null}, eq);
     S.inv = (o.inv||[]).map(it=>{ if(it.slot==="amulette") it.slot="talisman"; return it; });
+    if(!o.rar6){   // ancienne sauvegarde à 5 raretés : on insère le Peu commun (vert), les objets Rare+ montent d'un cran
+      const up = it => { if(it && it.ri>=1) it.ri++; };
+      S.inv.forEach(up); Object.values(S.equip).forEach(up); S.rar6 = true;
+      // les faveurs déjà achetées (ancien système par compteur) deviennent de vraies faveurs
+      if(o.pity!==undefined && o.pity>=PITY-1){ S.favPet=1; S.pity=0; }
+      if(o.skl && o.skl.pity>=PITY-1){ S.favSkl=1; }
+    }
     S.mats = Object.assign({metal:0,acier:0,cuir:0,bois:0,gemme:0}, o.mats||{});
     if(o.scraps===undefined){ S.scraps = craftScrap(S.maxStage||1)*2; for(const k of MATKEYS) S.mats[k]=6;
       setTimeout(()=>modal("Nouveau : l'Atelier !", `Les ennemis ne lâchent plus d'objets mais des <b>🔩 scraps</b>. Fabriquez votre équipement dans l'onglet <b>Atelier</b>, puis fusionnez 3 objets identiques pour monter en rareté. Un petit stock vous est offert pour commencer.`, [{t:"Voir l'Atelier",cls:"gold",f:()=>showView("loot")}]), 400); }
@@ -4906,7 +4993,7 @@ function load(o){
     S.matsGone = true;
     if(!o.soulsV2){ S.souls = Math.max(0, (o.souls||0) - altarSpent()); }
     S.soulsV2 = true;
-    if(o.firstLeg===undefined) S.firstLeg = Object.keys(S.pets).some(id=>petDef(id) && petDef(id).r>=3);
+    if(o.firstLeg===undefined) S.firstLeg = Object.keys(S.pets).some(id=>petDef(id) && petDef(id).r>=4);
     S.chal = Object.assign({floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, o.chal||{});
     if(!o.skl){   // anciens joueurs : ceux qui avaient déjà les compétences gardent Frappe puissante, Rage et Soin
       if((o.best||1)>=UNLOCK.skills || (o.prestiges||0)>0) S.skl = {owned:{frappe:{stars:1,copies:0}, rage:{stars:1,copies:0}, soin:{stars:1,copies:0}}, eq:["frappe","rage","soin"], pulls:0, pity:0, firstLeg:true};
