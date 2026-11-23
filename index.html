@@ -838,6 +838,16 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
   .card{padding:7px;margin-bottom:6px}.seg{margin-bottom:6px}
   .titanhero .titart{display:none}.titanhero{padding:8px}
 }
+
+.invtop{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px}.invtop .chips{flex:1;min-width:0}.invtop .btn{flex:none;padding:5px 8px;font-size:12.5px}
+.tile.sel{outline:3px solid #2f9e44;outline-offset:-1px;transform:scale(.94)}
+.selmark{position:absolute;top:-5px;left:-5px;width:18px;height:18px;border-radius:50%;background:#2f9e44;color:#fff;font-size:12px;line-height:18px;font-weight:900}
+
+.iart{width:78%;height:78%;display:block;filter:drop-shadow(0 2px 0 #0002)}
+.tile.itile .ti{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:0}
+.grid5 .tile.itile .ti{font-size:0}
+.sheeticon.iarth{width:76px;height:76px;margin:0 auto}.sheeticon.iarth .iart{width:100%;height:100%}
+.row.fuse .ic .iart{width:34px;height:34px}
 </style>
 </head>
 <body>
@@ -853,7 +863,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-0952";
+var BUILD_ID = "20261123-1358";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1331,16 +1341,19 @@ function ico(html){ return html.replace(ICO_RE, (m, tok, emo)=> spr(tok || ICO_M
 /* ================= DONNÉES ================= */
 const SAVE_KEY = "lames-familiers-v1";
 const KPS = 8;               // ennemis à vaincre par étape
-const INV_MAX = 40;
+const INV_BASE = 40, INV_STEP = 10, INV_BUY_MAX = 6;
+const invMax = () => INV_BASE + INV_STEP*(S.invX||0);
 
 const RAR = [
   {n:"Commun",     c:"#9aa5b1", m:1},
-  {n:"Peu commun", c:"#22b455", m:1.3},
-  {n:"Rare",       c:"#3b82f6", m:1.8},
-  {n:"Épique",     c:"#a855f7", m:2.8},
-  {n:"Légendaire", c:"#f59e0b", m:4.4},
-  {n:"Mythique",   c:"#ef4444", m:7},
+  {n:"Peu commun", c:"#22b455", m:3.2},
+  {n:"Rare",       c:"#3b82f6", m:10},
+  {n:"Épique",     c:"#a855f7", m:32},
+  {n:"Légendaire", c:"#f59e0b", m:100},
+  {n:"Mythique",   c:"#ef4444", m:320},
 ];
+/* Chaque niveau d'objet donne +6 % ; chaque rareté multiplie par ~3,2 : un Commun niveau 100 vaut un Mythique niveau 1 (1,06^99 ≈ 320). */
+const ITEM_G = 1.06;
 const SLOTS = {
   arme:     {n:"Arme",     ic:"§epee§", mat:"acier", base:{atk:4},        names:["Épée","Hache","Masse","Lance","Fléau","Espadon","Marteau de guerre"]},
   casque:   {n:"Casque",   ic:"🪖", mat:"metal", base:{hp:20,def:.6},  names:["Heaume","Barbute","Bassinet","Casque à nasal"]},
@@ -1407,7 +1420,7 @@ const RATE_KEYS = [
   [20, [15, 28, 30, 18,  6,   3  ]],
 ];
 const rarOpen = (lv, ri) => lv >= RAR_UNLOCK[ri];
-const sumNeed = lv => 6 + 8*(lv-1);
+const sumNeed = lv => 10 + 15*(lv-1);
 const pityMax = skl => (skl ? S.skl.firstLeg : S.firstLeg) ? PITY : 10;   // la première Légendaire arrive vite          // invocations pour passer du niveau lv au suivant
 function sumLevel(pulls){
   let lv=1, left = pulls ?? (S.pulls||0);
@@ -1471,7 +1484,10 @@ function fmt(n){
   if(n<0) return "-"+fmt(-n);
   if(n<1000) return (n<10 && n%1) ? n.toFixed(1) : Math.floor(n).toString();
   const e = Math.floor(Math.log10(n)/3);
-  if(e<SUF.length){ const v=n/Math.pow(1000,e); return (v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v))+" "+SUF[e]; }
+  const v=n/Math.pow(1000,e), num=(v<10?v.toFixed(2):v<100?v.toFixed(1):Math.floor(v));
+  if(e<SUF.length) return num+" "+SUF[e];
+  const k=e-SUF.length, A="abcdefghijklmnopqrstuvwxyz";             // aa, ab, … zz : de quoi aller jusqu'à 10^2070
+  if(k<676) return num+" "+A[Math.floor(k/26)]+A[k%26];
   return n.toExponential(2).replace("+","");
 }
 const roman = n => ["I","II","III","IV","V","VI","VII","VIII","IX","X"][n-1] || String(n);
@@ -1482,7 +1498,7 @@ const uid = () => (uidc++).toString(36);
 let S;
 function newState(keep){
   const s = {
-    gold:500, souls:0, soulsV2:true, matsGone:true, rar6:true, favPet:0, favSkl:0, prestiges:0, best:1,
+    gold:500, souls:0, soulsV2:true, matsGone:true, rar6:true, itemV2:true, runStart:1, favPet:0, favSkl:0, prestiges:0, best:1,
     stage:1, kills:0, maxStage:1, auto:true, hp:null,
     forge:{atk:0,hp:0,def:0,spd:0},
     pets:{}, team:[], crystals:START_CRYS, pity:0, pulls:0,
@@ -1490,11 +1506,11 @@ function newState(keep){
     mail:{read:{}, claimed:{}}, daily:{day:0, last:"", total:0}, joined:new Date().toISOString().slice(0,10),
     iap:{speed:false, noads:false, starter:false}, ads:{day:"", gems:0, boost:0, boostUntil:0},
     equip:{arme:null,casque:null,armure:null,bottes:null,bouclier:null,talisman:null},
-    inv:[], scraps:60, mats:{metal:2,acier:2,cuir:2,bois:2,gemme:2}, opts:{autoEquip:true, qty:1, vibe:true, speed:1, showRaids:true, music:true, vol:0.6, sfx:true, notif:true, autoSkill:false},
+    inv:[], scraps:60, mats:{metal:2,acier:2,cuir:2,bois:2,gemme:2}, opts:{autoEquip:false, qty:1, vibe:true, speed:1, showRaids:true, music:true, vol:0.6, sfx:true, notif:true, autoSkill:false},
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{coup:{stars:1,copies:0}, bandage:{stars:1,copies:0}, cri:{stars:1,copies:0}}, eq:["coup","cri","bandage"], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -1641,6 +1657,7 @@ function calc(){
   if(tb.spd){ C.interval/=1+tb.spd/100; C.famDps*=1+tb.spd/100; }
   if(tb.gold) C.gold*=1+tb.gold/100; if(tb.scrap) C.scrapMult*=1+tb.scrap/100;
   if(tb.fam) C.famDps*=1+tb.fam/100; if(tb.regen) C.regen+=tb.regen/100;
+  if(sb.fam) C.famDps*=1+sb.fam/100; if(sb.gold) C.gold*=1+sb.gold/100; if(sb.scrap) C.scrapMult*=1+sb.scrap/100; if(sb.regen) C.regen+=sb.regen/100;
   C.cdr = tb.cdr||0;
   if(S.hp===null || S.hp>C.hp) S.hp = Math.min(S.hp===null?C.hp:S.hp, C.hp);
   return C;
@@ -1649,12 +1666,17 @@ const isBoss = s => s%10===0;
 const biomeOf = s => BIOMES[Math.floor((s-1)/10)%BIOMES.length];
 const cercleOf = s => Math.floor((s-1)/(10*BIOMES.length))+1;
 const goldFor = s => 2*Math.pow(1.165,s-1);
+/* Courbe des monstres. Les boss ont beaucoup de PV, mais un coup ne peut pas leur enlever plus d'une part fixe
+   de leur vie, et leurs coups ne peuvent pas enlever plus d'une part fixe de la vôtre : un combat de boss dure 10 à 15 s. */
+const EN_HP0=18, EN_HPG=1.18, EN_ATK0=3, EN_ATKG=1.165, BOSS_HPM=3.5, BOSS_ATKM=1.35, ECO_PACE=1;
+const BOSS_CAP_HIT=0.07, BOSS_CAP_SKILL=0.18, BOSS_CAP_FAM=0.05, BOSS_CAP_TAKEN=0.2;
+const bossCapped = () => E && E.boss && !(MODE && MODE.kind==="wboss");
 function enemyFor(s){
   const b=biomeOf(s), boss=isBoss(s);
   let [n,ic] = boss ? b.boss : pick(b.e), ev=false;
   if(!boss && eventActive() && Math.random()<0.2){ n="Dragonnet"; ic="§dragonnet§"; ev=true; }   // invasion du week-end
-  let hp=18*Math.pow(1.23,s-1), atk=3*Math.pow(1.21,s-1);
-  if(boss){ hp*=6; atk*=1.5; }
+  let hp=EN_HP0*Math.pow(EN_HPG,s-1), atk=EN_ATK0*Math.pow(EN_ATKG,s-1);
+  if(boss){ hp*=BOSS_HPM; atk*=BOSS_ATKM; }
   return {n,ic,boss,ev,hp,max:hp,atk,cd:1.6,timer:boss?30:0};
 }
 
@@ -1662,7 +1684,7 @@ function enemyFor(s){
 function makeItem(ilvl, ri, slot, forceSet){
   slot = slot || pick(SLOTKEYS);
   const sd = SLOTS[slot];
-  const sc = Math.pow(1.12,ilvl-1)*RAR[ri].m*(0.85+Math.random()*0.3);
+  const sc = Math.pow(ITEM_G,ilvl-1)*RAR[ri].m*(0.85+Math.random()*0.3);
   const set = forceSet!==undefined ? forceSet : (ri>=1 && Math.random()<0.5 ? pick(Object.keys(SETS)) : null);
   const it = {id:uid(), slot, ri, ilvl, name: pick(sd.names)+(set?" "+SETS[set].n:(ri>=1?" "+pick(SUFFIX):""))};
   if(set) it.set = set;
@@ -1673,6 +1695,13 @@ function makeItem(ilvl, ri, slot, forceSet){
     it[af] = (it[af]||0) + ({crit:1.5,vol:1,or:6}[af])*ri;
   }
   return it;
+}
+function betterThanWorn(it){ const cur=S.equip[it.slot]; return !cur || score(it)*Math.pow(ITEM_G, Math.max(0,cur.ilvl-it.ilvl)) > score(cur)*1.005; }
+function autoEquipOK(it){
+  if(!S.opts.autoEquip) return false;
+  const cur=S.equip[it.slot]; if(!cur) return true;
+  if(cur.set && (setCounts()[cur.set]||0)>=2 && it.set!==cur.set) return false;        // ne casse jamais un ensemble actif
+  return score(it)*Math.pow(ITEM_G, Math.max(0,cur.ilvl-it.ilvl)) > score(cur)*1.02;    // comparé à niveau égal
 }
 function score(it){
   if(!it) return 0;
@@ -1706,13 +1735,13 @@ function canAfford(scr, mat, mn){ return S.scraps>=scr && (!mat || S.mats[mat]>=
 /* Renforcement : uniquement des scraps */
 const upMat = lv => 0;   // les matériaux ont été retirés du jeu
 /* Forge d'équipement : un objet au hasard parmi les 6, rareté selon le niveau de forge (même tableau que les invocations) */
-const FORGE_NEED = lv => 12 + 18*(lv-1);
+const FORGE_NEED = lv => 24 + 36*(lv-1);
 function forgeLevel(n){
   let lv=1, left = n ?? (S.stats.craft||0);
   while(lv<SUM_MAX && left>=FORGE_NEED(lv)){ left-=FORGE_NEED(lv); lv++; }
   return {lv, cur:left, need: lv<SUM_MAX ? FORGE_NEED(lv) : 0};
 }
-const itemCost = () => Math.max(45, Math.ceil(craftScrap(S.maxStage)*0.4));
+const itemCost = () => Math.max(30, Math.ceil(craftScrap(S.maxStage)*0.2));
 function rollItemRarity(){
   const rates=petRates(Math.min(SUM_MAX, forgeLevel().lv+al("forge"))), tot=rates.reduce((a,b)=>a+b,0);
   let r=Math.random()*tot, acc=0;
@@ -1724,8 +1753,8 @@ function forgeItems(n){
   for(let i=0;i<n;i++){
     const it=makeItem(1, rollItemRarity(), pick(SLOTKEYS)); track("craft");
     let placed;
-    if(S.opts.autoEquip && score(it)>score(S.equip[it.slot])){ equipItem(it, true); placed="equip"; }
-    else if(S.inv.length<INV_MAX){ S.inv.push(it); placed="inv"; }
+    if(autoEquipOK(it)){ equipItem(it, true); placed="equip"; }
+    else if(S.inv.length<invMax()){ S.inv.push(it); placed="inv"; }
     else {   // inventaire plein : on démonte le moins bon entre le nouvel objet et le pire de l'inventaire
       let wi=0; S.inv.forEach((x,j)=>{ const w=S.inv[wi]; if(x.ri<w.ri || (x.ri===w.ri && score(x)<score(w))) wi=j; });
       const w=S.inv[wi];
@@ -1757,6 +1786,8 @@ function forgeN(n){
   RV.lvUp = lv1>lv0 ? lv1 : 0; RV.lvName = "Niveau de forge";
   if(RV.lvUp) log(`🔨 Niveau de forge <b>${lv1}</b> ! Les objets rares sortent plus souvent.`, "boss");
   calc(); dirty.loot=dirty.equip=dirty.stats=true; Sfx.play("craft");
+  const betterN = out.filter(o=>o.placed==="inv" && betterThanWorn(o.it)).length;
+  if(betterN) setTimeout(()=>toast(`▲ ${betterN} objet${betterN>1?"s":""} meilleur${betterN>1?"s":""} que votre équipement : à équiper dans l'Inventaire`), 900);
   lastPull=n; lastKind="item";
   let list;
   if(n>10){   // ×100 : regroupé par type et rareté
@@ -1786,7 +1817,7 @@ function fuseAll(){
 function craft(slot){
   const sc=craftScrap(1), mat=SLOTS[slot].mat, mn=craftMat(craftLvl());
   if(!canAfford(sc,mat,mn)) return;
-  if(S.inv.length>=INV_MAX){ modal("Inventaire plein", "Démontez, vendez ou fusionnez des objets avant d'en fabriquer d'autres.", [{t:"OK"}]); return; }
+  if(S.inv.length>=invMax()){ modal("Inventaire plein", "Démontez, vendez ou fusionnez des objets avant d'en fabriquer d'autres.", [{t:"OK"}]); return; }
   S.scraps-=sc; S.mats[mat]-=mn;
   const it = makeItem(1, rollCraftRarity(), slot);   // un objet fabriqué sort toujours niveau 1
   const placed = placeItem(it); track("craft"); Sfx.play("craft");
@@ -1795,7 +1826,7 @@ function craft(slot){
 }
 /* Équipe automatiquement si meilleur (option), sinon range dans l'inventaire */
 function placeItem(it){
-  if(S.opts.autoEquip && score(it)>score(S.equip[it.slot])){ equipItem(it, true); return "equip"; }
+  if(autoEquipOK(it)){ equipItem(it, true); return "equip"; }
   S.inv.push(it); dirty.loot=true; return "inv";
 }
 function fusionGroups(){
@@ -1821,7 +1852,7 @@ function upgrade(slot, max){
   while(it.ilvl<craftLvl()){
     const c=upCost(it), m=SLOTS[slot].mat, mn=upMat(it.ilvl+1); if(S.scraps<c || S.mats[m]<mn) break;
     S.scraps-=c; S.mats[m]-=mn;
-    for(const st of ["atk","hp","def"]) if(it[st]) it[st]*=1.12;   // +1 niveau = +12 % sur les stats principales
+    for(const st of ["atk","hp","def"]) if(it[st]) it[st]*=ITEM_G;   // +1 niveau = +6 % sur les stats principales
     it.ilvl++; n++;
     if(!max) break;
   }
@@ -1836,12 +1867,12 @@ function equipItem(it, fromDrop){
   const old = S.equip[it.slot];
   S.equip[it.slot] = it;
   if(!fromDrop) S.inv = S.inv.filter(x=>x.id!==it.id);
-  if(old){ if(S.inv.length<INV_MAX) S.inv.push(old); else S.gold += sellValue(old); }
+  if(old){ if(S.inv.length<invMax()) S.inv.push(old); else S.gold += sellValue(old); }
   calc(); dirty.equip = dirty.loot = dirty.stats = true;
 }
 function dropMats(boss, vis){
   const b = biomeOf(S.stage);
-  const sc = Math.ceil(scrapFor(S.stage)*(boss?10:1)*C.scrapMult);
+  const sc = Math.ceil(scrapFor(S.stage)*(boss?10:1)*C.scrapMult*ECO_PACE);
   S.scraps += sc;
   if(vis && Math.random()<0.35) floatTxt("+"+fmt(sc)+" 🔩","gold",true);
   if(boss && hasP(5)){ S.scraps += sc; if(vis) floatTxt("+"+fmt(sc)+" 🔩 bonus","fam",true); }   // palier 5 : scraps des boss doublés
@@ -1905,6 +1936,7 @@ function spawn(){ E = MODE ? modeEnemy() : enemyFor(S.stage);
 function hit(base, vis, cls){
   let dmg = base*(E.shell?0.3:1), cr = Math.random()*100 < C.crit;
   if(cr) dmg *= 2;
+  if(bossCapped()) dmg = Math.min(dmg, E.max*(cls==="crit"?BOSS_CAP_SKILL:BOSS_CAP_HIT));
   E.hp -= dmg;
   if(C.vol) S.hp = Math.min(C.hp, S.hp + dmg*C.vol/100);
   if(vis){ floatTxt((cr?"💥 ":"")+fmt(dmg), cr?"crit":cls); slash(); Sfx.play(cr?"crit":"hit"); if(cr) shake(); }
@@ -1919,7 +1951,7 @@ function checkRecord(){
 function kill(vis){
   if(MODE){ modeEnd(true); return; }
   const boss = E.boss;
-  const g = goldFor(S.stage)*(boss?8:1)*C.gold*bm("gold");
+  const g = goldFor(S.stage)*(boss?8:1)*C.gold*bm("gold")*ECO_PACE;
   S.gold += g; S.stats.kills++; track("kill");
   if(vis){ floatTxt("+"+fmt(g)+" 🪙","gold",true); poof(); coinsFly(boss?6:2); Sfx.play("kill"); setTimeout(()=>Sfx.play("coin"),120); }
   if(E.ev || (boss && eventActive())){ const tk = boss ? 5 : 1+rnd(2); S.event.tokens += tk; if(vis) floatTxt("+"+tk+" §ecaille§","fam",true); }
@@ -2034,14 +2066,15 @@ function step(dt, vis){
   if(E && E.mech==="rage" && !E.raged && E.hp>0 && E.hp < E.max*0.25){ E.raged=true; E.atk*=1.8; if(vis){ floatTxt("ENRAGÉ !","crit"); $("#enemy").classList.add("raged"); } }
   if(C.famDps>0){
     if(vis){ famAnimT += dt; if(famAnimT>0.8){ famAnimT=0; petAtk(); } }
-    const d = C.famDps*bm("fam")*dt*(E.shell?0.3:1); E.hp -= d; famAcc += d; famT += dt;
+    let d = C.famDps*bm("fam")*dt*(E.shell?0.3:1); if(bossCapped()) d=Math.min(d, E.max*BOSS_CAP_FAM*dt); E.hp -= d; famAcc += d; famT += dt;
     if(famT>=1){ if(vis) floatTxt("🐾 "+fmt(famAcc),"fam"); famAcc=0; famT=0; }
     if(E.hp<=0){ kill(vis); return; }
   }
   E.cd -= dt;
   if(E.cd<=0){
     E.cd += 1.6;
-    const dmg = shielded() ? 0 : E.atk*E.atk/(E.atk+C.def);
+    let dmg = shielded() ? 0 : E.atk*E.atk/(E.atk+C.def);
+    if(bossCapped()) dmg = Math.min(dmg, C.hp*BOSS_CAP_TAKEN);
     S.hp -= dmg;
     if(vis && !dmg) floatTxt("Bloqué","fam",false,true);
     else if(vis){ floatTxt("-"+fmt(dmg),"dmg",false,true); enemyAtk(); const hb=$(".herobox"); if(hb && MOTION){ hb.classList.remove("ouch"); void hb.offsetWidth; hb.classList.add("ouch"); } }
@@ -2131,9 +2164,104 @@ function renderStats(){
   ];
   $("#stats").innerHTML = rows.map(r=>`<div class="st5" title="${r[1]}"><b>${r[0]} ${r[2]}</b><span>${r[1]}</span></div>`).join("");
 }
-function itemTile(it, attrs, extra){
-  const sd=SLOTS[it.slot];
-  return `<button class="tile" style="--c:${RAR[it.ri].c}" ${attrs}><span class="ti">${sd.ic}</span><span class="tlv">${it.ilvl}</span>${extra||""}</button>`;
+
+/* ---------- Dessin des objets : la forme dépend de l'emplacement, les couleurs et ornements de l'ensemble (ou de la rareté) ---------- */
+const ART_PAL = {   // métal, ombre, accent, gemme
+  loup:     ["#a7b0ba","#5b6573","#e7dcc8","#f2c94c"],
+  templier: ["#f1f3f5","#9aa5b1","#f2c94c","#e03131"],
+  ombres:   ["#4b3f63","#221a33","#9b6dff","#c084fc"],
+  wyrm:     ["#3fae5a","#1f6b33","#f2c94c","#ff6b3d"],
+  marchand: ["#f2c94c","#b07d12","#2fb380","#22b8cf"],
+  berserk:  ["#6b5a52","#3a2c26","#e03131","#ff8787"],
+  glacier:  ["#bfe3ff","#5c9bd1","#ffffff","#74c0fc"],
+  paladin:  ["#fff4d6","#c9a64a","#40c057","#ffd43b"],
+};
+const RAR_PAL = [["#b8c0c8","#6b7480","#8a6a48","#9aa5b1"],["#9fd8a8","#3f8f50","#8a6a48","#22b455"],["#9cc3f5","#3866b8","#c9a24a","#3b82f6"],
+  ["#c9a8f5","#7243c0","#f2c94c","#a855f7"],["#ffd76b","#c08a12","#fff1a8","#ff9f1c"],["#ff8a8a","#b3262f","#ffd43b","#ff3b3b"]];
+const OL = `stroke="#2d2216" stroke-width="2.4" stroke-linejoin="round"`;
+function artEmblem(set, x, y, r, col){
+  switch(set){
+    case "loup":     return `<path d="M${x-r} ${y-r*.6} l${r*.5} ${r*1.4} l${r*.5} ${-r*1.1} l${r*.5} ${r*1.1} l${r*.5} ${-r*1.4}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linejoin="round"/>`;
+    case "templier": return `<path d="M${x-r*.28} ${y-r} h${r*.56} v${r*.72} h${r*.72} v${r*.56} h${-r*.72} v${r*.72} h${-r*.56} v${-r*.72} h${-r*.72} v${-r*.56} h${r*.72}z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/>`;
+    case "ombres":   return `<path d="M${x+r*.3} ${y-r} a${r} ${r} 0 1 0 0 ${r*2} a${r*.75} ${r*.75} 0 1 1 0 ${-r*2}z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/>`;
+    case "wyrm":     return `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.62}" fill="${col}" stroke="#2d2216" stroke-width="1.4"/><ellipse cx="${x}" cy="${y}" rx="${r*.18}" ry="${r*.55}" fill="#2d2216"/>`;
+    case "marchand": return `<path d="M${x} ${y-r} l${r*.8} ${r} l${-r*.8} ${r} l${-r*.8} ${-r}z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/><path d="M${x} ${y-r*.5} l${r*.4} ${r*.5} l${-r*.4} ${r*.5}" fill="#fff" opacity=".55"/>`;
+    case "berserk":  return `<path d="M${x-r} ${y-r} L${x+r} ${y+r} M${x+r} ${y-r} L${x-r} ${y+r}" stroke="${col}" stroke-width="3.2" stroke-linecap="round"/>`;
+    case "glacier":  return `<g stroke="${col}" stroke-width="2.2" stroke-linecap="round"><path d="M${x} ${y-r} V${y+r} M${x-r*.87} ${y-r*.5} L${x+r*.87} ${y+r*.5} M${x+r*.87} ${y-r*.5} L${x-r*.87} ${y+r*.5}"/></g>`;
+    case "paladin":  return `<path d="M${x} ${y+r*.9} C${x-r*1.4} ${y-r*.1} ${x-r*.6} ${y-r*1.2} ${x} ${y-r*.35} C${x+r*.6} ${y-r*1.2} ${x+r*1.4} ${y-r*.1} ${x} ${y+r*.9}z" fill="${col}" stroke="#2d2216" stroke-width="1.4"/>`;
+  }
+  return `<circle cx="${x}" cy="${y}" r="${r*.55}" fill="${col}" stroke="#2d2216" stroke-width="1.4"/>`;
+}
+function artSVG(slot, set, ri){
+  const [m, d, a, g] = set && ART_PAL[set] ? ART_PAL[set] : RAR_PAL[Math.min(5,ri)], e = (x,y,r,c)=>artEmblem(set,x,y,r,c||g);
+  let body="";
+  switch(slot){
+    case "arme": {
+      if(set==="berserk"){   // hache
+        body = `<path d="M30 58 L38 10" stroke="#7a4a20" stroke-width="5" stroke-linecap="round"/><path d="M36 12 Q58 10 58 30 Q48 26 34 30 Z" fill="${m}" ${OL}/><path d="M36 14 Q24 12 22 26 Q30 24 35 28 Z" fill="${d}" ${OL}/>${e(46,20,4,a)}`;
+      } else if(set==="ombres" || set==="loup"){   // lame courbe
+        body = `<path d="M20 50 Q22 26 46 8 Q40 30 26 52 Z" fill="${m}" ${OL}/><path d="M26 44 Q30 28 42 14" stroke="#fff" stroke-width="2" opacity=".55" fill="none"/>
+          ${set==="loup"?`<path d="M30 40 l4 1 M33 33 l4 1 M37 26 l4 1" stroke="${d}" stroke-width="2.4"/>`:""}<path d="M12 50 L32 56" stroke="${a}" stroke-width="6" stroke-linecap="round"/><path d="M12 50 L32 56" ${OL} fill="none" opacity=".0"/>
+          <path d="M20 54 L14 62" stroke="#5b3a1f" stroke-width="5" stroke-linecap="round"/><circle cx="13" cy="62" r="3" fill="${g}" ${OL}/>`;
+      } else if(set==="glacier"){   // lame de glace
+        body = `<path d="M32 4 L40 20 L36 22 L42 36 L34 40 L32 46 L30 40 L22 36 L28 22 L24 20 Z" fill="${m}" ${OL}/><path d="M32 8 V42" stroke="#fff" stroke-width="2" opacity=".7"/><rect x="20" y="44" width="24" height="5" rx="2" fill="${d}" ${OL}/><path d="M32 49 V58" stroke="#5b3a1f" stroke-width="5"/><circle cx="32" cy="60" r="3.5" fill="${g}" ${OL}/>`;
+      } else {   // épée droite
+        const wide = set==="templier"||set==="paladin";
+        body = `<path d="M${wide?27:29} 44 V12 L32 4 L${wide?37:35} 12 V44 Z" fill="${m}" ${OL}/><path d="M32 8 V42" stroke="#fff" stroke-width="2" opacity=".55"/>
+          <path d="M${set==="wyrm"?14:18} 44 Q32 ${set==="wyrm"?52:48} ${set==="wyrm"?50:46} 44 L${set==="wyrm"?50:46} 49 Q32 53 ${set==="wyrm"?14:18} 49 Z" fill="${a}" ${OL}/>
+          ${set==="wyrm"?`<path d="M29 18 l3 3 3 -3 M29 26 l3 3 3 -3 M29 34 l3 3 3 -3" stroke="${d}" stroke-width="1.8" fill="none"/>`:""}
+          <path d="M32 50 V58" stroke="#5b3a1f" stroke-width="5"/><circle cx="32" cy="60" r="3.5" fill="${g}" ${OL}/>${set?e(32,46.5,3.2):""}`;
+      }
+      break; }
+    case "casque": {
+      let top="";
+      if(set==="loup") top=`<path d="M16 22 L14 6 L26 16 Z M48 22 L50 6 L38 16 Z" fill="${d}" ${OL}/>`;
+      if(set==="wyrm"||set==="berserk") top=`<path d="M16 26 Q4 20 6 6 Q14 18 22 20 Z M48 26 Q60 20 58 6 Q50 18 42 20 Z" fill="${set==="wyrm"?a:"#efe6d2"}" ${OL}/>`;
+      if(set==="paladin") top=`<path d="M14 28 Q2 22 4 10 Q12 20 18 22 Z M50 28 Q62 22 60 10 Q52 20 46 22 Z" fill="#fff" ${OL}/>`;
+      if(set==="glacier") top=`<path d="M22 14 L24 2 L28 12 M32 12 L32 0 L36 12 M40 12 L44 2 L42 14" fill="${a}" ${OL}/>`;
+      if(set==="ombres") top=`<path d="M10 40 Q8 8 32 6 Q56 8 54 40 Q48 26 32 24 Q16 26 10 40 Z" fill="${d}" ${OL}/>`;
+      if(set==="marchand") top=`<path d="M18 16 L22 6 L28 14 L32 4 L36 14 L42 6 L46 16 Z" fill="${a}" ${OL}/>`;
+      body = top+`<path d="M12 40 Q12 12 32 12 Q52 12 52 40 L52 50 Q32 56 12 50 Z" fill="${m}" ${OL}/><path d="M18 32 H46 V38 H18 Z" fill="#2d2216"/>
+        ${set==="templier"?`<path d="M30 26 h4 v20 h-4 z" fill="${g}"/>`:""}<path d="M18 20 Q32 14 46 20" stroke="#fff" stroke-width="2" opacity=".5" fill="none"/>${set&&set!=="templier"?e(32,46,3.5):""}`;
+      break; }
+    case "armure": {
+      body = `<path d="M14 16 L24 10 Q32 14 40 10 L50 16 L56 30 L48 32 L46 56 Q32 60 18 56 L16 32 L8 30 Z" fill="${m}" ${OL}/>
+        <path d="M24 10 Q32 18 40 10" fill="none" stroke="${d}" stroke-width="3"/><path d="M20 44 Q32 48 44 44" stroke="${d}" stroke-width="2.4" fill="none"/>
+        ${set==="loup"?`<path d="M14 16 Q20 22 24 12 Q30 22 32 14 Q34 22 40 12 Q44 22 50 16" fill="${a}" ${OL}/>`:""}
+        ${set==="berserk"?`<path d="M12 18 l-4 -6 6 2 M52 18 l4 -6 -6 2" fill="${a}" ${OL}/>`:""}
+        ${e(32,30,7)}`;
+      break; }
+    case "bottes": {
+      body = `<path d="M18 8 H36 V40 L52 46 Q56 50 54 56 H16 Q14 50 16 44 Z" fill="${m}" ${OL}/><path d="M16 50 H54" stroke="${d}" stroke-width="3"/>
+        <path d="M16 8 H38 V16 H16 Z" fill="${a}" ${OL}/>${set==="loup"?`<path d="M16 16 q4 5 8 0 q4 5 8 0 q3 5 6 0" fill="${a}" ${OL}/>`:""}${set==="glacier"?`<path d="M40 46 l2 -6 2 6 M46 48 l2 -6 2 6" fill="#fff" ${OL}/>`:""}
+        ${e(27,28,4.5)}`;
+      break; }
+    case "bouclier": {
+      const shape = set==="berserk"||set==="loup" ? `<circle cx="32" cy="32" r="25" fill="${m}" ${OL}/><circle cx="32" cy="32" r="18" fill="none" stroke="${d}" stroke-width="3"/>`
+        : set==="ombres"||set==="glacier" ? `<path d="M32 4 L56 16 Q54 44 32 60 Q10 44 8 16 Z" fill="${m}" ${OL}/>`
+        : `<path d="M10 10 Q32 2 54 10 Q56 42 32 60 Q8 42 10 10 Z" fill="${m}" ${OL}/>`;
+      body = shape + `<path d="M14 14 Q32 8 50 14" stroke="#fff" stroke-width="2" opacity=".45" fill="none"/>` + (set==="templier"
+        ? `<path d="M28 14 h8 v12 h12 v8 h-12 v18 h-8 v-18 h-12 v-8 h12 z" fill="${g}" ${OL}/>`
+        : e(32,32,11, set?g:a));
+      break; }
+    case "talisman": {
+      body = `<path d="M18 6 Q32 22 46 6" fill="none" stroke="${a}" stroke-width="3"/><path d="M32 18 L50 36 L32 60 L14 36 Z" fill="${m}" ${OL}/>
+        <path d="M32 26 L42 37 L32 50 L22 37 Z" fill="${g}" ${OL}/><path d="M32 28 L37 36 L32 34 Z" fill="#fff" opacity=".7"/>${set?e(32,37,5,"#fff"):""}`;
+      break; }
+  }
+  const glow = ri>=4 ? `<circle cx="32" cy="32" r="30" fill="${ri>=5?"#ff3b3b":"#ffd43b"}" opacity=".18"/>` : "";
+  return `<svg class="iart" viewBox="0 0 64 64" aria-hidden="true">${glow}${body}</svg>`;
+}
+const ART_CACHE = {};
+function itemArt(it){ const k=it.slot+"|"+(it.set||"")+"|"+it.ri; return ART_CACHE[k] || (ART_CACHE[k]=artSVG(it.slot, it.set, it.ri)); }
+function setBreakWarn(it){   // prévient quand équiper cet objet casse un ensemble actif
+  const cur=S.equip[it.slot]; if(!cur || !cur.set || it.set===cur.set) return "";
+  const n=setCounts()[cur.set]||0; if(n<2) return "";
+  const lose = n>=4 ? "le bonus 4 pièces" : n===2 ? "le bonus 2 pièces" : "";
+  return lose ? `<div class="small" style="color:var(--red);margin-top:6px">⚠️ L'équiper retire ${lose} de l'ensemble ${SETS[cur.set].n} (${n} → ${n-1} pièces).</div>` : "";
+}
+function itemTile(it, attrs, extra, cls){
+  return `<button class="tile itile ${cls||""}" style="--c:${RAR[it.ri].c}" ${attrs}><span class="ti">${itemArt(it)}</span><span class="tlv">${it.ilvl}</span>${extra||""}</button>`;
 }
 function renderEquip(){
   $("#equip").innerHTML = SLOTKEYS.map(k=>{
@@ -2203,11 +2331,12 @@ function renderRes(){
   const el=$("#resBox"); if(!el) return;
   el.innerHTML = `<div class="rchip">🔩 ${fmt(S.scraps)} scraps</div>`;
 }
+let invSel = null;   // sélection multiple dans l'inventaire (null = désactivée)
 function renderLoot(){
   let body;
   if(atelierTab==="craft"){
     const fc=itemCost(), F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100;
-    const fus = fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${SLOTS[g.slot].ic}</div><div class="mid"><div class="t">3 ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b></div></div>
+    const fus = fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${artSVG(g.slot, null, g.ri)}</div><div class="mid"><div class="t">3 ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b></div></div>
         <button class="btn violet sm" data-fuse="${g.slot}|${g.ri}">Fusionner</button></div>`).join("");
     const nf=fusionGroups().length;
     body = sumBand({ic:spr("forge"), cid:"forgeLvB", val:F.lv, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
@@ -2218,13 +2347,16 @@ function renderLoot(){
   } else {
     const chips = [["all","Tout"],...SLOTKEYS.map(k=>[k,SLOTS[k].ic])].map(([k,t])=>`<button class="chip ${invFilter===k?"on":""}" data-filter="${k}">${t}</button>`).join("");
     const items = S.inv.filter(it=>invFilter==="all"||it.slot===invFilter).sort((a,b)=>SLOTKEYS.indexOf(a.slot)-SLOTKEYS.indexOf(b.slot) || b.ri-a.ri || b.ilvl-a.ilvl);
-    body = `<div class="card grow"><div class="chips" style="margin-bottom:6px">${chips}</div>
-      ${items.length ? `<div class="pager" data-pg="inv"><div class="pgsrc grid5">${items.map(it=>{ const cur=S.equip[it.slot]; const better = !cur || score(it)*Math.pow(1.12,(cur.ilvl-it.ilvl))>score(cur)*1.005;
-          return itemTile(it, `data-shinv="${it.id}"`, better?`<span class="tup">▲</span>`:""); }).join("")}</div></div>`
+    if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
+    const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
+    body = `<div class="card grow"><div class="invtop"><div class="chips">${chips}</div><button class="btn sm ${invSel?"gold":""}" id="invSelBtn">${invSel?"Terminé":"☑️ Sélection"}</button></div>
+      ${items.length ? `<div class="pager" data-pg="inv"><div class="pgsrc grid5">${items.map(it=>{ const cur=S.equip[it.slot]; const better = !cur || score(it)*Math.pow(ITEM_G,(cur.ilvl-it.ilvl))>score(cur)*1.005;
+          return itemTile(it, `data-shinv="${it.id}"`, (better && !invSel?`<span class="tup">▲</span>`:"")+(invSel && invSel.has(it.id)?`<span class="selmark">✓</span>`:""), invSel && invSel.has(it.id)?"sel":""); }).join("")}</div></div>`
         : `<div class="empty-msg" style="flex:1">Inventaire vide. Forgez des objets !</div>`}
-      <div class="btnrow" style="margin-top:6px"><button class="btn sm" id="dismCommon">♻️ Démonter Communs</button><button class="btn sm" id="sellCommon">🪙 Vendre Communs</button></div></div>`;
+      ${invSel ? `<div class="btnrow" style="margin-top:6px"><button class="btn sm" id="invSelAll">Tout</button><button class="btn sm gold" id="invSelDism" ${nSel?"":"disabled"}>♻️ Démonter ${nSel||""}<small>+${fmt(selList.reduce((a,it)=>a+dismantleValue(it),0))} 🔩</small></button><button class="btn sm" id="invSelSell" ${nSel?"":"disabled"}>🪙 Vendre ${nSel||""}</button></div>`
+        : `<div class="btnrow" style="margin-top:6px"><button class="btn sm" id="dismCommon">♻️ Démonter Communs</button><button class="btn sm" id="sellCommon">🪙 Vendre Communs</button></div>`}</div>`;
   }
-  $("#tab-loot").innerHTML = `<div class="segrow"><div class="seg"><button data-atab="craft" class="${atelierTab==="craft"?"on":""}">Forger</button><button data-atab="inv" class="${atelierTab==="inv"?"on":""}">Inventaire ${S.inv.length}/${INV_MAX}</button></div><div class="reschips" id="resBox"></div></div>` + body;
+  $("#tab-loot").innerHTML = `<div class="segrow"><div class="seg"><button data-atab="craft" class="${atelierTab==="craft"?"on":""}">Forger</button><button data-atab="inv" class="${atelierTab==="inv"?"on":""}">Inventaire ${S.inv.length}/${invMax()}</button></div><div class="reschips" id="resBox"></div></div>` + body;
   renderRes();
 }
 let atelierLvl = 0, lastPointer = 0, atelierT = 0, ptrDown = false;
@@ -2326,7 +2458,7 @@ function openSheet(kind, id){
     const cap=craftLvl(), maxed=it.ilvl>=cap, c1=upCost(it), mx=upMaxInfo(it);
     title = it.name;
     const mk=SLOTS[it.slot].mat, m1=0, mic="";
-    body = `<div class="sheeticon">${SLOTS[it.slot].ic}</div>${rarTag(it.ri)}<div class="small">Niveau ${it.ilvl} / ${cap} · 🔩 ${fmt(S.scraps)}</div>${statList(it)}
+    body = `<div class="sheeticon iarth">${itemArt(it)}</div>${rarTag(it.ri)}<div class="small">Niveau ${it.ilvl} / ${cap} · 🔩 ${fmt(S.scraps)}</div>${statList(it)}
       <div class="small" style="margin-top:6px">Chaque niveau coûte des scraps, jusqu'au niveau de votre zone.</div>`;
     acts = maxed ? [{t:"Niveau max de la zone", dis:true}] : [
       {t:`⬆️ +1 niveau<small>🔩 ${fmt(c1)}${m1?` · ${mic} ${m1}`:""}</small>`, act:"up1", dis:S.scraps<c1 || S.mats[mk]<m1},
@@ -2335,11 +2467,11 @@ function openSheet(kind, id){
     const it=S.inv.find(x=>x.id===id); if(!it){ closeSheet(); return; }
     const cur=S.equip[it.slot];
     let cmp="";
-    if(cur){ const d=(score(it)/score(cur)-1)*100, p=(score(it)*Math.pow(1.12,cur.ilvl-it.ilvl)/score(cur)-1)*100;
+    if(cur){ const d=(score(it)/score(cur)-1)*100, p=(score(it)*Math.pow(ITEM_G,cur.ilvl-it.ilvl)/score(cur)-1)*100;
       const f=v=>`<span class="${v>0.5?"up":v<-0.5?"down":""}">${v>0.5?"▲":v<-0.5?"▼":"="} ${Math.abs(v).toFixed(0)} %</span>`;
       cmp = `<div class="slist"><div><span>Vs objet porté</span>${f(d)}</div>${cur.ilvl!==it.ilvl?`<div><span>À niveau égal</span>${f(p)}</div>`:""}</div>`; }
     title = it.name;
-    body = `<div class="sheeticon">${SLOTS[it.slot].ic}</div>${rarTag(it.ri)}<div class="small">Niveau ${it.ilvl}</div>${statList(it)}${cmp}`;
+    body = `<div class="sheeticon iarth">${itemArt(it)}</div>${rarTag(it.ri)}<div class="small">Niveau ${it.ilvl}</div>${statList(it)}${cmp}${setBreakWarn(it)}`;
     acts = [{t:"Équiper", act:"equip", cls:"gold"}, {t:`♻️ Démonter<small>+${fmt(dismantleValue(it))} 🔩</small>`, act:"dism"}, {t:`🪙 Vendre<small>+${fmt(sellValue(it))} or</small>`, act:"sell"}];
   } else if(kind==="shop"){
     title = "🛒 Boutique"; body = shopBody(); acts = [];
@@ -2428,7 +2560,9 @@ function updateDots(){
 
   $("#dot-city").classList.toggle("on", !!S.city && view!=="city" && (S.city.pending || BLD.some(b=>affordC(bldCost(b)))));
 }
-function soulGain(){ return S.maxStage>=PREST_MIN ? Math.floor(Math.pow((S.maxStage-80)/6,2)*(hasP(15)?1.25:1)) : 0; }   // 100 → 11 âmes, 110 → 25, 130 → 69
+const soulCurve = st => st>80 ? Math.pow((st-80)/6,2) : 0;   // 100 → 11, 110 → 25, 130 → 69
+function soulGain(){ if(S.maxStage<PREST_MIN) return 0; return Math.max(0, Math.floor((soulCurve(S.maxStage)-soulCurve(S.runStart||1))*(hasP(15)?1.25:1))); }
+const runClimb = () => S.maxStage - (S.runStart||1);   // 100 → 11 âmes, 110 → 25, 130 → 69
 const chestOf = st => ({crystals: 20 + st, orbs: 3 + Math.floor(st/10), scraps: Math.ceil(craftScrap(st)*0.4)*15});
 let prestTab = "reb";
 function renderPrest(){
@@ -2442,7 +2576,8 @@ function renderPrest(){
         <div class="soulnote">Gagnez des Âmes en renaissant. Une Âme dépensée disparaît.</div></div>
       <div class="card" style="text-align:center"><h2>Renaître</h2>
         <div class="small" style="margin-bottom:10px">${S.maxStage<PREST_MIN?`Atteignez l'étape ${PREST_MIN} pour renaître (actuelle : ${S.maxStage}).`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b>, <b>${ch.orbs} 🔮</b> et ${fmt(ch.scraps)} scraps${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
-        <button class="btn violet wide" id="btnPrest" ${g>0?"":"disabled"}>🔥 Renaître (+${g} âmes)</button></div>
+        ${S.maxStage>=PREST_MIN && g<=0?`<div class="small" style="margin:-4px 0 8px;color:var(--red)">Vous êtes reparti de l'étape ${S.runStart}. Montez plus haut que votre point de départ pour gagner des âmes.</div>`:""}
+        <button class="btn violet wide" id="btnPrest" ${g>0 && runClimb()>=20?"":"disabled"}>🔥 Renaître (+${g} âmes)</button></div>
       ${nextM?`<div class="card"><div class="chead"><h2>Prochain palier</h2><span class="small">Renaissances : <b>${S.prestiges}</b></span></div><div class="mrow"><span class="mp">${nextM.p}</span><span class="mi">${nextM.ic}</span><span class="mt">${nextM.t}</span></div></div>`:""}`;
   } else if(prestTab==="alt"){
     const tiles = ALTAR.map(a=>{ const lv=al(a.id), c=altarCost(a,lv), mx=lv>=a.max, fx=ALTAR_FX[a.id];
@@ -2463,7 +2598,7 @@ function renderPrest(){
 function renderOpts(){
   const tg=(k,t,d)=>`<div class="opt"><div><b>${t}</b><div class="small">${d}</div></div><button class="btn sm toggle ${S.opts[k]?"on":""}" data-opt="${k}">${S.opts[k]?"Oui":"Non"}</button></div>`;
   $("#tab-opts").innerHTML = `<div class="card">
-    ${tg("autoEquip","Équiper automatiquement","Porte un objet forgé s'il est meilleur.")}
+    ${tg("autoEquip","Équiper automatiquement","Porte un objet forgé s'il est meilleur, sauf s'il casse un ensemble. Désactivé par défaut.")}
     ${hasP(2)?tg("autoForge","Forge automatique","Forge un objet toutes les 15 s (palier de Renaissance 2).") : ""}
     ${tg("vibe","Vibrations","Retour au toucher sur mobile.")}
     ${tg("showRaids","Animation des assauts","Montre le combat quand vous défendez votre fief.")}</div>
@@ -2821,11 +2956,13 @@ function rebirth(){
   const unlocked = locked.length ? pick(locked) : null;                  // nouvelle classe au hasard
   if(unlocked) S.classes[unlocked.id] = 1;
   const chest = chestOf(S.maxStage), oldBest = S.best;
+  if(runClimb()<20) return;
   const keep = Object.assign({}, S, {souls:S.souls+g, prestiges:S.prestiges+1});
   S = newState(keep);
   S.crystals += chest.crystals; S.orbs += chest.orbs; S.scraps += chest.scraps;           // coffre de Renaissance
   const st = Math.min(10*al("start"), Math.floor(oldBest/2/10)*10);                         // départ avancé
   if(st>=10){ S.stage = S.maxStage = st+1; S.gold = goldFor(st)*40; }
+  S.runStart = S.stage;
   const mile = PMILE.find(m=>m.p===S.prestiges);
   if(mile && mile.p===7 && !S.pets.spectre){ S.pets.spectre={stars:1,copies:0}; if(S.team.length<teamMax()) S.team.push("spectre"); }
   calc(); S.hp=C.hp; E=null; deadT=0; spawn();
@@ -2932,7 +3069,13 @@ document.addEventListener("click", e=>{
   if(t.dataset.qty){ S.opts.qty = t.dataset.qty==="max" ? "max" : +t.dataset.qty; dirty.forge=true; frameUI(); return; }
   if(t.dataset.forge){ buyForge(t.dataset.forge); return; }
   if(t.dataset.sheq){ openSheet("eq", t.dataset.sheq); return; }
-  if(t.dataset.shinv){ openSheet("inv", t.dataset.shinv); return; }
+  if(t.dataset.shinv){ if(invSel){ const id=t.dataset.shinv; invSel.has(id)?invSel.delete(id):invSel.add(id); renderLoot(); return; } openSheet("inv", t.dataset.shinv); return; }
+  if(t.id==="invSelBtn"){ invSel = invSel ? null : new Set(); renderLoot(); return; }
+  if(t.id==="invSelAll"){ const vis=S.inv.filter(it=>invFilter==="all"||it.slot===invFilter); const all=vis.every(it=>invSel.has(it.id)); vis.forEach(it=>all?invSel.delete(it.id):invSel.add(it.id)); renderLoot(); return; }
+  if(t.id==="invSelDism" || t.id==="invSelSell"){ const dism=t.id==="invSelDism", list=S.inv.filter(it=>invSel.has(it.id)); if(!list.length) return;
+    const tot=list.reduce((a,it)=>a+(dism?dismantleValue(it):sellValue(it)),0), hi=list.filter(it=>it.ri>=3).length;
+    modal(dism?"Démonter la sélection ?":"Vendre la sélection ?", `${list.length} objet${list.length>1?"s":""} pour <b>${fmt(tot)} ${dism?"🔩":"🪙"}</b>.${hi?`<br><b style="color:var(--red)">Dont ${hi} Épique${hi>1?"s":""} ou mieux.</b>`:""}`, [{t:"Annuler"},{t:dism?"Démonter":"Vendre", cls:"gold", f:()=>{
+      const ids=new Set(list.map(i=>i.id)); S.inv=S.inv.filter(it=>!ids.has(it.id)); if(dism) S.scraps+=tot; else S.gold+=tot; invSel=new Set(); Sfx.play("craft"); toast(`${dism?"♻️":"🪙"} ${list.length} objet${list.length>1?"s":""} ${dism?"démonté":"vendu"}${list.length>1?"s":""} : +${fmt(tot)} ${dism?"🔩":"🪙"}`); save(); renderLoot(); }}]); return; }
   if(t.dataset.shpet){ openSheet("pet", t.dataset.shpet); return; }
   if(t.dataset.shbld){ openSheet("bld", t.dataset.shbld); return; }
   if(t.id==="btnDaily"){ rewTab = dailyReady() ? "cal" : (S.quests.list.some(q=>!q.claimed && q.prog>=q.goal) ? "quests" : (ACH.some(achReady) ? "ach" : mailUnread()>0 ? "mail" : "quests")); openSheet("rewards"); return; }
@@ -2943,7 +3086,7 @@ document.addEventListener("click", e=>{
   if(t.id==="evBanner"){ openSheet("event"); return; }
 
   if(t.id==="btnMail"){ rewTab="mail"; openSheet("rewards"); return; }
-  if(t.dataset.atab){ atelierTab=t.dataset.atab; dirty.loot=true; lastPointer=0; frameUI(); return; }
+  if(t.dataset.atab){ invSel=null; atelierTab=t.dataset.atab; dirty.loot=true; lastPointer=0; frameUI(); return; }
   if(t.dataset.fn){ forgeN(+t.dataset.fn); return; }
   if(t.id==="fuseAll"){ fuseAll(); return; }
   if(t.dataset.fuse){ const [sl,ri]=t.dataset.fuse.split("|"); fuse(sl,+ri); return; }
@@ -3225,7 +3368,7 @@ const MAIL = [
    body:"Les familiers et les compétences s'invoquent maintenant avec des Orbes d'invocation 🔮 (1 orbe par invocation, 9 pour un ×10, 90 pour un ×100). Elles tombent sur chaque boss, dans la Tour, avec les quêtes et le calendrier. Les cristaux restent la monnaie précieuse de la Boutique. Voici 10 orbes pour bien commencer !",
    reward:{orbs:10}},
   {id:"m-maj2", date:"2026-11-19", title:"Grosse mise à jour !", from:"L'équipe",
-   body:"Au programme : des bruitages et des animations de combat, 3 compétences actives, des quêtes du jour et 23 succès (bouton cadeau en haut), des ensembles d'équipement, deux nouvelles zones (Abysses et Cité céleste), 5 nouveaux familiers, et chaque week-end l'Invasion de dragons avec un familier exclusif à gagner. Bon jeu !",
+   body:"Au programme : des bruitages et des animations de combat, 3 compétences actives, des quêtes du jour et des succès (bouton cadeau en haut), des ensembles d'équipement, deux nouvelles zones (Abysses et Cité céleste), 5 nouveaux familiers, et chaque week-end l'Invasion de dragons avec un familier exclusif à gagner. Bon jeu !",
    reward:{crystals:30}},
   {id:"m-fief", date:"2026-11-19", title:"Nouveauté : votre fief !", from:"L'équipe",
    body:"Dès l'étape 45, fondez votre fief : mine, scierie, carrière, maisons, caserne, tours et remparts. Des pillards viennent toutes les 10 nouvelles étapes, et vous choisissez quand les affronter. Voici de quoi bien démarrer.",
@@ -3703,6 +3846,7 @@ const PREMIUM = [
   {id:"lpet",   ic:"🐾", n:"Faveur légendaire",        d:()=>"Votre prochaine invocation de familier sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("fams"), give:()=>{ S.favPet=1; }, once:()=>!!S.favPet},
   {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.favSkl=1; }, once:()=>!!S.favSkl},
   {id:"slot",   ic:"➕", n:"Place de familier en plus", d:()=>S.extraSlot ? "Déjà achetée" : "Une place de plus dans l'équipe, pour toujours", cost:500, max:1, ok:()=>unlocked("fams"), once:()=>S.extraSlot>0, give:()=>{ S.extraSlot=1; calc(); dirty.fams=true; }},
+  {id:"invx",   ic:"📦", n:"+10 places d'inventaire",   d:()=>`Inventaire : ${invMax()} places${(S.invX||0)>=INV_BUY_MAX?" (maximum)":` · jusqu'à ${INV_BASE+INV_STEP*INV_BUY_MAX}`}`, get cost(){ return 80+40*(S.invX||0); }, max:99, once:()=>(S.invX||0)>=INV_BUY_MAX, give:()=>{ S.invX=(S.invX||0)+1; dirty.loot=true; }},
   {id:"cls",    ic:"🎭", n:"Changer de classe",         d:()=>"Choisissez une autre classe déjà débloquée, sans attendre la Renaissance", cost:100, max:3, ok:()=>Object.keys(S.classes||{}).length>1, give:()=>{ setTimeout(()=>classPicker(null,null), 200); }},
 ];
 function premiumBuy(id){
@@ -4010,9 +4154,11 @@ const GUIDES = {
   loot:  {ic:"🔨", t:"L'Atelier est ouvert", s:"L'Atelier", go:"loot", go_t:"Fabriquer", l:[
     ["🔩","Les monstres laissent des scraps. À la Forge d'équipement, dépensez-les pour obtenir un objet au hasard parmi les 6 (arme, casque, armure, bottes, bouclier, talisman), en ×1, ×10 ou ×100."],
     ["🔨","Chaque objet forgé fait monter votre niveau de forge. Comme pour les invocations : Communs, Peu communs et Rares au départ, Épiques au niveau "+RAR_UNLOCK[3]+", Légendaires au niveau "+RAR_UNLOCK[4]+", Mythiques au niveau "+RAR_UNLOCK[5]+"."],
-    ["⬆️","Les objets sortent au niveau 1. S'ils sont meilleurs que les vôtres, ils sont équipés tout seuls. Renforcez-les avec des scraps en touchant un objet porté."],
+    ["⬆️","Les objets sortent au niveau 1 et vont dans l'Inventaire : touchez-en un pour le comparer et l'équiper (une flèche ▲ signale les meilleurs). Renforcez vos objets portés avec des scraps : +6 % par niveau."],
+    ["💎","La rareté compte beaucoup : chaque rareté vaut environ 3 fois la précédente. Un Commun niveau 100 vaut à peine un Mythique niveau 1."],
     ["♻️","3 objets identiques de même rareté se fusionnent en un objet de la rareté au-dessus. Les autres peuvent être gardés, démontés ou vendus."],
-    ["✨","Certains objets appartiennent à un ensemble (Loup, Templier, Ombres) : porter 2 ou 4 pièces du même donne un gros bonus."]]},
+    ["✨","Certains objets appartiennent à l'un des 8 ensembles (Loup, Templier, Ombres, Wyrm, Marchand, Berserker, Glacier, Paladin), reconnaissables à leurs couleurs : porter 2 ou 4 pièces du même donne un gros bonus."],
+    ["☑️","Dans l'Inventaire, le bouton Sélection permet de choisir plusieurs objets pour les démonter ou les vendre d'un coup. Des places en plus s'achètent au Marché."]]},
   skills:{ic:"💥", t:"Les compétences sont débloquées", s:"Les compétences", go:"combat", go_t:"Essayer", l:[
     ["💥","3 boutons apparaissent sous le combat, un par compétence équipée : attaques, soins ou bonus temporaires."],
     ["⏳","Après usage, une compétence se recharge : le cercle bleu montre le temps restant."],
@@ -4040,6 +4186,7 @@ const GUIDES = {
     ["📍","Les Défis ont leur propre onglet en bas de l'écran."]]},
   prest: {ic:"👻", t:"La Renaissance est débloquée", s:"La Renaissance", go:"prest", go_t:"Voir les Âmes", l:[
     ["🔥","À partir de l'étape "+PREST_MIN+", vous pouvez renaître : vous repartez à zéro avec des Âmes, un coffre de cristaux et de scraps. Plus vous êtes allé loin, plus vous gagnez."],
+    ["⏩","Les Âmes ne comptent que le chemin parcouru pendant la partie : si vous repartez d'une étape avancée, il faut monter au moins 20 étapes plus haut pour renaître à nouveau."],
     ["👻","Les Âmes sont une monnaie : dépensez-les à l'Autel des Âmes pour des améliorations permanentes : or, scraps, familiers, chances de forge, départ avancé à une étape plus haute…"],
     ["🏅","Chaque Renaissance débloque un palier : 4e place de familier, forge automatique, 4e compétence, familier exclusif…"],
     ["📦","Vous gardez familiers, cristaux, fief, classes et Âmes. Vous perdez l'or, la Forge, l'équipement et les scraps."],
@@ -4053,6 +4200,7 @@ const GUIDES = {
     ["👑","Un boss garde la fin de chaque zone, toutes les 10 étapes. Il est bien plus résistant que les monstres normaux."],
     ["⏳","Vous avez 30 secondes pour le battre (barre jaune). Sinon il vous repousse et vous retournez à l'étape d'avant pour gagner de l'or."],
     ["🔥","Chaque boss a un pouvoir, affiché à côté de son nom : Enragé (plus fort à la fin), Carapace (brisée par une compétence) ou Régénération."],
+    ["⚔️","Un combat de boss dure une dizaine de secondes : un coup ne peut pas lui retirer plus de 7 % de sa vie (18 % pour une compétence), et ses coups ne peuvent pas vous retirer plus de 20 % de la vôtre."],
     ["⚒️","Bloqué ? Améliorez-vous à la Forge, utilisez vos compétences, puis touchez « farm » pour relancer le défi."]]},
   event: {ic:"🐲", t:"Invasion de dragons !", s:"L'invasion de dragons", l:[
     ["🐲","Pendant le week-end, des dragonnets se mêlent aux monstres de toutes les zones."],
@@ -4090,7 +4238,7 @@ function guidesList(){
 /* ---------- Défis : tour des épreuves et boss de la semaine (combats réels dans l'arène) ---------- */
 let MODE = null;
 const TOWER_KEYS = 3, W_TRIES = 3;
-const W_TIERS = [{r:1,cr:20,ob:1},{r:3,cr:40,ob:2},{r:8,cr:60,ob:3},{r:20,cr:100,ob:5},{r:50,cr:150,ob:10}];   // dégâts en « boss de votre record »
+const W_TIERS = [{r:1,cr:20,ob:1},{r:3,cr:40,ob:2},{r:8,cr:60,ob:3},{r:20,cr:100,ob:5},{r:50,cr:150,ob:10},{r:150,cr:250,ob:15},{r:500,cr:400,ob:25}];   // dégâts en « boss de votre record »
 function weekId(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return d.getFullYear()+"-S"+(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)); }
 function chalReset(){
   const c=S.chal, d=today(), w=weekId();
@@ -4106,7 +4254,7 @@ function modeEnemy(){
     e.max=e.hp; e.boss=true; e.timer=30; e.n="Gardien de l'étage "+MODE.floor; e.ic=bb[1]; e.ev=false; return e;
   }
   const st=Math.max(10, Math.ceil(S.best/10)*10), e=enemyFor(st);
-  MODE.ref=e.hp; e.hp=e.max=e.hp*1e4; e.atk*=1.1; e.boss=true; e.timer=30; e.n="Titan de la semaine"; e.ic="§dragontri§"; e.ev=false; return e;
+  MODE.ref=e.hp; e.hp=e.max=e.hp*1e15; e.atk*=1.1; e.boss=true; e.timer=30; e.n="Titan de la semaine"; e.ic="§dragontri§"; e.ev=false; return e;
 }
 function chalStart(kind){
   chalReset();
@@ -4135,9 +4283,9 @@ function modeEnd(win, quit){
   } else {
     const dmg = e ? e.max-e.hp : 0, ratio = m.ref ? dmg/m.ref : 0;
     const best = Math.max(S.chal.wbest, ratio), rec = ratio>S.chal.wbest; S.chal.wbest = best;
-    log(`🐲 Titan de la semaine : ${fmt(dmg)} dégâts (×${ratio.toFixed(1)}).`, "boss");
+    log(`🐲 Titan de la semaine : ${fmt(dmg)} dégâts (×${ratio<1000?ratio.toFixed(1):fmt(ratio)}).`, "boss");
     const ready = W_TIERS.filter((t,i)=>best>=t.r && !S.chal.wclaim[i]).length;
-    modal("Fin du combat", `<div class="sheeticon">🐲</div>Vous avez infligé <b>${fmt(dmg)}</b> dégâts, soit <b>×${ratio.toFixed(1)}</b> les PV du boss de votre record.${rec?`<br><b style="color:var(--grn)">Nouveau record de la semaine !</b>`:""}${ready?`<br><br>${ready} récompense${ready>1?"s":""} à récupérer dans le panneau des défis.`:""}`, [{t:"OK", cls:"gold"}]);
+    modal("Fin du combat", `<div class="sheeticon">🐲</div>Vous avez infligé <b>${fmt(dmg)}</b> dégâts, soit <b>×${ratio<1000?ratio.toFixed(1):fmt(ratio)}</b> les PV du boss de votre record.${rec?`<br><b style="color:var(--grn)">Nouveau record de la semaine !</b>`:""}${ready?`<br><br>${ready} récompense${ready>1?"s":""} à récupérer dans le panneau des défis.`:""}`, [{t:"OK", cls:"gold"}]);
   }
   spawn(); dirty.enemy=true; save();
 }
@@ -4667,7 +4815,7 @@ const ACH = [
   {id:"st25",  n:"Aventurier",        d:"Atteindre l'étape 25",           v:()=>S.best, g:25, r:20},
   {id:"st100", n:"Héros de légende",  d:"Atteindre l'étape 100",          v:()=>S.best, g:100, r:100},
   {id:"st50",  n:"Conquérant",        d:"Atteindre l'étape 50",           v:()=>S.best, g:50, r:30},
-  {id:"st100", n:"Héros du royaume",  d:"Atteindre l'étape 100",          v:()=>S.best, g:100, r:60},
+  {id:"st150", n:"Héros du royaume",  d:"Atteindre l'étape 150",          v:()=>S.best, g:150, r:80},
   {id:"st200", n:"Légende éternelle", d:"Atteindre l'étape 200",          v:()=>S.best, g:200, r:120},
   {id:"k1",    n:"Chasseur",          d:"Vaincre 1 000 monstres",         v:()=>S.stats.kills||0, g:1e3, r:20},
   {id:"k2",    n:"Massacreur",        d:"Vaincre 10 000 monstres",        v:()=>S.stats.kills||0, g:1e4, r:40},
@@ -4677,7 +4825,7 @@ const ACH = [
   {id:"p1",    n:"Invocateur",        d:"Invoquer 10 fois",               v:()=>S.pulls||0, g:10, r:15},
   {id:"p2",    n:"Grand invocateur",  d:"Invoquer 100 fois",              v:()=>S.pulls||0, g:100, r:50},
   {id:"leg",   n:"Compagnon légendaire", d:"Obtenir un familier Légendaire", v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=4).length, g:1, r:25},
-  {id:"myth",  n:"Mythique !",        d:"Obtenir un familier Mythique",   v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=4).length, g:1, r:50},
+  {id:"myth",  n:"Mythique !",        d:"Obtenir un familier Mythique",   v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=5).length, g:1, r:50},
   {id:"coll",  n:"Collectionneur",    d:"Obtenir tous les familiers d'invocation", v:()=>PETS.filter(p=>!p.event && S.pets[p.id]).length, g:()=>PETS.filter(p=>!p.event).length, r:100},
   {id:"c1",    n:"Apprenti forgeron", d:"Forger 10 objets",            v:()=>S.stats.craft||0, g:10, r:15},
   {id:"c2",    n:"Maître forgeron",   d:"Forger 100 objets",              v:()=>S.stats.craft||0, g:100, r:50},
@@ -4689,6 +4837,31 @@ const ACH = [
   {id:"cl5",   n:"Polyvalent",        d:"Débloquer 5 classes",            v:()=>Object.keys(S.classes).length, g:5, r:40},
   {id:"d1",    n:"Défenseur",         d:"Repousser 5 assauts du fief",    v:()=>S.city?S.city.wins:0, g:5, r:30},
   {id:"d2",    n:"Rempart du royaume",d:"Repousser 20 assauts du fief",   v:()=>S.city?S.city.wins:0, g:20, r:60},
+  {id:"st300", n:"Au-delà des cartes",d:"Atteindre l'étape 300",          v:()=>S.best, g:300, r:150},
+  {id:"st500", n:"Mythe vivant",      d:"Atteindre l'étape 500",          v:()=>S.best, g:500, r:250},
+  {id:"k4",    n:"Fin du monde",      d:"Vaincre 1 000 000 de monstres",  v:()=>S.stats.kills||0, g:1e6, r:150},
+  {id:"b3",    n:"Régicide",          d:"Terrasser 200 boss",             v:()=>S.stats.bosses||0, g:200, r:80},
+  {id:"b4",    n:"Chute des empires", d:"Terrasser 1 000 boss",           v:()=>S.stats.bosses||0, g:1000, r:150},
+  {id:"p3",    n:"Maître des orbes",  d:"Invoquer 500 familiers",         v:()=>S.pulls||0, g:500, r:80},
+  {id:"p4",    n:"Archimage",         d:"Invoquer 2 000 familiers",       v:()=>S.pulls||0, g:2000, r:150},
+  {id:"sk1",   n:"Érudit",            d:"Invoquer 100 compétences",       v:()=>S.skl?S.skl.pulls||0:0, g:100, r:50},
+  {id:"skc",   n:"Grimoire complet",  d:"Obtenir toutes les compétences", v:()=>S.skl?Object.keys(S.skl.owned).length:0, g:()=>SKILLS.length, r:120},
+  {id:"lv20",  n:"Invocateur suprême",d:"Atteindre le niveau d'invocation 20", v:()=>sumLevel().lv, g:20, r:100},
+  {id:"c4",    n:"Forge éternelle",   d:"Forger 10 000 objets",           v:()=>S.stats.craft||0, g:1e4, r:150},
+  {id:"f2",    n:"Grand alchimiste",  d:"Fusionner 100 fois",             v:()=>S.stats.fuse||0, g:100, r:80},
+  {id:"up1",   n:"Affûteur",          d:"Renforcer des objets de 500 niveaux", v:()=>S.stats.upgrade||0, g:500, r:50},
+  {id:"mi1",   n:"Relique",           d:"Posséder un objet Mythique",     v:()=>[...S.inv, ...Object.values(S.equip)].some(it=>it && it.ri>=5)?1:0, g:1, r:80},
+  {id:"set2",  n:"Double panoplie",   d:"Avoir deux bonus d'ensemble actifs", v:()=>Object.values(setCounts()).filter(n=>n>=2).length, g:2, r:40},
+  {id:"tw1",   n:"Grimpeur",          d:"Conquérir l'étage 10 de la Tour", v:()=>S.chal?S.chal.floor-1:0, g:10, r:40},
+  {id:"tw2",   n:"Maître de la Tour", d:"Conquérir l'étage 50 de la Tour", v:()=>S.chal?S.chal.floor-1:0, g:50, r:120},
+  {id:"ti1",   n:"Tueur de titans",   d:"Infliger ×50 au Titan de la semaine", v:()=>S.chal?S.chal.wbest||0:0, g:50, r:80},
+  {id:"r3",    n:"Cycle éternel",     d:"Renaître 10 fois",               v:()=>S.prestiges, g:10, r:100},
+  {id:"r4",    n:"Immortel",          d:"Renaître 25 fois",               v:()=>S.prestiges, g:25, r:200},
+  {id:"pl25",  n:"Meilleur ami",      d:"Monter un familier au niveau 25", v:()=>Math.max(0,...Object.values(S.pets).map(o=>o.lvl||1)), g:25, r:60},
+  {id:"str7",  n:"Fidèle",            d:"Se connecter 7 jours d'affilée", v:()=>S.streak?S.streak.n||0:0, g:7, r:40},
+  {id:"str30", n:"Pilier du royaume", d:"Se connecter 30 jours d'affilée", v:()=>S.streak?S.streak.n||0:0, g:30, r:150},
+  {id:"bp30",  n:"Champion de la saison", d:"Atteindre le palier 30 du passe de combat", v:()=>typeof bpLevel==="function"?bpLevel():0, g:30, r:100},
+  {id:"gold1", n:"Trésor royal",      d:"Posséder 1 Md d'or",             v:()=>S.gold, g:1e9, r:60},
 ];
 const achGoal = a => typeof a.g==="function" ? a.g() : a.g;
 const achReady = a => !S.ach.claimed[a.id] && a.v()>=achGoal(a);
@@ -4720,16 +4893,21 @@ function rewardsSheet(){
 
 /* ---------- Ensembles d'équipement ---------- */
 const SETS = {
-  loup:     {n:"du Loup",     ic:"§p_loup§",  b2:"+15 % d'attaque", b4:"+40 % d'attaque et +10 % de vitesse"},
-  templier: {n:"du Templier", ic:"§bouclier§",b2:"+20 % de défense", b4:"+40 % de PV et +40 % de défense"},
-  ombres:   {n:"des Ombres",  ic:"§dague§",   b2:"+5 % de critique", b4:"+10 % de critique et +5 % de vol de vie"},
+  loup:     {n:"du Loup",      ic:"§p_loup§",   b2:"+15 % d'attaque",            b4:"+40 % d'attaque et +10 % de vitesse",        e2:{atk:15},  e4:{atk:25, spd:10}},
+  templier: {n:"du Templier",  ic:"§bouclier§", b2:"+20 % de défense",           b4:"+40 % de PV et +40 % de défense",            e2:{def:20},  e4:{def:20, hp:40}},
+  ombres:   {n:"des Ombres",   ic:"§dague§",    b2:"+5 % de critique",           b4:"+10 % de critique et +5 % de vol de vie",    e2:{crit:5},  e4:{crit:5, vol:5}},
+  wyrm:     {n:"du Wyrm",      ic:"§p_dragon§", b2:"+25 % de dégâts des familiers", b4:"+60 % de dégâts des familiers et +10 % d'attaque", e2:{fam:25}, e4:{fam:35, atk:10}},
+  marchand: {n:"du Marchand",  ic:"§sac§",      b2:"+20 % d'or",                 b4:"+50 % d'or et +25 % de scraps",              e2:{gold:20}, e4:{gold:30, scrap:25}},
+  berserk:  {n:"du Berserker", ic:"§hache§",    b2:"+10 % de vitesse",           b4:"+25 % de vitesse et +15 % d'attaque",        e2:{spd:10},  e4:{spd:15, atk:15}},
+  glacier:  {n:"du Glacier",   ic:"§nuage§",    b2:"+15 % de PV",                b4:"+35 % de PV et +2 % de régénération par seconde", e2:{hp:15}, e4:{hp:20, regen:2}},
+  paladin:  {n:"du Paladin",   ic:"§coeurvert§",b2:"+4 % de vol de vie",         b4:"+8 % de vol de vie et +20 % de défense",     e2:{vol:4},   e4:{vol:4, def:20}},
 };
 function setCounts(){ const c={}; for(const k of SLOTKEYS){ const it=S.equip[k]; if(it && it.set) c[it.set]=(c[it.set]||0)+1; } return c; }
 function setBonus(){
-  const c=setCounts(), b={atk:0,def:0,hp:0,spd:0,crit:0,vol:0};
-  if((c.loup||0)>=2) b.atk+=15; if((c.loup||0)>=4){ b.atk+=25; b.spd+=10; }
-  if((c.templier||0)>=2) b.def+=20; if((c.templier||0)>=4){ b.def+=20; b.hp+=40; }
-  if((c.ombres||0)>=2) b.crit+=5; if((c.ombres||0)>=4){ b.crit+=5; b.vol+=5; }
+  const c=setCounts(), b={atk:0,def:0,hp:0,spd:0,crit:0,vol:0,fam:0,gold:0,scrap:0,regen:0};
+  for(const k in SETS){ const n=c[k]||0, d=SETS[k];
+    if(n>=2) for(const x in d.e2) b[x]+=d.e2[x];
+    if(n>=4) for(const x in d.e4) b[x]+=d.e4[x]; }
   return b;
 }
 function setsHTML(){
@@ -4872,7 +5050,7 @@ document.addEventListener("visibilitychange", ()=>{ if(document.hidden) schedule
 const DEMO_SAVE = {"gold":19098.614429971927,"souls":0,"prestiges":0,"best":26,"stage":26,"kills":8,"maxStage":26,"auto":false,"hp":null,"forge":{"atk":32,"hp":32,"def":31,"spd":23},"pets":{"faucon":{"stars":2,"copies":1},"renard":{"stars":1,"copies":0},"rat":{"stars":2,"copies":0},"corbeau":{"stars":2,"copies":0},"chat":{"stars":2,"copies":0},"basilic":{"stars":1,"copies":0},"lion":{"stars":1,"copies":0},"loup":{"stars":1,"copies":0},"sanglier":{"stars":1,"copies":0}},"team":["lion","basilic","faucon"],"crystals":9,"pity":4,"pulls":14,"cls":"guerrier","classes":{"guerrier":1},"city":{"lv":{"mine":6,"scierie":6,"carriere":6,"maison":6,"caserne":4,"tour":3,"mur":4},"res":{"or":189.3980357749985,"bois":157.55372318749934,"pierre":38.541119949998844},"hp":1136.8,"soldiers":48.666666666666664,"raid":1,"prog":6,"pending":false,"lastRaid":0,"report":null,"wins":0},"cityStash":0,"mail":{"read":{},"claimed":{}},"daily":{"day":0,"last":"","total":0},"equip":{"arme":{"id":"mwni2l44","slot":"arme","ri":3,"ilvl":26,"name":"Marteau de guerre du Roi déchu","atk":317.7084673532868,"or":18},"casque":{"id":"mwni2l7w","slot":"casque","ri":4,"ilvl":26,"name":"Barbute du Templier","hp":2512.5414760548488,"def":75.37624428164547,"vol":4},"armure":{"id":"mwni2l1k","slot":"armure","ri":3,"ilvl":26,"name":"Cuirasse du Loup","def":185.84278971141904,"hp":743.3711588456762,"vol":3},"bottes":{"id":"mwni2l80","slot":"bottes","ri":2,"ilvl":26,"name":"Bottes de marche des Braises","def":58.02269812832798,"hp":483.522484402733,"vol":2},"bouclier":{"id":"mwni2l3y","slot":"bouclier","ri":2,"ilvl":26,"name":"Targe des Braises","def":100.15310571215136,"hp":300.4593171364539,"crit":3},"talisman":{"id":"mwni2l5j","slot":"talisman","ri":3,"ilvl":26,"name":"Talisman des Braises","atk":134.28166434810564,"crit":4.086763961956807,"or":18}},"inv":[{"id":"mwni2l1m","slot":"arme","ri":4,"ilvl":26,"name":"Marteau de guerre de la Tempête","atk":521.0502367789751,"crit":6},{"id":"mwni2l2h","slot":"casque","ri":4,"ilvl":1,"name":"Bassinet du Givre","hp":139.1132492735067,"def":4.1733974782052,"vol":4},{"id":"mwni2l39","slot":"talisman","ri":3,"ilvl":26,"name":"Amulette de la Couronne","atk":139.8830570027002,"crit":4.6796858962339325,"vol":3},{"id":"mwni2l41","slot":"casque","ri":4,"ilvl":1,"name":"Heaume de la Couronne","hp":153.46500567499933,"def":4.60395017024998,"crit":6},{"id":"mwni2l4y","slot":"bouclier","ri":4,"ilvl":26,"name":"Targe du Roi déchu","def":209.10570798546146,"hp":627.3171239563844,"crit":6},{"id":"mwni2l5n","slot":"arme","ri":4,"ilvl":26,"name":"Masse des Braises","atk":447.13276733224023,"crit":6},{"id":"mwni2l6n","slot":"bouclier","ri":2,"ilvl":1,"name":"Targe des Anciens","def":5.783239027937508,"hp":17.349717083812525,"crit":3},{"id":"mwni2l6t","slot":"arme","ri":3,"ilvl":1,"name":"Fléau du Templier","atk":14.465545600279409,"vol":3},{"id":"mwni2l7j","slot":"bouclier","ri":1,"ilvl":1,"name":"Écu de la Tempête","def":3.155837754222844,"hp":9.467513262668533},{"id":"mwni2l7n","slot":"casque","ri":4,"ilvl":1,"name":"Bassinet des Ombres","hp":152.49345514678262,"def":4.574803654403478,"vol":4},{"id":"mwni2l7t","slot":"casque","ri":2,"ilvl":1,"name":"Casque à nasal de la Couronne","hp":53.228055376508514,"def":1.5968416612952554,"or":12},{"id":"mwni2kxw","slot":"casque","ri":3,"ilvl":26,"name":"Heaume de la Tempête","hp":1482.7589267286173,"def":44.48276780185852,"vol":3},{"id":"mwni2l7z","slot":"bottes","ri":2,"ilvl":1,"name":"Grèves des Anciens","def":3.225778118660281,"hp":26.88148432216901,"vol":2},{"id":"mwni2l85","slot":"talisman","ri":3,"ilvl":26,"name":"Amulette des Anciens","atk":135.1605529140901,"crit":4.022544492928493,"or":18},{"id":"mwni2l86","slot":"arme","ri":3,"ilvl":1,"name":"Masse de la Tempête","atk":16.731664009720575,"vol":3},{"id":"mwni2l8b","slot":"bottes","ri":4,"ilvl":26,"name":"Solerets de la Tempête","def":127.08425199372081,"hp":1059.0354332810068,"vol":4},{"id":"mwni2l8c","slot":"bottes","ri":1,"ilvl":1,"name":"Solerets des Braises","def":2.150268421661705,"hp":17.918903513847543},{"id":"mwni2l8d","slot":"bouclier","ri":1,"ilvl":1,"name":"Targe du Soldat","def":3.6153523243081587,"hp":10.846056972924476},{"id":"mwni2l8i","slot":"talisman","ri":1,"ilvl":1,"name":"Talisman du Templier","atk":3.2302995822557956,"crit":1.611759534282819},{"id":"mwni2l8j","slot":"armure","ri":1,"ilvl":1,"name":"Cotte de mailles des Ombres","def":4.497440944376745,"hp":17.98976377750698},{"id":"mwni2l8n","slot":"armure","ri":2,"ilvl":1,"name":"Cuirasse des Anciens","def":7.605694730814267,"hp":30.422778923257066,"or":12},{"id":"mwni2l8p","slot":"arme","ri":2,"ilvl":1,"name":"Lance du Dragon","atk":9.95330454509384,"crit":3},{"id":"mwni2l8q","slot":"armure","ri":4,"ilvl":26,"name":"Harnois de l'Aube","def":350.493789471607,"hp":1401.975157886428,"vol":4},{"id":"mwni2l8r","slot":"bottes","ri":1,"ilvl":1,"name":"Solerets du Roi déchu","def":2.038339057270148,"hp":16.986158810584566}],"scraps":117408,"mats":{"metal":3,"acier":19,"cuir":1,"bois":3,"gemme":0},"opts":{"autoEquip":false,"qty":1,"vibe":true,"speed":1,"showRaids":false},"stats":{"kills":4493,"bosses":2},"last":0};
 function loadDemo(){
   const o = JSON.parse(JSON.stringify(DEMO_SAVE));
-  o.last = Date.now(); o.opts = Object.assign({}, o.opts, {showRaids:true, autoEquip:true});
+  o.last = Date.now(); o.opts = Object.assign({}, o.opts, {showRaids:true, autoEquip:false});
   load(o); S.auto = true;
   // partie de test : pas de tutoriel ni d'explications de Hubert
   S.tuto.step = TUTO.length; S.tuto.cnt = 0; S.tuto.intro = true; S.tuto.gq = [];
@@ -4956,11 +5134,19 @@ function load(o){
   if(o){
     S = Object.assign(base, o);
     S.forge = Object.assign(base.forge, o.forge||{});
-    S.opts  = Object.assign({autoEquip:true,qty:1,vibe:true,speed:1,showRaids:true,music:true,vol:0.6,sfx:true,notif:true,autoSkill:false}, o.opts||{}); delete S.opts.autoSell;
+    S.opts  = Object.assign({autoEquip:false,qty:1,vibe:true,speed:1,showRaids:true,music:true,vol:0.6,sfx:true,notif:true,autoSkill:false}, o.opts||{}); delete S.opts.autoSell;
     const eq = Object.assign({}, o.equip||{});
     if(eq.amulette){ eq.talisman = eq.amulette; eq.amulette.slot="talisman"; } delete eq.amulette;   // ancienne version
     S.equip = Object.assign({arme:null,casque:null,armure:null,bottes:null,bouclier:null,talisman:null}, eq);
     S.inv = (o.inv||[]).map(it=>{ if(it.slot==="amulette") it.slot="talisman"; return it; });
+    if(!o.itemV2){   // nouvelle échelle des objets : on garde la part de chance de chaque objet, on recalcule ses stats
+      const OLDM = o.rar6 ? [1,1.3,1.8,2.8,4.4,7] : [1,1.3,1.6,2.6,4.2,7];
+      const conv = it => { if(!it || !SLOTS[it.slot]) return; const ri = (!o.rar6 && it.ri>=1) ? it.ri+1 : it.ri, base=SLOTS[it.slot].base;
+        for(const k in base){ if(!it[k]) continue; const old = base[k]*Math.pow(1.12,it.ilvl-1)*OLDM[Math.min(5,ri)], luck = Math.max(0.8, Math.min(1.2, it[k]/old));
+          it[k] = base[k]*Math.pow(ITEM_G,it.ilvl-1)*RAR[Math.min(5,ri)].m*luck; } };
+      (o.inv||[]).forEach(conv); Object.values(o.equip||{}).forEach(conv);
+      S.opts.autoEquip = false;
+    }
     if(!o.rar6){   // ancienne sauvegarde à 5 raretés : on insère le Peu commun (vert), les objets Rare+ montent d'un cran
       const up = it => { if(it && it.ri>=1) it.ri++; };
       S.inv.forEach(up); Object.values(S.equip).forEach(up); S.rar6 = true;
@@ -5034,10 +5220,10 @@ function offline(){
   const en = enemyFor(st);
   const tpk = en.hp/(C.atk/C.interval + C.famDps) + 0.3;
   const kills = Math.floor(el/tpk*0.5);
-  const g = kills*goldFor(st)*C.gold;
+  const g = kills*goldFor(st)*C.gold*ECO_PACE;
   if(g<=0) return;
   const cr = Math.floor(kills*0.01), ob = Math.floor(kills/70), tr = Math.floor(kills/20);
-  const scr = Math.ceil(kills*scrapFor(st)*C.scrapMult), nm = 0;
+  const scr = Math.ceil(kills*scrapFor(st)*C.scrapMult*ECO_PACE), nm = 0;
   const gain = ()=>{ S.gold += g; S.crystals += cr; S.scraps += scr; S.orbs += ob; S.treats += tr;
  };
   gain();
