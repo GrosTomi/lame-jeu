@@ -880,6 +880,10 @@ header{background:linear-gradient(180deg,#2a48b0 0%,#1f3b8f 60%,#1a3380 100%);bo
 .cbar .herobox{background:linear-gradient(#fffaf0,#f6e6c3);border:3px solid #e2b85c!important;box-shadow:0 3px 0 #9a6f1d55!important}
 nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px solid #e2b85c!important;box-shadow:0 -3px 0 #9a6f1d inset}
 .seg{background:linear-gradient(#1a3380,#14296a);border:2px solid #c9a24a;box-shadow:inset 0 2px 4px #0006}
+
+.mclose{position:sticky;top:-6px;float:right;margin:-8px -8px 0 0;z-index:3;width:34px;height:34px;border-radius:50%;background:linear-gradient(#fffaf0,#f0dcae);border:2px solid #c9a24a;color:#5a3d12;font-size:16px;font-weight:900;line-height:1;box-shadow:0 2px 0 #9a6f1d}
+.mclose:active{transform:scale(.9)}
+.atier{display:inline-block;white-space:nowrap;line-height:1.35;font-family:var(--disp);font-weight:400;font-size:12px;color:#fff;background:#c9a24a;border-radius:6px;padding:0 5px;margin-left:3px;vertical-align:1px}.atier small{font-size:9.5px;opacity:.85}
 </style>
 </head>
 <body>
@@ -895,7 +899,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1432";
+var BUILD_ID = "20261123-1442";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1042,7 +1046,7 @@ var BUILD_ID = "20261123-1432";
   <div class="vs">contre</div>
   <div class="rside"><div id="raidArmy">🏰</div><div class="small" id="raidMil"></div><div class="bar hhp"><i id="raidW"></i><b id="raidWt"></b></div></div>
   <div id="raidRes"></div><div id="raidTap">Touchez pour continuer</div></div>
-<div id="modal"><div class="box"><h3 id="mTitle"></h3><div id="mBody"></div><div class="acts" id="mActs"></div></div></div>
+<div id="modal"><div class="box"><button class="mclose" id="mClose" aria-label="Fermer">✕</button><h3 id="mTitle"></h3><div id="mBody"></div><div class="acts" id="mActs"></div></div></div>
 
 <script>
 "use strict";
@@ -1545,7 +1549,7 @@ function newState(keep){
     iap:{speed:false, noads:false, starter:false}, ads:{day:"", gems:0, boost:0, boostUntil:0},
     equip:{arme:null,casque:null,armure:null,bottes:null,bouclier:null,talisman:null},
     inv:[], scraps:60, mats:{metal:2,acier:2,cuir:2,bois:2,gemme:2}, opts:{autoEquip:false, qty:1, vibe:true, speed:1, showRaids:true, music:true, vol:0.6, sfx:true, notif:true, autoSkill:false},
-    tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}}, event:{tokens:0, bought:{}},
+    tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}, tier:{}, tiersV2:true}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
   if(keep){ for(const k of ["souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
@@ -1714,6 +1718,7 @@ function enemyFor(s){
   let [n,ic] = boss ? b.boss : pick(b.e), ev=false;
   if(!boss && eventActive() && Math.random()<0.2){ n="Dragonnet"; ic="§dragonnet§"; ev=true; }   // invasion du week-end
   let hp=EN_HP0*Math.pow(EN_HPG,s-1), atk=EN_ATK0*Math.pow(EN_ATKG,s-1);
+  if(s>100){ hp*=Math.pow(1.03, s-100); atk*=Math.pow(1.025, s-100); }   // au-delà de l'étape 100, chaque zone durcit un peu plus
   if(boss){ hp*=BOSS_HPM; atk*=BOSS_ATKM; }
   return {n,ic,boss,ev,hp,max:hp,atk,cd:1.6,timer:boss?30:0};
 }
@@ -1840,11 +1845,11 @@ function forgeN(n){
 function fuseAll(){
   let n=0, best=0, guard=0;
   while(guard++<500){
-    const g=fusionGroups()[0]; if(!g) break;
-    const pool = S.inv.filter(it=>it.slot===g.slot && it.ri===g.ri).sort((a,b)=>b.ilvl-a.ilvl).slice(0,3);
+    const g=fusionGroups().find(x=>S.scraps>=fuseCost(x.ri)); if(!g) break;
+    const pool = fusePool(g.slot, g.ri); S.scraps -= fuseCost(g.ri);
     const ids=new Set(pool.map(x=>x.id)); S.inv=S.inv.filter(x=>!ids.has(x.id));
     const sets=pool.map(x=>x.set).filter(Boolean), fset=sets.length ? sets.sort((a,b)=>sets.filter(v=>v===b).length-sets.filter(v=>v===a).length)[0] : undefined;
-    const it=makeItem(Math.max(...pool.map(x=>x.ilvl)), g.ri+1, g.slot, fset);
+    const it=makeItem(1, g.ri+1, g.slot, fset);
     placeItem(it); track("fuse"); n++; best=Math.max(best, it.ri);
   }
   if(!n) return;
@@ -1867,6 +1872,10 @@ function placeItem(it){
   if(autoEquipOK(it)){ equipItem(it, true); return "equip"; }
   S.inv.push(it); dirty.loot=true; return "inv";
 }
+/* Une fusion est un sacrifice : l'objet obtenu repart au niveau 1 et coûte des scraps
+   (3 forges au prix de votre record d'étape pour un Peu commun, puis ×2 à chaque rang). */
+const fuseCost = ri => Math.ceil(Math.max(30, craftScrap(S.maxStage)*0.2) * 3 * Math.pow(2, Math.max(0, ri)));   // ri = rareté de départ
+function fusePool(slot, ri){ return S.inv.filter(it=>it.slot===slot && it.ri===ri).sort((a,b)=>a.ilvl-b.ilvl || score(a)-score(b)).slice(0,3); }   // on sacrifie d'abord les moins avancés
 function fusionGroups(){
   const g={};
   for(const it of S.inv){ if(it.ri>=5) continue; const k=it.slot+"|"+it.ri; (g[k]=g[k]||[]).push(it); }
@@ -1874,13 +1883,14 @@ function fusionGroups(){
 }
 function fuse(slot, ri){
   lastPull = 0;
-  const pool = S.inv.filter(it=>it.slot===slot && it.ri===ri).sort((a,b)=>b.ilvl-a.ilvl).slice(0,3);
-  if(pool.length<3 || ri>=5) return;
+  const pool = fusePool(slot, ri), cost = fuseCost(ri);
+  if(pool.length<3 || ri>=5 || S.scraps<cost) return;
+  S.scraps -= cost;
   const ids = new Set(pool.map(x=>x.id));
   S.inv = S.inv.filter(x=>!ids.has(x.id));
   const sets = pool.map(x=>x.set).filter(Boolean), fset = sets.length ? sets.sort((a,b)=>sets.filter(v=>v===b).length-sets.filter(v=>v===a).length)[0] : undefined;
-  const it = makeItem(Math.max(...pool.map(x=>x.ilvl)), ri+1, slot, fset);
-  const placed = placeItem(it); track("fuse");
+  const it = makeItem(1, ri+1, slot, fset);
+  const placed = placeItem(it); track("fuse"); dirty.loot=dirty.res=true;
   log(`✨ Fusion : <b style="color:${RAR[it.ri].c}">${it.name}</b> (${RAR[it.ri].n})`, "loot");
   showReveal([{ic:SLOTS[slot].ic, n:it.name, ri:it.ri, tag: placed==="equip" ? "Fusion · Équipé !" : "Fusion !"}]);
 }
@@ -2384,12 +2394,12 @@ function renderLoot(){
   if(atelierTab==="craft"){
     const fc=itemCost(), F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100;
     const fus = fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${artSVG(g.slot, null, g.ri)}</div><div class="mid"><div class="t">3 ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b></div></div>
-        <button class="btn violet sm" data-fuse="${g.slot}|${g.ri}">Fusionner</button></div>`).join("");
+        <button class="btn violet sm" data-fuse="${g.slot}|${g.ri}" ${S.scraps>=fuseCost(g.ri)?"":"disabled"}>Fusionner<small>🔩 ${fmt(fuseCost(g.ri))}</small></button></div>`).join("");
     const nf=fusionGroups().length;
     body = sumBand({ic:spr("forge"), cid:"forgeLvB", val:F.lv, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
         btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>🔩 ${fmt(fc)}</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>🔩 ${fmt(fc*10)}</small></button><button class="btn violet" id="forge100" data-fn="100">×100<small>🔩 ${fmt(fc*100)}</small></button>`,
         ft:`Prix selon l'étape où vous combattez · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard')
-      + `<div class="card grow"><div class="chead"><h2>✨ Fusions<small>3 identiques = 1 de rareté supérieure</small></h2>${nf>1?`<button class="btn violet sm" id="fuseAll">Tout</button>`:""}</div>
+      + `<div class="card grow"><div class="chead"><h2>✨ Fusions<small>3 identiques = 1 de rareté supérieure, niveau 1</small></h2>${nf>1?`<button class="btn violet sm" id="fuseAll">Tout</button>`:""}</div>
         ${fus?`<div class="pager" data-pg="fuse"><div class="pgsrc list">${fus}</div></div>`:`<div class="empty-msg">Rien à fusionner pour l'instant. Forgez des objets : 3 objets identiques de même rareté se fusionnent en 1 de rareté supérieure.</div>`}</div>`;
   } else {
     const chips = [["all","Tout"],...SLOTKEYS.map(k=>[k,SLOTS[k].ic])].map(([k,t])=>`<button class="chip ${invFilter===k?"on":""}" data-filter="${k}">${t}</button>`).join("");
@@ -2557,6 +2567,7 @@ function openSheet(kind, id){
             {t: inTeam?"Retirer de l'équipe":"Mettre dans l'équipe", act:"team", cls: inTeam?"":"gold"}];
   }
   acts.push({t:"Fermer", act:"close"});
+  $("#mClose").style.display = "";
   $("#mTitle").innerHTML = title; $("#mBody").innerHTML = body;
   $("#mActs").innerHTML = acts.map(a=>`<button class="btn ${a.cls||""}" data-act="${a.act||""}" ${a.dis?"disabled":""}>${a.t}</button>`).join("");
   $("#modal").classList.add("on");
@@ -2608,7 +2619,7 @@ function updateDots(){
   $("#dot-city").classList.toggle("on", !!S.city && view!=="city" && (S.city.pending || BLD.some(b=>affordC(bldCost(b)))));
 }
 const soulCurve = st => st>80 ? Math.pow((st-80)/6,2) : 0;   // 100 → 11, 110 → 25, 130 → 69
-function soulGain(){ if(S.maxStage<PREST_MIN) return 0; return Math.max(0, Math.floor((soulCurve(S.maxStage)-soulCurve(S.runStart||1))*(hasP(15)?1.25:1))); }
+function soulGain(){ if(S.maxStage<prestMin()) return 0; return Math.max(0, Math.floor((soulCurve(S.maxStage)-soulCurve(S.runStart||1))*(hasP(15)?1.25:1))); }
 const runClimb = () => S.maxStage - (S.runStart||1);   // 100 → 11 âmes, 110 → 25, 130 → 69
 const chestOf = st => ({crystals: 20 + st, orbs: 3 + Math.floor(st/10), scraps: Math.ceil(craftScrap(st)*0.4)*15});
 let prestTab = "reb";
@@ -2622,8 +2633,8 @@ function renderPrest(){
     body = `<div class="card soulcard"><div class="big">👻 ${free}</div><div class="small">Âme${free>1?"s":""} à dépenser à l'Autel</div>
         <div class="soulnote">Gagnez des Âmes en renaissant. Une Âme dépensée disparaît.</div></div>
       <div class="card" style="text-align:center"><h2>Renaître</h2>
-        <div class="small" style="margin-bottom:10px">${S.maxStage<PREST_MIN?`Atteignez l'étape ${PREST_MIN} pour renaître (actuelle : ${S.maxStage}).`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b>, <b>${ch.orbs} 🔮</b> et ${fmt(ch.scraps)} scraps${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
-        ${S.maxStage>=PREST_MIN && g<=0?`<div class="small" style="margin:-4px 0 8px;color:var(--red)">Vous êtes reparti de l'étape ${S.runStart}. Montez plus haut que votre point de départ pour gagner des âmes.</div>`:""}
+        <div class="small" style="margin-bottom:10px">${S.maxStage<prestMin()?`Atteignez l'étape ${prestMin()} pour renaître (record de cette partie : ${S.maxStage}). Chaque Renaissance demande 20 étapes de plus que la précédente.`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b>, <b>${ch.orbs} 🔮</b> et ${fmt(ch.scraps)} scraps${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
+        ${S.maxStage>=prestMin() && g<=0?`<div class="small" style="margin:-4px 0 8px;color:var(--red)">Vous êtes reparti de l'étape ${S.runStart}. Montez plus haut que votre point de départ pour gagner des âmes.</div>`:""}
         <button class="btn violet wide" id="btnPrest" ${g>0 && runClimb()>=20?"":"disabled"}>🔥 Renaître (+${g} âmes)</button></div>
       ${nextM?`<div class="card"><div class="chead"><h2>Prochain palier</h2><span class="small">Renaissances : <b>${S.prestiges}</b></span></div><div class="mrow"><span class="mp">${nextM.p}</span><span class="mi">${nextM.ic}</span><span class="mt">${nextM.t}</span></div></div>`:""}`;
   } else if(prestTab==="alt"){
@@ -3067,7 +3078,7 @@ function PETS_RATES_HTML(){
   `<div class="small" style="margin-top:10px">Au départ : Commun, Peu commun et Rare. Les Épiques arrivent au niveau ${RAR_UNLOCK[3]}, les Légendaires au niveau ${RAR_UNLOCK[4]}, les Mythiques au niveau ${RAR_UNLOCK[5]} (très rares). Une fois les Légendaires débloqués, un Légendaire est garanti au plus tard à la ${PITY}<sup>e</sup> invocation. Un ×10 contient au moins un Rare. Un doublon fait gagner des étoiles (+50 % de puissance chacune, 5★ max).</div></div>`;
 }
 function modal(title, body, acts){
-  sheet = null;
+  sheet = null; $("#mClose").style.display = acts.length ? "" : "none";   // pas de croix quand un choix est obligatoire
   $("#mTitle").innerHTML=title; $("#mBody").innerHTML=body;
   const A=$("#mActs"); A.innerHTML="";
   acts.forEach(a=>{ const b=document.createElement("button"); b.className="btn "+(a.cls||""); b.innerHTML=a.t; b.onclick=()=>{ $("#modal").classList.remove("on"); a.f&&a.f(); }; A.appendChild(b); });
@@ -3077,6 +3088,7 @@ function modal(title, body, acts){
 document.addEventListener("click", e=>{
   const t = e.target.closest("button, [data-shbld], [data-tfloor], #goal.raidgo"); if(!t) return;
   if(t.tagName==="BUTTON" && !t.dataset.skill && !t.disabled) Sfx.play(t.closest("nav") || t.dataset.sub || t.dataset.dtab || t.dataset.shoptab || t.dataset.ftab ? "tab" : "ui");
+  if(t.id==="mClose"){ if(sheet) closeSheet(); else $("#modal").classList.remove("on"); return; }
   if(t.dataset.pickcls){ pickClass(t.dataset.pickcls); return; }
   if(t.dataset.guide){ guideShow(t.dataset.guide, false); return; }
   if(t.dataset.altar){ altarBuy(t.dataset.altar); renderPrest(); return; }
@@ -4171,6 +4183,7 @@ function track(ev, n=1){
 
 /* ---------- Déblocage progressif des onglets ---------- */
 const PREST_MIN = 100;
+const prestMin = () => PREST_MIN + 20*Math.min(S.prestiges||0, 20);   // 100, puis +20 étapes à chaque Renaissance (jusqu'à 500)
 const UNLOCK = {hero:3, loot:8, skills:15, fams:20, defis:30, city:CITY_UNLOCK, prest:PREST_MIN};
 const UNLOCK_TXT = {hero:"l'onglet Héros", fams:"les Familiers", loot:"la Forge d'équipement", skills:"les compétences", defis:"les Défis", prest:"la Renaissance", city:"votre Fief"};
 const unlocked = k => !(k in UNLOCK) || S.best>=UNLOCK[k] || S.prestiges>0 || (k==="fams" && S.pets && Object.keys(S.pets).length>0) || !!(S.tuto && S.tuto.seen && S.tuto.seen[k]) || (k==="city" && !!S.city);   // déjà débloqué une fois = reste ouvert   // qui a déjà des familiers les garde
@@ -4208,7 +4221,7 @@ const GUIDES = {
     ["🔨","Chaque objet forgé fait monter votre niveau de forge. Comme pour les invocations : Communs, Peu communs et Rares au départ, Épiques au niveau "+RAR_UNLOCK[3]+", Légendaires au niveau "+RAR_UNLOCK[4]+", Mythiques au niveau "+RAR_UNLOCK[5]+"."],
     ["⬆️","Les objets sortent au niveau 1 et vont dans l'Inventaire : touchez-en un pour le comparer et l'équiper (une flèche ▲ signale les meilleurs). Renforcez vos objets portés avec des scraps : +6 % par niveau."],
     ["💎","La rareté compte beaucoup : chaque rareté vaut environ 3 fois la précédente. Un Commun niveau 100 vaut à peine un Mythique niveau 1."],
-    ["♻️","3 objets identiques de même rareté se fusionnent en un objet de la rareté au-dessus. Les autres peuvent être gardés, démontés ou vendus."],
+    ["♻️","3 objets identiques de même rareté se fusionnent en un objet de la rareté au-dessus, qui repart au niveau 1 et coûte des scraps. Les autres peuvent être gardés, démontés ou vendus."],
     ["✨","Certains objets appartiennent à l'un des 8 ensembles (Loup, Templier, Ombres, Wyrm, Marchand, Berserker, Glacier, Paladin), reconnaissables à leurs couleurs : porter 2 ou 4 pièces du même donne un gros bonus."],
     ["☑️","Dans l'Inventaire, le bouton Sélection permet de choisir plusieurs objets pour les démonter ou les vendre d'un coup. Des places en plus s'achètent au Marché."]]},
   skills:{ic:"💥", t:"Les compétences sont débloquées", s:"Les compétences", go:"combat", go_t:"Essayer", l:[
@@ -4237,7 +4250,7 @@ const GUIDES = {
     ["🐲","Le Titan de la semaine : infligez-lui un maximum de dégâts en 30 secondes, 3 essais par jour. Plus vous frappez fort, plus vous débloquez de récompenses, remises à zéro chaque lundi."],
     ["📍","Les Défis ont leur propre onglet en bas de l'écran."]]},
   prest: {ic:"👻", t:"La Renaissance est débloquée", s:"La Renaissance", go:"prest", go_t:"Voir les Âmes", l:[
-    ["🔥","À partir de l'étape "+PREST_MIN+", vous pouvez renaître : vous repartez à zéro avec des Âmes, un coffre de cristaux et de scraps. Plus vous êtes allé loin, plus vous gagnez."],
+    ["🔥","À partir de l'étape "+PREST_MIN+" (puis 20 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro avec des Âmes, un coffre de cristaux et de scraps. Plus vous êtes allé loin, plus vous gagnez."],
     ["⏩","Les Âmes ne comptent que le chemin parcouru pendant la partie : si vous repartez d'une étape avancée, il faut monter au moins 20 étapes plus haut pour renaître à nouveau."],
     ["👻","Les Âmes sont une monnaie : dépensez-les à l'Autel des Âmes pour des améliorations permanentes : or, scraps, familiers, chances de forge, départ avancé à une étape plus haute…"],
     ["🏅","Chaque Renaissance débloque un palier : 4e place de familier, forge automatique, 4e compétence, familier exclusif…"],
@@ -4869,67 +4882,56 @@ function questsBody(){
 }
 
 /* ---------- Succès ---------- */
+/* Succès à paliers : chaque ligne monte de palier en palier, avec une récompense plus grosse à chaque fois.
+   « old » : identifiants des anciens succès, pour ne pas redonner une récompense déjà touchée. */
 const ACH = [
-  {id:"st25",  n:"Aventurier",        d:"Atteindre l'étape 25",           v:()=>S.best, g:25, r:20},
-  {id:"st100", n:"Héros de légende",  d:"Atteindre l'étape 100",          v:()=>S.best, g:100, r:100},
-  {id:"st50",  n:"Conquérant",        d:"Atteindre l'étape 50",           v:()=>S.best, g:50, r:30},
-  {id:"st150", n:"Héros du royaume",  d:"Atteindre l'étape 150",          v:()=>S.best, g:150, r:80},
-  {id:"st200", n:"Légende éternelle", d:"Atteindre l'étape 200",          v:()=>S.best, g:200, r:120},
-  {id:"k1",    n:"Chasseur",          d:"Vaincre 1 000 monstres",         v:()=>S.stats.kills||0, g:1e3, r:20},
-  {id:"k2",    n:"Massacreur",        d:"Vaincre 10 000 monstres",        v:()=>S.stats.kills||0, g:1e4, r:40},
-  {id:"k3",    n:"Fléau des monstres",d:"Vaincre 100 000 monstres",       v:()=>S.stats.kills||0, g:1e5, r:80},
-  {id:"b1",    n:"Tueur de boss",     d:"Terrasser 10 boss",              v:()=>S.stats.bosses||0, g:10, r:20},
-  {id:"b2",    n:"Briseur de couronnes", d:"Terrasser 50 boss",           v:()=>S.stats.bosses||0, g:50, r:50},
-  {id:"p1",    n:"Invocateur",        d:"Invoquer 10 fois",               v:()=>S.pulls||0, g:10, r:15},
-  {id:"p2",    n:"Grand invocateur",  d:"Invoquer 100 fois",              v:()=>S.pulls||0, g:100, r:50},
-  {id:"leg",   n:"Compagnon légendaire", d:"Obtenir un familier Légendaire", v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=4).length, g:1, r:25},
-  {id:"myth",  n:"Mythique !",        d:"Obtenir un familier Mythique",   v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=5).length, g:1, r:50},
-  {id:"coll",  n:"Collectionneur",    d:"Obtenir tous les familiers d'invocation", v:()=>PETS.filter(p=>!p.event && S.pets[p.id]).length, g:()=>PETS.filter(p=>!p.event).length, r:100},
-  {id:"c1",    n:"Apprenti forgeron", d:"Forger 10 objets",            v:()=>S.stats.craft||0, g:10, r:15},
-  {id:"c2",    n:"Maître forgeron",   d:"Forger 100 objets",              v:()=>S.stats.craft||0, g:100, r:50},
-  {id:"c3",    n:"Forgeron légendaire", d:"Forger 1 000 objets",          v:()=>S.stats.craft||0, g:1000, r:100},
-  {id:"f1",    n:"Alchimiste",        d:"Fusionner 10 fois",              v:()=>S.stats.fuse||0, g:10, r:30},
-  {id:"set4",  n:"Panoplie",          d:"Porter 4 pièces d'un même ensemble", v:()=>Math.max(0,...Object.values(setCounts())), g:4, r:40},
-  {id:"r1",    n:"Renaissance",       d:"Renaître une fois",              v:()=>S.prestiges, g:1, r:30},
-  {id:"r2",    n:"Phénix",            d:"Renaître 5 fois",                v:()=>S.prestiges, g:5, r:60},
-  {id:"cl5",   n:"Polyvalent",        d:"Débloquer 5 classes",            v:()=>Object.keys(S.classes).length, g:5, r:40},
-  {id:"d1",    n:"Défenseur",         d:"Repousser 5 assauts du fief",    v:()=>S.city?S.city.wins:0, g:5, r:30},
-  {id:"d2",    n:"Rempart du royaume",d:"Repousser 20 assauts du fief",   v:()=>S.city?S.city.wins:0, g:20, r:60},
-  {id:"st300", n:"Au-delà des cartes",d:"Atteindre l'étape 300",          v:()=>S.best, g:300, r:150},
-  {id:"st500", n:"Mythe vivant",      d:"Atteindre l'étape 500",          v:()=>S.best, g:500, r:250},
-  {id:"k4",    n:"Fin du monde",      d:"Vaincre 1 000 000 de monstres",  v:()=>S.stats.kills||0, g:1e6, r:150},
-  {id:"b3",    n:"Régicide",          d:"Terrasser 200 boss",             v:()=>S.stats.bosses||0, g:200, r:80},
-  {id:"b4",    n:"Chute des empires", d:"Terrasser 1 000 boss",           v:()=>S.stats.bosses||0, g:1000, r:150},
-  {id:"p3",    n:"Maître des orbes",  d:"Invoquer 500 familiers",         v:()=>S.pulls||0, g:500, r:80},
-  {id:"p4",    n:"Archimage",         d:"Invoquer 2 000 familiers",       v:()=>S.pulls||0, g:2000, r:150},
-  {id:"sk1",   n:"Érudit",            d:"Invoquer 100 compétences",       v:()=>S.skl?S.skl.pulls||0:0, g:100, r:50},
-  {id:"skc",   n:"Grimoire complet",  d:"Obtenir toutes les compétences", v:()=>S.skl?Object.keys(S.skl.owned).length:0, g:()=>SKILLS.length, r:120},
-  {id:"lv20",  n:"Invocateur suprême",d:"Atteindre le niveau d'invocation 20", v:()=>sumLevel().lv, g:20, r:100},
-  {id:"c4",    n:"Forge éternelle",   d:"Forger 10 000 objets",           v:()=>S.stats.craft||0, g:1e4, r:150},
-  {id:"f2",    n:"Grand alchimiste",  d:"Fusionner 100 fois",             v:()=>S.stats.fuse||0, g:100, r:80},
-  {id:"up1",   n:"Affûteur",          d:"Renforcer des objets de 500 niveaux", v:()=>S.stats.upgrade||0, g:500, r:50},
-  {id:"mi1",   n:"Relique",           d:"Posséder un objet Mythique",     v:()=>[...S.inv, ...Object.values(S.equip)].some(it=>it && it.ri>=5)?1:0, g:1, r:80},
-  {id:"set2",  n:"Double panoplie",   d:"Avoir deux bonus d'ensemble actifs", v:()=>Object.values(setCounts()).filter(n=>n>=2).length, g:2, r:40},
-  {id:"tw1",   n:"Grimpeur",          d:"Conquérir l'étage 10 de la Tour", v:()=>S.chal?S.chal.floor-1:0, g:10, r:40},
-  {id:"tw2",   n:"Maître de la Tour", d:"Conquérir l'étage 50 de la Tour", v:()=>S.chal?S.chal.floor-1:0, g:50, r:120},
-  {id:"ti1",   n:"Tueur de titans",   d:"Infliger ×50 au Titan de la semaine", v:()=>S.chal?S.chal.wbest||0:0, g:50, r:80},
-  {id:"r3",    n:"Cycle éternel",     d:"Renaître 10 fois",               v:()=>S.prestiges, g:10, r:100},
-  {id:"r4",    n:"Immortel",          d:"Renaître 25 fois",               v:()=>S.prestiges, g:25, r:200},
-  {id:"pl25",  n:"Meilleur ami",      d:"Monter un familier au niveau 25", v:()=>Math.max(0,...Object.values(S.pets).map(o=>o.lvl||1)), g:25, r:60},
-  {id:"str7",  n:"Fidèle",            d:"Se connecter 7 jours d'affilée", v:()=>S.streak?S.streak.n||0:0, g:7, r:40},
-  {id:"str30", n:"Pilier du royaume", d:"Se connecter 30 jours d'affilée", v:()=>S.streak?S.streak.n||0:0, g:30, r:150},
-  {id:"bp30",  n:"Champion de la saison", d:"Atteindre le palier 30 du passe de combat", v:()=>typeof bpLevel==="function"?bpLevel():0, g:30, r:100},
-  {id:"gold1", n:"Trésor royal",      d:"Posséder 1 Md d'or",             v:()=>S.gold, g:1e9, r:60},
+  {id:"stage", n:"Explorateur",     d:"Atteindre l'étape {g}",               v:()=>S.best, t:[[25,20],[50,30],[100,60],[150,80],[200,120],[300,150],[500,250],[750,350],[1000,500]], old:["st25","st50","st100","st150","st200","st300","st500"]},
+  {id:"kills", n:"Chasseur",        d:"Vaincre {g} monstres",                 v:()=>S.stats.kills||0, t:[[1e3,20],[1e4,40],[1e5,80],[1e6,150],[1e7,300],[1e8,500]], old:["k1","k2","k3","k4"]},
+  {id:"boss",  n:"Tueur de boss",   d:"Terrasser {g} boss",                   v:()=>S.stats.bosses||0, t:[[10,20],[50,50],[200,80],[1000,150],[5000,300],[20000,500]], old:["b1","b2","b3","b4"]},
+  {id:"craft", n:"Forgeron",        d:"Forger {g} objets",                    v:()=>S.stats.craft||0, t:[[10,15],[100,50],[1000,100],[10000,150],[25000,250],[100000,500]], old:["c1","c2","c3","c4"]},
+  {id:"fuse",  n:"Alchimiste",      d:"Fusionner {g} fois",                   v:()=>S.stats.fuse||0, t:[[10,30],[100,80],[1000,150],[5000,300],[20000,500]], old:["f1","f2"]},
+  {id:"upg",   n:"Affûteur",        d:"Renforcer des objets de {g} niveaux",  v:()=>S.stats.upgrade||0, t:[[500,50],[5000,100],[50000,200],[250000,350],[1e6,500]], old:["up1"]},
+  {id:"pulls", n:"Invocateur",      d:"Invoquer {g} familiers",               v:()=>S.pulls||0, t:[[10,15],[100,50],[500,80],[2000,150],[10000,300],[50000,500]], old:["p1","p2","p3","p4"]},
+  {id:"spull", n:"Érudit",          d:"Invoquer {g} compétences",             v:()=>S.skl?S.skl.pulls||0:0, t:[[10,15],[100,50],[500,80],[2000,150],[10000,300]], old:[null,"sk1"]},
+  {id:"reb",   n:"Phénix",          d:"Renaître {g} fois",                    v:()=>S.prestiges, t:[[1,30],[5,60],[10,100],[25,200],[50,300],[100,500]], old:["r1","r2","r3","r4"]},
+  {id:"def",   n:"Défenseur",       d:"Repousser {g} assauts du fief",        v:()=>S.city?S.city.wins:0, t:[[5,30],[20,60],[100,120],[500,250],[2000,400]], old:["d1","d2"]},
+  {id:"tower", n:"Grimpeur",        d:"Conquérir l'étage {g} de la Tour",     v:()=>S.chal?S.chal.floor-1:0, t:[[10,40],[50,120],[100,200],[250,350],[500,500]], old:["tw1","tw2"]},
+  {id:"titan", n:"Tueur de titans",  d:"Infliger ×{g} au Titan de la semaine", v:()=>S.chal?S.chal.wbest||0:0, t:[[50,80],[500,150],[5000,300],[50000,500]], old:["ti1"]},
+  {id:"gold",  n:"Trésor royal",    d:"Posséder {g} d'or",                    v:()=>S.gold, t:[[1e9,60],[1e15,100],[1e21,200],[1e30,350],[1e45,500]], old:["gold1"]},
+  {id:"streak",n:"Fidèle",          d:"Se connecter {g} jours d'affilée",     v:()=>S.streak?S.streak.n||0:0, t:[[7,40],[30,150],[100,400]], old:["str7","str30"]},
+  {id:"petlv", n:"Meilleur ami",    d:"Monter un familier au niveau {g}",     v:()=>Math.max(0,...Object.values(S.pets).map(o=>o.lvl||1)), t:[[10,30],[25,60],[50,150]], old:[null,"pl25"]},
+  {id:"slv",   n:"Invocateur suprême", d:"Atteindre le niveau d'invocation {g}", v:()=>sumLevel().lv, t:[[5,30],[10,60],[15,80],[20,100]], old:[null,null,null,"lv20"]},
+  {id:"cls",   n:"Polyvalent",      d:"Débloquer {g} classes",                v:()=>Object.keys(S.classes).length, t:[[3,20],[5,40],[()=>CLASSES.length,100]], old:[null,"cl5"]},
+  {id:"leg",   n:"Compagnon légendaire", d:"Obtenir un familier Légendaire",  v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=4).length, t:[[1,25]], old:["leg"]},
+  {id:"myth",  n:"Mythique !",      d:"Obtenir un familier Mythique",         v:()=>Object.keys(S.pets).filter(id=>petDef(id)&&petDef(id).r>=5).length, t:[[1,50]], old:["myth"]},
+  {id:"coll",  n:"Collectionneur",  d:"Obtenir tous les familiers d'invocation", v:()=>PETS.filter(p=>!p.event && S.pets[p.id]).length, t:[[()=>PETS.filter(p=>!p.event).length,100]], old:["coll"]},
+  {id:"skc",   n:"Grimoire complet", d:"Obtenir toutes les compétences",      v:()=>S.skl?Object.keys(S.skl.owned).length:0, t:[[()=>SKILLS.length,120]], old:["skc"]},
+  {id:"relic", n:"Relique",         d:"Posséder un objet Mythique",           v:()=>[...S.inv, ...Object.values(S.equip)].some(it=>it && it.ri>=5)?1:0, t:[[1,80]], old:["mi1"]},
+  {id:"set",   n:"Panoplie",        d:"Porter 4 pièces d'un même ensemble",   v:()=>Math.max(0,...Object.values(setCounts())), t:[[4,40]], old:["set4"]},
+  {id:"set2",  n:"Double panoplie", d:"Avoir deux bonus d'ensemble actifs",   v:()=>Object.values(setCounts()).filter(n=>n>=2).length, t:[[2,40]], old:["set2"]},
+  {id:"bp30",  n:"Champion de la saison", d:"Atteindre le palier 30 du passe de combat", v:()=>typeof bpLevel==="function"?bpLevel():0, t:[[30,100]], old:["bp30"]},
 ];
-const achGoal = a => typeof a.g==="function" ? a.g() : a.g;
-const achReady = a => !S.ach.claimed[a.id] && a.v()>=achGoal(a);
-function claimAch(id){ const a=ACH.find(x=>x.id===id); if(!a || !achReady(a)) return; S.ach.claimed[id]=true; grant({crystals:a.r}); Sfx.play("legend"); toast(`${spr("trophee")} Succès « ${a.n} » : +${a.r} ${spr("cristal")}`); }
+const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+const achTier = a => (S.ach.tier && S.ach.tier[a.id]) || 0;                 // paliers déjà récupérés
+const achDone = a => achTier(a) >= a.t.length;
+const achGoal = a => { const g=a.t[Math.min(achTier(a), a.t.length-1)][0]; return typeof g==="function" ? g() : g; };
+const achRew  = a => a.t[Math.min(achTier(a), a.t.length-1)][1];
+const achReady = a => !achDone(a) && a.v()>=achGoal(a);
+function achMigrate(){   // anciens succès : les paliers déjà touchés sont comptés comme récupérés
+  S.ach.tier = S.ach.tier || {};
+  if(S.ach.tiersV2) return;
+  for(const a of ACH){ let n=0; (a.old||[]).forEach((id,k)=>{ if(id && S.ach.claimed && S.ach.claimed[id]) n=Math.max(n,k+1); }); if(n) S.ach.tier[a.id]=Math.max(achTier(a), n); }
+  S.ach.tiersV2 = true;
+}
+function claimAch(id){ const a=ACH.find(x=>x.id===id); if(!a || !achReady(a)) return; const r=achRew(a); S.ach.tier[id]=achTier(a)+1; grant({crystals:r}); Sfx.play("legend"); toast(`${spr("trophee")} Succès « ${a.n} » : +${r} ${spr("cristal")}`); }
 function achBody(){
-  const done=ACH.filter(a=>S.ach.claimed[a.id]).length;
-  const rows=[...ACH].sort((a,b)=>(achReady(b)-achReady(a)) || (!!S.ach.claimed[a.id]-!!S.ach.claimed[b.id])).map(a=>{ const g=achGoal(a), v=Math.min(g,a.v()), c=S.ach.claimed[a.id], rd=achReady(a);
-    return `<div class="qrow ${c?"claimed":""}"><div class="mid"><b>${spr(c?"trophee":"etoile")} ${a.n}</b><small>${a.d} · ${a.r} ${spr("cristal")}</small><div class="prog"><i style="width:${v/g*100}%"></i></div></div>
-      ${c?`<span class="badge bup">Obtenu</span>`:`<button class="btn sm ${rd?"gold":""}" data-act="a:${a.id}" ${rd?"":"disabled"}>${rd?"Récupérer":fmt(v)+"/"+fmt(g)}</button>`}</div>`; }).join("");
-  return `<div class="small" style="margin-bottom:8px">${done} / ${ACH.length} succès obtenus.</div>${rows}`;
+  const tot=ACH.reduce((n,a)=>n+a.t.length,0), got=ACH.reduce((n,a)=>n+Math.min(achTier(a),a.t.length),0);
+  const rows=[...ACH].sort((a,b)=>(achReady(b)-achReady(a)) || (achDone(a)-achDone(b))).map(a=>{
+    const dn=achDone(a), g=achGoal(a), v=Math.min(g,a.v()), rd=achReady(a), tr=achTier(a), multi=a.t.length>1;
+    const lvl = multi ? `<span class="atier">${dn?ROMAN[a.t.length-1]:ROMAN[tr]}<small>/${ROMAN[a.t.length-1]}</small></span>` : "";
+    return `<div class="qrow ${dn?"claimed":""}"><div class="mid"><b>${spr(dn?"trophee":"etoile")} ${a.n} ${lvl}</b><small>${a.d.replace("{g}", fmt(g))}${dn?"":` · ${achRew(a)} ${spr("cristal")}`}</small><div class="prog"><i style="width:${dn?100:v/g*100}%"></i></div></div>
+      ${dn?`<span class="badge bup">Terminé</span>`:`<button class="btn sm ${rd?"gold":""}" data-act="a:${a.id}" ${rd?"":"disabled"}>${rd?"Récupérer":fmt(v)+"/"+fmt(g)}</button>`}</div>`; }).join("");
+  return `<div class="small" style="margin-bottom:8px">${got} / ${tot} paliers de succès obtenus.</div>${rows}`;
 }
 
 /* ---------- Fenêtre « Récompenses » (calendrier, quêtes, succès) ---------- */
@@ -5328,7 +5330,7 @@ function load(o){
     if(!unlocked("skills") && !(S.skl.pulls>0) && Object.keys(S.skl.owned).every(id=>["coup","cri","bandage"].includes(id))){ S.skl.owned={}; S.skl.eq=[]; }
     if(unlocked("skills")) sklStarter();
     S.quests = Object.assign({day:"", list:[], bonus:false}, o.quests||{});
-    S.ach = Object.assign({claimed:{}}, o.ach||{}); S.event = Object.assign({tokens:0, bought:{}}, o.event||{});
+    S.ach = Object.assign({claimed:{}, tier:{}}, o.ach||{}); achMigrate(); S.event = Object.assign({tokens:0, bought:{}}, o.event||{});
     const legacySet = n => /du Loup$/.test(n)?"loup":/du Templier$/.test(n)?"templier":/des Ombres$/.test(n)?"ombres":undefined;
     for(const it of [...(o.inv||[]), ...Object.values(o.equip||{})]) if(it && !it.set && it.name){ const st=legacySet(it.name); if(st) it.set=st; }
     S.joined = o.joined || "2000-01-01";   // anciens joueurs : ils gardent tous les messages
