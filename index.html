@@ -852,6 +852,34 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 .tile .canup{display:none;position:absolute;top:2px;right:3px;width:17px;height:17px;border-radius:50%;background:#2f9e44;color:#fff;font-size:10px;line-height:17px;text-align:center;font-family:Nunito;font-weight:900;box-shadow:0 1px 0 #1b6b2c;animation:upb 1.4s ease-in-out infinite}
 .tile.up .canup{display:block}
 @keyframes upb{50%{transform:translateY(-2px)}}
+
+#fxa{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+#fxu{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483000}
+
+/* ===== Direction artistique : parchemin, bois, or ===== */
+header{background:linear-gradient(180deg,#2a48b0 0%,#1f3b8f 60%,#1a3380 100%);border-bottom:4px solid #e2b85c;box-shadow:0 3px 0 #9a6f1d,0 6px 12px #0003}
+.pill,.iconbtn{background:linear-gradient(180deg,#14296a,#0e1d52);border:2px solid #c9a24a;box-shadow:inset 0 1px 0 #ffffff26,inset 0 -2px 0 #0004,0 2px 0 #0b1640}
+.iconbtn.gift{background:linear-gradient(#ffd76b,#f0a81c);border-color:#fff3c4;box-shadow:inset 0 1px 0 #fff8,0 2px 0 #9a6f1d}
+#mini{background:linear-gradient(180deg,#1c3590,#162b78);border-bottom:2px solid #c9a24a}
+.bar{border:2px solid #f2d27a;background:linear-gradient(#0a133d,#1c2a66);box-shadow:inset 0 2px 3px #0008,0 1px 0 #0003}
+.bar>i{position:relative}
+.bar>i::after{content:"";position:absolute;left:0;right:0;top:0;height:45%;background:linear-gradient(#ffffff59,#ffffff00);border-radius:inherit}
+.ehp>i{background:linear-gradient(#ff7b7b,#e03131 60%,#b3202a)}
+.hhp>i{background:linear-gradient(#7ef09a,#2fb350 60%,#1f8a3c)}
+#modal .box{background:radial-gradient(circle at 20% 10%,#fffaf0 0,transparent 40%),radial-gradient(circle at 85% 90%,#f3e2bd 0,transparent 45%),linear-gradient(#fdf3dc,#f6e6c3);
+  border:4px solid #e2b85c;box-shadow:0 0 0 3px #9a6f1d,inset 0 0 0 3px #fffaf0,inset 0 0 0 5px #e2b85c66,0 18px 40px #000a;position:relative}
+#modal .box::before,#modal .box::after{content:"";position:absolute;width:22px;height:22px;border:3px solid #c9a24a;pointer-events:none}
+#modal .box::before{top:7px;left:7px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+#modal .box::after{bottom:7px;right:7px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+#modal h3{color:#4a2f0c;display:flex;align-items:center;justify-content:center;gap:10px}
+#modal h3::before,#modal h3::after{content:"";flex:0 1 38px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#c9a24a)}
+#modal h3::after{background:linear-gradient(90deg,#c9a24a,transparent)}
+#arena{border:4px solid #f2d27a;box-shadow:0 0 0 3px #8a5a22,0 6px 0 #1f3b8f66,inset 0 0 40px #0003}
+#arena::before{content:"";position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg,transparent 0,var(--ground,#4f8a34) 38%);opacity:.55;pointer-events:none;z-index:0}
+#arena::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 2px #ffffff40,inset 0 -30px 50px -20px #0004;border-radius:18px;pointer-events:none;z-index:2}
+.cbar .herobox{background:linear-gradient(#fffaf0,#f6e6c3);border:3px solid #e2b85c!important;box-shadow:0 3px 0 #9a6f1d55!important}
+nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px solid #e2b85c!important;box-shadow:0 -3px 0 #9a6f1d inset}
+.seg{background:linear-gradient(#1a3380,#14296a);border:2px solid #c9a24a;box-shadow:inset 0 2px 4px #0006}
 </style>
 </head>
 <body>
@@ -867,7 +895,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1418";
+var BUILD_ID = "20261123-1432";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -880,6 +908,7 @@ var BUILD_ID = "20261123-1418";
   document.addEventListener("visibilitychange", function(){ if(!document.hidden) check(); });
 })();
 </script>
+<canvas id="fxu" aria-hidden="true"></canvas>
 <div id="app">
 <header>
   <div class="res">
@@ -920,6 +949,7 @@ var BUILD_ID = "20261123-1418";
           <div class="dside dright"><div class="ename" id="ename">—</div><div class="bar ehp"><i id="ehpFill"></i><b id="ehpTxt"></b></div><div id="enemy">👺</div></div>
         </div>
       </div>
+      <canvas id="fxa" aria-hidden="true"></canvas>
       <div id="floats"></div>
       <div class="dead" id="dead" style="display:none">💀 Vous êtes tombé<span>Retour à l'étape précédente</span></div>
     </div>
@@ -1282,6 +1312,9 @@ const SPR = (()=>{
     ${glow(23,30,"#fff6a8",3.5)}${glow(41,30,"#fff6a8",3.5)}<path d="M14 40 Q20 64 32 62 Q44 64 50 40 Q42 48 32 46 Q22 48 14 40 Z" fill="#fff" ${S}/><path d="M26 44 q6 3 12 0" fill="none" ${s2}/>`;
   P.dragonnet = P.p_dragon.replace(/#3fbf5f/g,"#e8553b").replace(/#a8e6a0/g,"#ffc2a8").replace(/#2e9c4a/g,"#a8331f");
   P.ecaille = `<path d="M32 4 Q56 10 56 30 Q56 50 32 60 Q8 50 8 30 Q8 10 32 4 Z" fill="#e0313f" ${S}/><path d="M32 12 Q48 16 48 30 Q48 44 32 52" fill="none" stroke="#ff8a8a" stroke-width="4" stroke-linecap="round"/><path d="M20 22 Q32 28 44 22 M18 36 Q32 42 46 36" fill="none" stroke="#a3122a" stroke-width="3"/>`;
+  P.cle = `<circle cx="20" cy="22" r="13" fill="#ffc93c" ${S}/><circle cx="20" cy="22" r="5" fill="#fff6d6" ${S}/><path d="M30 30 L54 54 M44 44 L50 38 M50 50 L56 44" fill="none" stroke="${k}" stroke-width="9" stroke-linecap="round"/><path d="M30 30 L54 54 M44 44 L50 38 M50 50 L56 44" fill="none" stroke="#ffc93c" stroke-width="4.5" stroke-linecap="round"/>`;
+  P.palette = `<path d="M32 6 Q58 6 58 30 Q58 42 46 42 Q38 42 40 50 Q42 58 32 58 Q6 58 6 32 Q6 6 32 6 Z" fill="#f3d9a8" ${S}/><circle cx="20" cy="24" r="5" fill="#e03131" ${S}/><circle cx="32" cy="16" r="5" fill="#3b82f6" ${S}/><circle cx="45" cy="22" r="5" fill="#2fb380" ${S}/><circle cx="18" cy="40" r="5" fill="#ffd43b" ${S}/>`;
+  P.lune = `<path d="M40 6 A26 26 0 1 0 58 42 A20 20 0 1 1 40 6 Z" fill="#ffe066" ${S}/><circle cx="24" cy="30" r="3" fill="#f0c419"/><circle cx="30" cy="44" r="2.4" fill="#f0c419"/>`;
   P.cadenas = `<path d="M18 28 V20 Q18 6 32 6 Q46 6 46 20 V28" fill="none" stroke="${k}" stroke-width="9"/><path d="M18 28 V20 Q18 6 32 6 Q46 6 46 20 V28" fill="none" stroke="#b7c0cf" stroke-width="4"/><rect x="10" y="28" width="44" height="32" rx="6" fill="#ffc93c" ${S}/><circle cx="32" cy="42" r="5" fill="${k}"/><rect x="30" y="44" width="4" height="9" fill="${k}"/>`;
   P.p_lapin = `<ellipse cx="22" cy="16" rx="6" ry="15" fill="#f4f4f8" ${S}/><ellipse cx="42" cy="16" rx="6" ry="15" fill="#f4f4f8" ${S}/><ellipse cx="22" cy="16" rx="2.5" ry="10" fill="#f6b6c8"/><ellipse cx="42" cy="16" rx="2.5" ry="10" fill="#f6b6c8"/>
     <path d="M10 42 Q10 24 32 24 Q54 24 54 42 Q52 60 32 60 Q12 60 10 42 Z" fill="#fbfbff" ${S}/>${cute(24,40,5)}${cute(40,40,5)}<path d="M29 48 h6 l-3 3 z" fill="#f38fa9" ${s2}/><path d="M32 51 q-3 4 -6 2 M32 51 q3 4 6 2" fill="none" ${s2}/>
@@ -1322,7 +1355,8 @@ const ICO_MAP = {
   "🧛":"vampire","☠️":"liche","👿":"demon","🐕":"cerbere","💪":"bras","🪓":"hache","🌿":"feuille","🧘":"lotus","🐀":"p_rat","🐈":"p_chat","🐗":"p_sanglier","🐦":"p_corbeau",
   "🦅":"p_faucon","🦊":"p_renard","🐻":"p_ours","🦉":"p_chouette","🦁":"p_lion","🦄":"p_licorne","🐉":"p_dragon","🐙":"p_kraken","🗺️":"carte","💚":"coeurvert","📱":"tel","⏸️":"pause",
   "🎭":"masques","📥":"reception","🗑️":"corbeille","⛏️":"pioche","🪚":"scie","⛰️":"montagne","🏠":"maison","👆":"doigt","✅":"coche","✉️":"lettre","📭":"lettreouverte","🔮":"boule",
-  "🤴":"epees","❄️":"nuage",
+  "🤴":"epees","❄️":"nuage","🔑":"cle","🎨":"palette","🌙":"lune","🏅":"trophee","⭐":"etoile","📅":"parchemin","🏘️":"maison","🏗️":"marteau",
+  "🔒":"cadenas","🔓":"cadenas","📍":"doigt","☑️":"coche","➕":"fleche",
 };
 (function buildSpriteSheet(){
   const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -1745,7 +1779,7 @@ function forgeLevel(n){
   while(lv<SUM_MAX && left>=FORGE_NEED(lv)){ left-=FORGE_NEED(lv); lv++; }
   return {lv, cur:left, need: lv<SUM_MAX ? FORGE_NEED(lv) : 0};
 }
-const itemCost = () => Math.max(30, Math.ceil(craftScrap(S.maxStage)*0.2));
+const itemCost = () => Math.max(30, Math.ceil(craftScrap(Math.max(S.stage, S.maxStage-20))*0.2));   // prix selon l'étape actuelle (au plus 20 étapes sous le record)
 function rollItemRarity(){
   const rates=petRates(Math.min(SUM_MAX, forgeLevel().lv+al("forge"))), tot=rates.reduce((a,b)=>a+b,0);
   let r=Math.random()*tot, acc=0;
@@ -1943,7 +1977,7 @@ function hit(base, vis, cls){
   if(bossCapped()) dmg = Math.min(dmg, E.max*(cls==="crit"?BOSS_CAP_SKILL:BOSS_CAP_HIT));
   E.hp -= dmg;
   if(C.vol) S.hp = Math.min(C.hp, S.hp + dmg*C.vol/100);
-  if(vis){ floatTxt((cr?"💥 ":"")+fmt(dmg), cr?"crit":cls); slash(); Sfx.play(cr?"crit":"hit"); if(cr) shake(); }
+  if(vis){ floatTxt((cr?"💥 ":"")+fmt(dmg), cr?"crit":cls); slash(); Sfx.play(cr?"crit":"hit"); if(cr) shake(); PFX && PFX.hit(cr || cls==="crit"); }
   if(E.hp<=0) kill(vis);
 }
 function checkRecord(){
@@ -1957,7 +1991,7 @@ function kill(vis){
   const boss = E.boss;
   const g = goldFor(S.stage)*(boss?8:1)*C.gold*bm("gold")*ECO_PACE;
   S.gold += g; S.stats.kills++; track("kill");
-  if(vis){ floatTxt("+"+fmt(g)+" 🪙","gold",true); poof(); coinsFly(boss?6:2); Sfx.play("kill"); setTimeout(()=>Sfx.play("coin"),120); }
+  if(vis){ floatTxt("+"+fmt(g)+" 🪙","gold",true); poof(); PFX && PFX.death(boss); coinsFly(boss?6:2); Sfx.play("kill"); setTimeout(()=>Sfx.play("coin"),120); }
   if(E.ev || (boss && eventActive())){ const tk = boss ? 5 : 1+rnd(2); S.event.tokens += tk; if(vis) floatTxt("+"+tk+" §ecaille§","fam",true); }
   if(boss){
     S.stats.bosses++; track("boss"); if(vis) Sfx.play("boss");
@@ -2354,7 +2388,7 @@ function renderLoot(){
     const nf=fusionGroups().length;
     body = sumBand({ic:spr("forge"), cid:"forgeLvB", val:F.lv, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
         btns:`<button class="btn gold" id="forge1" data-fn="1">×1<small>🔩 ${fmt(fc)}</small></button><button class="btn gold" id="forge10" data-fn="10">×10<small>🔩 ${fmt(fc*10)}</small></button><button class="btn violet" id="forge100" data-fn="100">×100<small>🔩 ${fmt(fc*100)}</small></button>`,
-        ft:`Un objet au hasard parmi les 6 · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard')
+        ft:`Prix selon l'étape où vous combattez · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard')
       + `<div class="card grow"><div class="chead"><h2>✨ Fusions<small>3 identiques = 1 de rareté supérieure</small></h2>${nf>1?`<button class="btn violet sm" id="fuseAll">Tout</button>`:""}</div>
         ${fus?`<div class="pager" data-pg="fuse"><div class="pgsrc list">${fus}</div></div>`:`<div class="empty-msg">Rien à fusionner pour l'instant. Forgez des objets : 3 objets identiques de même rareté se fusionnent en 1 de rareté supérieure.</div>`}</div>`;
   } else {
@@ -2653,9 +2687,12 @@ const SCENES = [
 ];
 const SCENE_COL = [["#2f7d32","#1b5e20"],["#4f6b35","#2f4520"],["#6e3b22","#4a2614"],["#9fc2e8","#6f98c9"],["#3a2766","#24184a"],["#8a1f2c","#5a0f1c"],["#145a8c","#0b3a63"],["#ffffffcc","#f2c94c"]];
 let sceneIdx=-1;
+const GROUND_COL = ["#4f8a34","#4b5a2c","#6b4a2b","#dfeaf6","#463a5e","#5a1f22","#18466b","#ffffff8c"];
 function renderScene(){
   const el=$("#scene"); if(!el) return;
   const i = MODE ? (MODE.kind==="tower" ? 4 : 5) : Math.max(0, BIOMES.indexOf(biomeOf(S.stage))) % SCENES.length;
+  PFX && PFX.setAmb(i);
+  { const ar=$("#arena"); if(ar) ar.style.setProperty("--ground", GROUND_COL[i]); }
   if(i===sceneIdx) return; sceneIdx=i;
   const [a,b]=SCENE_COL[i];
   el.innerHTML = `<svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">${SCENES[i](a,b)}</svg>`;
@@ -2774,7 +2811,7 @@ function showView(v){
   if(v==="fams") dirty.fams=true;
   if(v==="city"){ dirty.city=true; lastPointer=0; }
   $("#main").scrollTop = 0;
-  frameUI(); pgSchedule();
+  frameUI(); pgSchedule(); if(v==="combat" && PFX) PFX.kick();
 }
 
 /* ================= ACTIONS ================= */
@@ -3140,7 +3177,7 @@ document.addEventListener("click", e=>{
       modal("Taux de la forge", `<div style="text-align:left"><div class="small" style="margin-bottom:8px">Votre <b>niveau de forge</b> est ${F.lv}/${SUM_MAX}. Chaque objet forgé le fait progresser, et chaque niveau augmente vos chances d'obtenir des objets rares.</div>
         <table class="rtab"><tr><th></th><th>Maintenant</th>${nx?`<th>Niv. ${F.lv+1}</th>`:""}<th>Niv. ${SUM_MAX}</th><th>Puissance</th></tr>
         ${RAR.map((r,i)=>`<tr><td style="color:${r.c}">${r.n}</td><td><b>${cell(now[i])}</b></td>${nx?`<td>${cell(nx[i])}</td>`:""}<td>${cell(mx[i])}</td><td>×${r.m}</td></tr>`).join("")}</table>
-        <div class="small">Chacun des 6 types d'objet a la même chance de sortir. Les objets sortent niveau 1 : renforcez-les en touchant un objet porté. Fusion : 3 objets du même type et de même rareté donnent 1 objet de rareté supérieure, au niveau du meilleur des trois.</div></div>`, [{t:"OK",cls:"gold"}]); break; }
+        <div class="small">Le prix d'une forge suit l'étape où vous combattez (jusqu'à 20 étapes sous votre record) : farmer un peu plus bas la rend moins chère. Chacun des 6 types d'objet a la même chance de sortir. Les objets sortent niveau 1 : renforcez-les en touchant un objet porté. Fusion : 3 objets du même type et de même rareté donnent 1 objet de rareté supérieure, au niveau du meilleur des trois.</div></div>`, [{t:"OK",cls:"gold"}]); break; }
     case "btnPrestX": break;
     case "btnPrest": modal("Renaître ?", `Vous perdez or, forge, équipement et ressources. Vous gardez familiers et 💎, et gagnez <b style="color:var(--violet)">${soulGain()} âmes</b>.`, [{t:"Annuler"},{t:"🔥 Renaître",cls:"violet",f:rebirth}]); break;
     case "expBtn": { const code=btoa(unescape(encodeURIComponent(JSON.stringify(S)))); $("#saveTxt").value=code; try{ navigator.clipboard.writeText(code).then(()=>{ t.textContent="Copié ✔"; },()=>{}); }catch(_){} break; }
@@ -5003,6 +5040,7 @@ const Sfx = (()=>{
   };
   return {
     play(n){
+      if((n==="buy"||n==="success"||n==="legend"||n==="up") && !document.hidden){ const now2=performance.now(); if(now2-(last["fx_"+n]||0)>120){ last["fx_"+n]=now2; PFX && PFX.ui(lastPtr[0], lastPtr[1], n==="legend"); } }
       if(!S.opts.sfx || document.hidden) return;
       const now=performance.now(); if(MIN[n] && now-(last[n]||0)<MIN[n]) return; last[n]=now;
       try{ if(!ctx && !init()) return; if(ctx.state==="suspended") ctx.resume(); SND[n] && SND[n](ctx.currentTime+0.005); }catch(_){}
@@ -5010,6 +5048,88 @@ const Sfx = (()=>{
   };
 })();
 
+
+/* ================= PARTICULES ================= */
+/* Deux toiles : une dans l'arène (coups, morts, aura des boss, ambiance de zone), une plein écran (récompenses, achats). */
+var PFX = (()=>{
+  let ac=null, ax=null, uc=null, ux=null, parts=[], uparts=[], amb=-1, raf=0, lastF=0, ambT=0, dpr=Math.min(2, window.devicePixelRatio||1);
+  const AMB = [   // ambiance par décor (même ordre que SCENES)
+    {n:7, f:()=>({x:Math.random(), y:-0.05, vx:0.03+Math.random()*0.05, vy:0.05+Math.random()*0.05, r:3+Math.random()*2.5, c:pick(["#7cc96b","#c9a227","#e07b39"]), sh:"leaf", rot:Math.random()*6, vr:(Math.random()-.5)*2, life:14})},
+    {n:9, f:()=>({x:Math.random(), y:0.3+Math.random()*0.65, vx:(Math.random()-.5)*0.03, vy:(Math.random()-.5)*0.03, r:2+Math.random()*1.5, c:"#e6ff7a", sh:"glow", life:6+Math.random()*4, tw:Math.random()*6})},
+    {n:10, f:()=>({x:Math.random(), y:Math.random(), vx:(Math.random()-.5)*0.01, vy:-0.004-Math.random()*0.01, r:1+Math.random()*1.4, c:"#f3d9a8", sh:"dot", life:8})},
+    {n:16, f:()=>({x:Math.random()*1.1-0.05, y:-0.05, vx:(Math.random()-.5)*0.03, vy:0.05+Math.random()*0.06, r:1.5+Math.random()*2, c:"#ffffff", sh:"dot", life:14})},
+    {n:8, f:()=>({x:Math.random(), y:1.02, vx:(Math.random()-.5)*0.02, vy:-0.04-Math.random()*0.04, r:1.5+Math.random()*1.5, c:pick(["#b197fc","#8b6bd6"]), sh:"glow", life:9})},
+    {n:12, f:()=>({x:Math.random(), y:1.02, vx:(Math.random()-.5)*0.03, vy:-0.07-Math.random()*0.07, r:1.5+Math.random()*2, c:pick(["#ff922b","#ffd43b","#ff6b3d"]), sh:"glow", life:7})},
+    {n:9, f:()=>({x:Math.random(), y:1.02, vx:(Math.random()-.5)*0.01, vy:-0.04-Math.random()*0.05, r:2+Math.random()*3, c:"#d0ebff", sh:"ring", life:10, wob:Math.random()*6})},
+    {n:8, f:()=>({x:Math.random(), y:Math.random()*0.8, vx:0, vy:0, r:1.5+Math.random()*2, c:"#ffe066", sh:"star", life:2.5+Math.random()*2, tw:Math.random()*6})},
+  ];
+  function ensure(){
+    if(!ac){ ac=document.getElementById("fxa"); if(ac) ax=ac.getContext("2d"); }
+    if(!uc){ uc=document.getElementById("fxu"); if(uc) ux=uc.getContext("2d"); }
+  }
+  function fit(c){ const w=c.clientWidth, h=c.clientHeight; if(c.width!==Math.round(w*dpr) || c.height!==Math.round(h*dpr)){ c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); } return [w,h]; }
+  function arenaOn(){ return MOTION && typeof view!=="undefined" && view==="combat" && !document.hidden; }
+  function kick(){ if(!raf && MOTION) raf=requestAnimationFrame(frame); }
+  function drawP(x, p, X, Y, a){
+    x.globalAlpha=a; x.fillStyle=p.c; x.strokeStyle=p.c;
+    switch(p.sh){
+      case "leaf": x.save(); x.translate(X,Y); x.rotate(p.rot); x.beginPath(); x.ellipse(0,0,p.r*1.6,p.r*0.7,0,0,7); x.fill(); x.restore(); break;
+      case "glow": { const g=x.createRadialGradient(X,Y,0,X,Y,p.r*3); g.addColorStop(0,p.c); g.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=g; x.beginPath(); x.arc(X,Y,p.r*3,0,7); x.fill(); break; }
+      case "ring": x.lineWidth=1.2; x.beginPath(); x.arc(X,Y,p.r,0,7); x.stroke(); break;
+      case "star": x.save(); x.translate(X,Y); x.beginPath(); for(let i=0;i<4;i++){ x.rotate(Math.PI/2); x.moveTo(0,0); x.lineTo(p.r*0.5,p.r*0.5); x.lineTo(0,p.r*2.4); x.lineTo(-p.r*0.5,p.r*0.5); } x.fill(); x.restore(); break;
+      case "shard": x.save(); x.translate(X,Y); x.rotate(Math.atan2(p.vy,p.vx)); x.fillRect(-p.r*2,-p.r*0.45,p.r*4,p.r*0.9); x.restore(); break;
+      default: x.beginPath(); x.arc(X,Y,p.r,0,7); x.fill();
+    }
+  }
+  function frame(t){
+    raf=0; ensure(); const dt=Math.min(0.05, (t-(lastF||t))/1000); lastF=t;
+    let alive=false;
+    if(ac && arenaOn()){
+      const [w,h]=fit(ac); ax.setTransform(dpr,0,0,dpr,0,0); ax.clearRect(0,0,w,h);
+      if(amb>=0 && AMB[amb]){ const A=AMB[amb]; ambT+=dt; const want=A.n; let cnt=parts.filter(p=>p.amb).length;
+        while(cnt<want && ambT>0.25){ ambT-=0.25; const p=A.f(); p.amb=true; p.age=0; p.px=true; parts.push(p); cnt++; } }
+      if(E && E.boss && E.hp>0 && Math.random()<dt*14){ const en=document.getElementById("enemy"); if(en){ const b=en.getBoundingClientRect(), r=ac.getBoundingClientRect(), a=Math.random()*6.28, rr=b.width*0.45;
+        parts.push({x:b.left-r.left+b.width/2+Math.cos(a)*rr, y:b.top-r.top+b.height/2+Math.sin(a)*rr*0.8, vx:0, vy:-18-Math.random()*16, r:2+Math.random()*2, c:E.raged?"#ff3b3b":(E.mech==="regen"?"#69db7c":E.mech==="carapace"?"#74c0fc":"#ffd43b"), sh:"glow", life:1.1, age:0, g:0}); } }
+      const out=[];
+      for(const p of parts){
+        p.age+=dt; if(p.age>p.life) continue;
+        if(p.px){ p.x+=p.vx*dt*(p.wob?1+Math.sin(p.age*3+p.wob):1); p.y+=p.vy*dt; if(p.rot!==undefined) p.rot+=p.vr*dt; if(p.y>1.08||p.y<-0.1||p.x<-0.1||p.x>1.1) continue; }
+        else { p.vy+=(p.g||0)*dt; p.vx*=1-(p.drag||0)*dt; p.vy*=1-(p.drag||0)*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; }
+        const fade = p.px ? Math.min(1, p.age/0.8, (p.life-p.age)/1.2) : 1-p.age/p.life;
+        const tw = p.tw!==undefined ? 0.55+0.45*Math.sin(p.age*5+p.tw) : 1;
+        drawP(ax, p, p.px?p.x*w:p.x, p.px?p.y*h:p.y, Math.max(0,fade*tw)*(p.px?0.75:1));
+        out.push(p);
+      }
+      parts=out; ax.globalAlpha=1; alive = true;
+    } else if(ac){ const [w,h]=fit(ac); ax.clearRect(0,0,w,h); parts=parts.filter(p=>p.amb); }
+    if(uc && uparts.length){
+      const [w,h]=fit(uc); ux.setTransform(dpr,0,0,dpr,0,0); ux.clearRect(0,0,w,h); const out=[];
+      for(const p of uparts){ p.age+=dt; if(p.age>p.life) continue; p.vy+=(p.g||0)*dt; p.vx*=1-(p.drag||0)*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; if(p.rot!==undefined) p.rot+=p.vr*dt; drawP(ux,p,p.x,p.y,1-p.age/p.life); out.push(p); }
+      uparts=out; ux.globalAlpha=1; if(!uparts.length) ux.clearRect(0,0,w,h); alive=true;
+    }
+    if(alive && (arenaOn() || uparts.length)) raf=requestAnimationFrame(frame);
+  }
+  function arenaXY(sel){ ensure(); const el=document.getElementById(sel); if(!el||!ac) return null; const b=el.getBoundingClientRect(), r=ac.getBoundingClientRect(); return [b.left-r.left+b.width/2, b.top-r.top+b.height/2, b.width]; }
+  return {
+    setAmb(i){ if(amb!==i){ amb=i; parts=parts.filter(p=>!p.amb); } kick(); },
+    hit(crit){ if(!arenaOn()) return; const q=arenaXY("enemy"); if(!q) return; const [x,y]=q; const n=crit?16:7;
+      for(let i=0;i<n;i++){ const a=Math.random()*6.28, v=(crit?160:100)*(0.5+Math.random());
+        parts.push({x:x+(Math.random()-.5)*14, y:y+(Math.random()-.5)*14, vx:Math.cos(a)*v-30, vy:Math.sin(a)*v-40, g:260, drag:2.5, r:crit?2.4:1.8, c:crit?pick(["#ffd43b","#fff3a8","#ff922b"]):pick(["#ffffff","#ffe8a3"]), sh:"shard", life:0.35+Math.random()*0.25, age:0}); }
+      if(crit) parts.push({x, y, vx:0, vy:0, r:10, c:"#fff3a8", sh:"star", life:0.25, age:0});
+      if(parts.length>160) parts.splice(0, parts.length-160); kick(); },
+    death(boss){ if(!arenaOn()) return; const q=arenaXY("enemy"); if(!q) return; const [x,y,wd]=q; const n=boss?40:18;
+      for(let i=0;i<n;i++){ const a=Math.random()*6.28, v=40+Math.random()*(boss?170:90);
+        parts.push({x:x+(Math.random()-.5)*wd*0.5, y:y+(Math.random()-.5)*wd*0.4, vx:Math.cos(a)*v, vy:Math.sin(a)*v*0.6-30, g:-20, drag:2, r:3+Math.random()*(boss?6:4), c:pick(boss?["#ffd43b","#fff3a8","#e9ecef","#ffffff"]:["#e9ecef","#ced4da","#f8f9fa"]), sh:boss?"glow":"dot", life:0.6+Math.random()*0.5, age:0}); }
+      kick(); },
+    ui(x, y, big){ if(!MOTION) return; ensure(); if(!uc) return; const n=big?34:16;
+      for(let i=0;i<n;i++){ const a=Math.random()*6.28, v=(big?260:170)*(0.4+Math.random());
+        uparts.push({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v-(big?120:80), g:420, drag:1.2, r:big?3.2:2.4, c:pick(["#ffd43b","#ffe066","#ffffff","#74c0fc","#b197fc"]), sh:pick(["star","dot","shard"]), rot:0, vr:4, life:0.7+Math.random()*0.5, age:0}); }
+      kick(); },
+    kick,
+  };
+})();
+var lastPtr = [innerWidth/2, innerHeight/2];
+document.addEventListener("pointerdown", e=>{ lastPtr=[e.clientX, e.clientY]; }, {capture:true, passive:true});
 /* ---------- Animations de combat ---------- */
 const MOTION = !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 let flyCount = 0;
@@ -5289,15 +5409,26 @@ if(saved) offline(); else { log("⚔️ Votre quête commence à l'orée de la <
 /* Ouvre le calendrier au lancement si une récompense attend */
 setTimeout(()=>{ if(dailyReady() && !$("#modal").classList.contains("on") && !$("#summon").classList.contains("on")) openSheet("daily"); }, 700);
 const GAME_PACE = 0.85;
-let lastT = performance.now();
+let lastT = performance.now(), CATCH = 0, catchShown = 0;
+/* Jeu en arrière-plan : quand le navigateur ralentit ou endort l'onglet, le temps perdu est rattrapé
+   en simulant le combat (jusqu'à la durée d'absence maximale), par tranches pour ne pas figer l'écran. */
+const CATCH_MAX = () => (8+2*al("absence"))*3600;
 setInterval(()=>{
   const now = performance.now();
-  let real = Math.min(30, (now-lastT)/1000); lastT = now;
-  const vis = real < 0.5 && !document.hidden;
-  let dt = real*GAME_PACE*(speedUnlocked() ? (S.opts.speed||1) : 1);   // tout le combat tourne à 85 % (×1, ×2 et ×3)
+  let real = (now-lastT)/1000; lastT = now;
+  if(real > 1.5){ CATCH = Math.min(CATCH_MAX(), CATCH + real - 0.1); real = 0.1; }
+  const vis = !document.hidden && CATCH<=0;
+  const sp = GAME_PACE*(speedUnlocked() ? (S.opts.speed||1) : 1);   // tout le combat tourne à 85 % (×1, ×2 et ×3)
+  let dt = real*sp;
   if(pausedForPick) dt = 0;   // le combat attend le choix de classe
   cityTick(real);
   while(dt>0){ const s=Math.min(0.1,dt); step(s, vis); dt-=s; }
+  if(CATCH>0 && !pausedForPick){
+    const chunk = Math.min(CATCH, 240); CATCH -= chunk; cityTick(chunk);
+    let cd = chunk*sp; while(cd>0){ const s=Math.min(0.1,cd); step(s, false); cd-=s; }
+    if(!document.hidden && chunk>=30 && now-catchShown>4000){ catchShown=now; toast(`⏩ Rattrapage du temps passé en arrière-plan… ${Math.ceil(CATCH/60)} min restantes`); }
+    if(CATCH<=0){ Object.keys(dirty).forEach(k=>dirty[k]=true); save(); }
+  } else if(CATCH>0) CATCH=0;
   frameUI();
 }, 100);
 setInterval(save, 10000);
