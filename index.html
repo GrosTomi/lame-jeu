@@ -921,6 +921,8 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .btn.green{background:linear-gradient(#5fd37a,#2fae4f);color:#fff;border-color:#1f7a37}
 #heroName{font-weight:900;max-width:52%;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
 .seg5 button{min-width:0}.seg5 button small{white-space:nowrap}
+.herobox .passbtn{width:40px;height:40px;margin-right:-4px}.herobox .passbtn .sp{width:24px;height:24px}
+#dot-pass{position:absolute;top:-5px;right:-5px}
 </style>
 </head>
 <body>
@@ -936,7 +938,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-1847";
+var BUILD_ID = "20261123-1918";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1002,6 +1004,7 @@ var BUILD_ID = "20261123-1847";
           <div class="hl"><b id="heroName">Vous</b> <span id="heroLine"></span></div>
           <div class="bar hhp"><i id="hhpFill"></i><b id="hhpTxt"></b></div>
         </div>
+        <button class="iconbtn passbtn" id="btnPass" aria-label="Passe de combat">📜<span class="dot" id="dot-pass"></span></button>
       </div>
       <div id="skills"></div>
       <div id="bossRow"><button class="btn red wide" id="btnBoss">👑 Défier le boss</button></div>
@@ -2755,6 +2758,7 @@ function updateDots(){
   $("#dot-prest").classList.toggle("on", view!=="prest" && (soulGain()>0 || ALTAR.some(x=>al(x.id)<x.max && S.souls>=altarCost(x,al(x.id)))));
   const rc=rewardsCount()+mailUnread(), dd=$("#dot-daily"); dd.classList.toggle("on", rc>0); dd.textContent = rc>0 ? rc : "";
 
+  { const dp=$("#dot-pass"); if(dp) dp.classList.toggle("on", bpClaimable()>0); }
   $("#dot-city").classList.toggle("on", !!S.city && view!=="city" && (S.city.pending || BLD.some(b=>affordC(bldCost(b)))));
 }
 const soulCurve = st => st>80 ? Math.pow((st-80)/7.5,2) : 0;   // 100 → 7, 110 → 16, 130 → 44
@@ -3327,6 +3331,7 @@ document.addEventListener("click", e=>{
     case "adPrivacy": if(NP.AdMob) NP.AdMob.showPrivacyOptionsForm().catch(()=>{}); break;
     case "rkRetry": LB.err=""; LB.at={}; renderRank(); break;
     case "eqUpAll": upgradeAll(); break;
+    case "btnPass": shopTab="bp"; showView("shop"); break;
     case "tutoReset": S.tuto.step=0; S.tuto.cnt=0; S.tuto.gs={}; S.tuto.gq=[]; S.tuto.intro=false; showView("combat"); break;
     case "guidesBtn": guidesList(); break;
     case "demoBtn": modal("Charger la partie de test ?", "Votre partie actuelle sera remplacée. Copiez d'abord votre code de sauvegarde si vous voulez la garder.", [{t:"Annuler"},{t:"Charger",cls:"gold",f:loadDemo}]); break;
