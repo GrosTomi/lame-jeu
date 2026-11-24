@@ -1043,7 +1043,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1618";
+var BUILD_ID = "20261124-1947";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1615,31 +1615,31 @@ const CLASSES = [
   {id:"forgeron", n:"Forgeron",          ic:"⚒️", st:"loot",  b:25, pl:12,  d:"{v} % de scraps"},
 ];
 /* Niveau d'invocation : chaque invocation donne 1 point. Plus le niveau monte, plus les raretés hautes sortent.
-   Commun, Peu commun et Rare dès le départ ; Épique au niveau 5, Légendaire au niveau 10, Mythique au niveau 15 (taux très bas).
+   Commun, Peu commun et Rare dès le départ ; Épique au niveau 10, Légendaire au niveau 25, Mythique au niveau 40 (taux infime), niveau max 50 (= les taux de l'ancien niveau 20).
    Taux par palier (Commun, Peu commun, Rare, Épique, Légendaire, Mythique), interpolés entre les paliers. */
-const SUM_MAX = 20;
-const RAR_UNLOCK = [1, 1, 1, 5, 10, 15];
+const SUM_MAX = 50;
+const RAR_UNLOCK = [1, 1, 1, 10, 25, 40];
 const RATE_KEYS = [
   [1,  [72, 23,  5,  0,  0,   0  ]],
-  [4,  [56, 31, 13,  0,  0,   0  ]],
-  [5,  [52, 32, 14,  2,  0,   0  ]],
-  [9,  [40, 33, 20,  7,  0,   0  ]],
-  [10, [37, 33, 21,  8,  1,   0  ]],
-  [14, [28, 32, 25, 12,  3,   0  ]],
-  [15, [25, 32, 26, 13.5, 3.49, 0.01]],
-  [20, [16, 29, 31, 19.5, 4.43, 0.0667]],   // Mythique : 1 sur 1 500 au niveau max
+  [8,  [56, 31, 13,  0,  0,   0  ]],
+  [10, [52, 32, 14,  2,  0,   0  ]],
+  [22, [40, 33, 20,  7,  0,   0  ]],
+  [25, [37, 33, 21,  8,  1,   0  ]],
+  [37, [28, 32, 25, 12,  3,   0  ]],
+  [40, [25.5, 32, 25.8, 13.2, 3.4979, 0.0021]],   // Mythique : à peine 1 sur 50 000 au niveau 40
+  [50, [16, 29, 31, 19.5, 4.43, 0.0667]],         // Mythique : 1 sur 1 500 au niveau max (= l'ancien niveau 20)
 ];
 const rarOpen = (lv, ri) => lv >= RAR_UNLOCK[ri];
 /* Forge d'équipement : taux bien plus bas pour les raretés hautes (Légendaire 0,1 % au niv. 10 → 3 % au niv. 20 ; Mythique 0,01 % au niv. 15 → 0,5 %) */
 const FORGE_RATE_KEYS = [
   [1,  [72, 23, 5,  0,    0,   0   ]],
-  [4,  [58, 30, 12, 0,    0,   0   ]],
-  [5,  [55, 31, 13, 1,    0,   0   ]],
-  [9,  [45, 32, 19, 4,    0,   0   ]],
-  [10, [43, 32, 20, 4.9,  0.1, 0   ]],
-  [14, [35, 32, 25, 7.5,  0.5, 0   ]],
-  [15, [33, 32, 26, 8.495, 0.5, 0.005]],
-  [20, [22, 30.43, 32, 12.5, 3, 0.0667]],   // Mythique : 1 sur 1 500 au niveau max
+  [8,  [58, 30, 12, 0,    0,   0   ]],
+  [10, [55, 31, 13, 1,    0,   0   ]],
+  [22, [45, 32, 19, 4,    0,   0   ]],
+  [25, [43, 32, 20, 4.9,  0.1, 0   ]],
+  [37, [35, 32, 25, 7.5,  0.5, 0   ]],
+  [40, [33, 32, 26, 8.498, 0.5, 0.002]],    // Mythique : 1 sur 50 000 au niveau 40
+  [50, [22, 30.43, 32, 12.5, 3, 0.0667]],   // Mythique : 1 sur 1 500 au niveau max (= l'ancien niveau 20)
 ];
 function ratesFrom(keys, lv){
   lv=Math.max(1, Math.min(SUM_MAX, lv));
@@ -1650,7 +1650,7 @@ function ratesFrom(keys, lv){
   return a.map((v,i)=> rarOpen(lv,i) ? Math.round((v+(b[i]-v)*t)*10000)/10000 : 0);
 }
 const forgeRates = lv => ratesFrom(FORGE_RATE_KEYS, lv);
-const sumNeed = lv => 10 + 15*(lv-1);
+const sumNeed = lv => 5 + 2*(lv-1);   // 50 niveaux, même effort total qu'avant pour le max (~2 600 invocations)
 const pityMax = skl => (skl ? S.skl.firstLeg : S.firstLeg) ? PITY : 10;   // la première Légendaire arrive vite          // invocations pour passer du niveau lv au suivant
 function sumLevel(pulls){
   let lv=1, left = pulls ?? (S.pulls||0);
@@ -2042,7 +2042,7 @@ function canAfford(scr, mat, mn){ return S.scraps>=scr && (!mat || S.mats[mat]>=
 /* Renforcement : uniquement des scraps */
 const upMat = lv => 0;   // les matériaux ont été retirés du jeu
 /* Forge d'équipement : un objet au hasard parmi les 6, rareté selon le niveau de forge (même tableau que les invocations) */
-const FORGE_NEED = lv => 12 + 12*(lv-1);   // 2× plus lent qu'avant
+const FORGE_NEED = lv => 5 + 2*(lv-1);   // 50 niveaux, même effort total qu'avant pour le max (~2 600 objets)
 function forgeLevel(n){
   let lv=1, left = n ?? (S.stats.craft||0);
   while(lv<SUM_MAX && left>=FORGE_NEED(lv)){ left-=FORGE_NEED(lv); lv++; }
@@ -2242,10 +2242,11 @@ function addPet(p){
   if(o.copies>=need){ o.copies-=need; o.stars++; return {p, kind:"star", stars:o.stars}; }
   return {p, kind:"copy", have:o.copies, need};
 }
+const mythShare = (lv, mx) => lv>=SUM_MAX ? mx : mx*0.05*Math.pow(20, (lv-RAR_UNLOCK[5])/(SUM_MAX-RAR_UNLOCK[5]));   // garantie Légendaire : part de Mythique infime au niveau 40, normale au 50
 function summonOne(minR){
   let ri; const lv=Math.min(SUM_MAX, sumLevel().lv+al("faveur"));
-  if(S.favPet){ S.favPet=0; ri = rarOpen(lv,5) && Math.random()<0.17 ? 5 : 4; }               // faveur achetée : Légendaire ou mieux, toujours
-  else if(rarOpen(lv,4) && S.pity>=pityMax(false)-1) ri = rarOpen(lv,5) && Math.random()<0.1 ? 5 : 4;   // garantie gratuite, après le déblocage des Légendaires
+  if(S.favPet){ S.favPet=0; ri = rarOpen(lv,5) && Math.random()<mythShare(lv,0.17) ? 5 : 4; }               // faveur achetée : Légendaire ou mieux, toujours
+  else if(rarOpen(lv,4) && S.pity>=pityMax(false)-1) ri = rarOpen(lv,5) && Math.random()<mythShare(lv,0.1) ? 5 : 4;   // garantie gratuite, après le déblocage des Légendaires
   else { ri = rollPetRarity(); if(ri<minR) ri = minR; }
   if(ri>=4){ S.pity = 0; S.firstLeg = true; } else if(rarOpen(lv,4)) S.pity++;
   S.pulls++;
@@ -5622,8 +5623,8 @@ function addSkill(sk){
 function sklRoll(minR){
   let ri;
   const slv=Math.min(SUM_MAX, sumLevel(S.skl.pulls).lv+al("faveur"));
-  if(S.favSkl){ S.favSkl=0; ri = rarOpen(slv,5) && Math.random()<0.17 ? 5 : 4; }
-  else if(rarOpen(slv,4) && S.skl.pity>=pityMax(true)-1) ri = rarOpen(slv,5) && Math.random()<0.1 ? 5 : 4;
+  if(S.favSkl){ S.favSkl=0; ri = rarOpen(slv,5) && Math.random()<mythShare(slv,0.17) ? 5 : 4; }
+  else if(rarOpen(slv,4) && S.skl.pity>=pityMax(true)-1) ri = rarOpen(slv,5) && Math.random()<mythShare(slv,0.1) ? 5 : 4;
   else { const rates=petRates(slv), tot=rates.reduce((a,b)=>a+b,0); let r=Math.random()*tot, acc=0; ri=0;
     for(let i=0;i<rates.length;i++){ acc+=rates[i]; if(r<acc){ ri=i; break; } }
     if(ri<minR) ri=minR; }
