@@ -155,7 +155,11 @@ h2{font-family:var(--disp);font-weight:400;font-size:20px;margin:0 0 10px;color:
 #bossRow{display:none;margin-top:10px}
 #floats{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .fl{position:absolute;font-family:var(--disp);font-size:20px;color:#fff;-webkit-text-stroke:1px #0008;text-shadow:0 2px 0 #0006;animation:up 1s ease-out forwards;white-space:nowrap}
-.fl.crit{color:#ffe14d;font-size:27px}.fl.gold{color:var(--or);font-size:16px}.fl.fam{color:#bff3ff;font-size:15px}.fl.dmg{color:#ff8a8a;font-size:16px}
+.fl.crit{color:#ffe14d;font-size:30px;-webkit-text-stroke:1.5px #6b3a00;animation:upc 1s ease-out forwards}.fl.combo{color:#ffd0f0;font-size:18px;-webkit-text-stroke:1px #5a1a4a}
+@keyframes upc{0%{transform:translateY(0) scale(.6);opacity:0}12%{transform:translateY(-6px) scale(1.25);opacity:1}30%{transform:translateY(-14px) scale(1)}100%{transform:translateY(-60px) scale(1);opacity:0}}
+#arena.hitstop *{animation-play-state:paused!important}
+#enemy.charge{animation:charge .25s ease-in-out infinite alternate;filter:drop-shadow(0 0 14px #ff8a00)}@keyframes charge{to{transform:scale(1.08) translateX(-4px)}}
+#enemy.shieldup{filter:drop-shadow(0 0 10px #4dabf7) drop-shadow(0 0 4px #a5d8ff)}.fl.gold{color:var(--or);font-size:16px}.fl.fam{color:#bff3ff;font-size:15px}.fl.dmg{color:#ff8a8a;font-size:16px}
 @keyframes up{0%{opacity:0;transform:translateY(8px) scale(.7)}15%{opacity:1;transform:translateY(0) scale(1.15)}100%{opacity:0;transform:translateY(-60px)}}
 .dead{position:absolute;inset:0;background:#1f3b8fcc;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--disp);font-size:26px;color:#fff;gap:4px;z-index:2;text-align:center}
 .dead span{font-family:Nunito;font-size:14px}
@@ -912,7 +916,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .rkn{width:38px;text-align:center;font-weight:900;color:var(--mut)}.rkn.m1,.rkn.m2,.rkn.m3{font-size:20px}
 .rkname{flex:1;min-width:0;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkv{font-weight:900;color:var(--ink,#3b2a14)}
 .rkrow[data-rkp]{cursor:pointer}.rkrow[data-rkp]:active{background:#0000000d}
-.rkme{display:flex;align-items:center;gap:10px;margin-top:8px}.rksub{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}#view-rank{display:flex;flex-direction:column}#tab-rank{display:flex;flex-direction:column;flex:1;min-height:0}.rksub button{font-size:12px;padding:6px 2px}
+.rkme{display:flex;align-items:center;gap:10px;margin-top:8px}.rksub{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}#view-rank{display:flex;flex-direction:column}#tab-rank{display:flex;flex-direction:column;flex:1;min-height:0}.rksub button{font-size:12px;padding:6px 2px}
 .pin{width:100%;font:inherit;font-size:18px;font-weight:800;padding:10px 12px;border-radius:12px;border:2px solid #c9a35a;background:#fffaf0;color:#3b2a14;text-align:center}
 .perr{color:#e03131;font-weight:700;min-height:18px;margin-top:6px;font-size:13px}
 #defSeg .seg button{white-space:nowrap;font-size:14px;padding:8px 2px}#defSeg .tdot{vertical-align:middle}
@@ -945,6 +949,8 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 @media (prefers-reduced-motion:reduce){.smoke circle,.glow{animation:none}}
 .morest{flex:none;font-size:11.5px;font-weight:900;color:#3557d6;background:#e7ecff;border:1.5px solid #b7c4ff;border-radius:9px;padding:2px 7px;margin-left:auto;margin-right:6px;white-space:nowrap}
 .mstat h3{font-family:var(--disp);font-size:14px;margin:8px 0 2px;color:#7a5a20}.mstat>div{flex-wrap:wrap}.mstat small{width:100%;text-align:right;font-size:10.5px;color:var(--mut);margin-top:-2px}
+.reccode{font-family:ui-monospace,Menlo,monospace;font-size:21px;font-weight:900;letter-spacing:1px;text-align:center;background:#fff;border:2px dashed #c9a35a;border-radius:12px;padding:12px 6px;margin:10px 0;user-select:all}
+.rktitle{font-size:10.5px;color:#7a5a20;background:#ffe9a8;border-radius:6px;padding:0 5px;font-weight:900}
 </style>
 </head>
 <body>
@@ -960,7 +966,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261123-2104";
+var BUILD_ID = "20261124-0815";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1644,7 +1650,7 @@ function newState(keep){
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}, tier:{}, tiersV2:true}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["pseudo","pseudoSkip","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["pseudo","pseudoSkip","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -2107,15 +2113,15 @@ function summon(n){
 /* ================= COMBAT ================= */
 let E=null, heroCd=0, deadT=0, famAcc=0, famT=0;
 function spawn(){ E = MODE ? modeEnemy() : enemyFor(S.stage);
-  if(!MODE && E.boss){ E.mech = MECH_ORDER[zoneIdx(S.stage)%3]; if(E.mech==="carapace") E.shell=true;
+  if(!MODE && E.boss){ E.mech = S.stage<=100 ? MECH_ORDER[zoneIdx(S.stage)%3] : MECH_ORDER[Math.floor((S.stage-1)/10)%MECH_ORDER.length];   // coup dévastateur et bouclier : à partir de l'étape 100 E.fT=0; E.warn=0; E.shield=0; if(E.mech==="carapace") E.shell=true;
     if(typeof view!=="undefined" && view==="combat" && !document.hidden){ E.timer += 1.6; arenaBanner(`<small>Boss</small><b>${E.n}</b><span>${MECH[E.mech].ic} ${MECH[E.mech].n} : ${MECH[E.mech].d}</span>`, "boss", 2400); } } heroCd = Math.max(heroCd,0.25); dirty.enemy = true; if(fxOK()) enterFx(); }
 function hit(base, vis, cls){
   let dmg = base*(E.shell?0.3:1), cr = Math.random()*100 < C.crit;
   if(cr) dmg *= 1 + C.critd/100;
   if(bossCapped()) dmg = Math.min(dmg, E.max*(cls==="crit"?BOSS_CAP_SKILL:BOSS_CAP_HIT));
-  E.hp -= dmg;
+  dmgE(dmg);
   if(C.vol) S.hp = Math.min(C.hp, S.hp + dmg*C.vol/100);
-  if(vis){ floatTxt((cr?"💥 ":"")+fmt(dmg), cr?"crit":cls); slash(); Sfx.play(cr?"crit":"hit"); if(cr) shake(); PFX && PFX.hit(cr || cls==="crit"); }
+  if(vis){ floatTxt((cr?"💥 ":"")+fmt(dmg), cr?"crit":cls); slash(); Sfx.play(cr?"crit":"hit"); if(cr){ shake(); hitStop(); } PFX && PFX.hit(cr || cls==="crit"); }
   if(E.hp<=0) kill(vis);
 }
 function checkRecord(){
@@ -2123,6 +2129,7 @@ function checkRecord(){
   S.maxStage = S.stage; dirty.prest = true;
   if(S.maxStage>S.best){ S.best = S.maxStage; S.crystals += 3; }   // nouveau record absolu : +3 💎
   track("stage"); cityOnStage(); checkUnlocks();
+  if(S.best===S.maxStage && S.best%25===0) evLog("record", {joined:S.joined||"", p:S.prestiges});
 }
 function kill(vis){
   if(MODE){ modeEnd(true); return; }
@@ -2256,8 +2263,15 @@ const MECH = {
   rage:     {ic:"🔥", n:"Enragé",       d:"Sous 25 % de vie, il frappe presque deux fois plus fort : achevez-le vite !"},
   carapace: {ic:"🛡️", n:"Carapace",     d:"Il encaisse 70 % de dégâts en moins tant que vous n'avez pas utilisé de compétence."},
   regen:    {ic:"💚", n:"Régénération", d:"Il récupère de la vie sans arrêt : frappez sans relâche."},
+  fracas:   {ic:"⚠️", n:"Coup dévastateur", d:"Il prépare régulièrement un coup très puissant, annoncé à l'avance : l'esquive peut l'éviter."},
+  bouclier: {ic:"💠", n:"Bouclier runique", d:"À mi-vie, il se protège d'un bouclier : brisez-le en 8 s ou il se soigne."},
 };
-const MECH_ORDER = ["rage","carapace","regen"];
+const MECH_ORDER = ["rage","carapace","regen","fracas","bouclier"];
+function dmgE(d){   // les dégâts passent d'abord par le bouclier runique
+  if(E.shield>0){ const a=Math.min(E.shield,d); E.shield-=a; d-=a;
+    if(E.shield<=0){ E.shield=0; E.shT=0; floatTxt("BOUCLIER BRISÉ !","crit"); shake(); Sfx.play("crit"); } }
+  E.hp -= d;
+}
 function step(dt, vis){
   if(deadT>0){ deadT-=dt; if(deadT<=0){ S.hp=C.hp; spawn(); } return; }
   if(!E) spawn();
@@ -2266,12 +2280,22 @@ function step(dt, vis){
   heroCd -= dt;
   if(heroCd<=0){ heroCd += C.interval/bm("spd"); hit(C.atk*bm("atk"), vis, "hit"); if(vis) knightAtk();
     const r=Math.random()*100, extra = r < C.tpl ? 2 : r < C.tpl + C.dbl ? 1 : 0;   // double et triple coup
-    for(let i=0;i<extra && E && E.hp>0 && deadT<=0;i++){ if(vis && i===0) floatTxt(extra===2?"Triple !":"Double !","fam",false); hit(C.atk*bm("atk"), vis, "hit"); } }
+    for(let i=0;i<extra && E && E.hp>0 && deadT<=0;i++){ if(vis && i===0){ floatTxt(extra===2?"⚔️ Triple !":"⚔️ Double !","combo",false); if(extra===2) vibe([12,40,12]); } hit(C.atk*bm("atk"), vis, "hit"); } }
   if(E && E.mech==="regen" && E.hp>0) E.hp = Math.min(E.max, E.hp + E.max*0.012*dt);
+  if(E && E.mech==="bouclier" && !E.shUsed && E.hp>0 && E.hp < E.max*0.5){ E.shUsed=true; E.shield=E.max*0.08; E.shT=8; if(vis){ floatTxt("💠 BOUCLIER !","crit"); Sfx.play("ui"); } }
+  if(E && E.shield>0){ E.shT-=dt; if(E.shT<=0){ E.shield=0; E.hp=Math.min(E.max, E.hp+E.max*0.1); if(vis) floatTxt("Le boss se soigne !","dmg"); } }
+  if(E && E.mech==="fracas" && E.hp>0){
+    if(E.warn>0){ E.warn-=dt; if(E.warn<=0){ E.warn=0;
+        const dodged = !shielded() && Math.random()*100 < Math.min(75, 10+2*(C.dodge||0));
+        let dmg = shielded()||dodged ? 0 : 2.2*E.atk*E.atk/(E.atk+C.def); dmg = Math.min(dmg, C.hp*0.3);
+        S.hp -= dmg; if(vis){ if(dmg){ floatTxt("💥 -"+fmt(dmg),"crit",false,true); shake(); vibe(30); Sfx.play("hurt"); } else floatTxt(dodged?"Esquivé !":"Bloqué","fam",false,true); }
+        if(S.hp<=0){ die(); return; } } }
+    else { E.fT+=dt; if(E.fT>=7){ E.fT=0; E.warn=1.6; if(vis){ floatTxt("⚠️ Il prépare un coup !","dmg"); Sfx.play("blip"); } } }
+  }
   if(E && E.mech==="rage" && !E.raged && E.hp>0 && E.hp < E.max*0.25){ E.raged=true; E.atk*=1.8; if(vis){ floatTxt("ENRAGÉ !","crit"); $("#enemy").classList.add("raged"); } }
   if(C.famDps>0){
     if(vis){ famAnimT += dt; if(famAnimT>0.8){ famAnimT=0; petAtk(); } }
-    let d = C.famDps*bm("fam")*dt*(E.shell?0.3:1); if(bossCapped()) d=Math.min(d, E.max*BOSS_CAP_FAM*dt); E.hp -= d; famAcc += d; famT += dt;
+    let d = C.famDps*bm("fam")*dt*(E.shell?0.3:1); if(bossCapped()) d=Math.min(d, E.max*BOSS_CAP_FAM*dt); dmgE(d); famAcc += d; famT += dt;
     if(famT>=1){ if(vis) floatTxt("🐾 "+fmt(famAcc),"fam"); famAcc=0; famT=0; }
     if(E.hp<=0){ kill(vis); return; }
   }
@@ -2870,10 +2894,12 @@ function renderOpts(){
     ${tg("notif","Notifications","Rappels quand le butin ou la récompense du jour vous attend (application).")}
     <div class="opt"><div><b>Volume</b><div class="small">De la musique.</div></div><input type="range" id="volRange" min="0" max="1" step="0.05" value="${S.opts.vol ?? 0.6}" style="width:130px;accent-color:#3557d6"></div></div>
     <div class="card"><h2>Aide</h2><div class="small" style="margin-bottom:8px">Relisez les explications de chaque partie du jeu.</div><button class="btn blue wide sm" id="guidesBtn">Revoir les explications</button></div>
-    <div class="card"><h2>Profil</h2><div class="btnrow" style="align-items:center"><span style="flex:1;font-weight:800;font-size:16px">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"}</span><button class="btn sm" id="pseudoBtn">Changer de nom</button></div>${Ads.privacy?`<button class="linkbtn" id="adPrivacy" style="margin-top:8px;margin-right:12px">Choix publicitaires</button>`:""}${LB_ON()?`<button class="linkbtn" id="lbDelete" style="margin-top:8px">Supprimer mes données du classement</button>`:""}</div>
+    <div class="card"><h2>Profil</h2><div class="btnrow" style="align-items:center"><span style="flex:1;font-weight:800;font-size:16px">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"}</span><button class="btn sm" id="pseudoBtn">Changer de nom</button></div>${Ads.privacy?`<button class="linkbtn" id="adPrivacy" style="margin-top:8px;margin-right:12px">Choix publicitaires</button>`:""}${LB_ON()?`<button class="linkbtn" id="lbDelete" style="margin-top:8px">Supprimer mes données en ligne</button><button class="linkbtn" id="statsOpt" style="margin-top:8px;margin-left:12px">Statistiques anonymes : ${S.opts.stats===false?"non":"oui"}</button>`:""}</div>
     <div class="card"><h2>Sauvegarde</h2>
     <div class="small" style="margin-bottom:6px;color:${cloudReady?"var(--grn)":"var(--mut)"}">${cloudReady?"☁️ Sauvegarde en ligne active : votre partie vous suit sur tous vos appareils.":localOK?"📱 Sauvegardée sur cet appareil.":"⚠️ Cet affichage ne peut pas sauvegarder : copiez votre code régulièrement."}</div>
-    <div class="small" style="margin-bottom:8px">Copiez ce code pour garder une copie ou changer d'appareil.</div>
+    ${LB_ON()?`<div class="small" style="margin-bottom:6px">☁️ Sauvegarde en ligne ${cloudOK?`: dernier envoi ${new Date(cloudOK).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}`:"automatique toutes les 3 min"}.</div>
+    <div class="btnrow" style="margin-bottom:10px"><button class="btn gold sm" id="recShow">🔑 Mon code de récupération</button><button class="btn blue sm" id="recAsk">Récupérer ma partie</button></div>`:""}
+    <div class="small" style="margin-bottom:8px">Ou copiez ce code de sauvegarde complet pour garder une copie.</div>
     <textarea id="saveTxt" placeholder="Collez ici un code de sauvegarde"></textarea>
     <div class="btnrow" style="margin-top:8px"><button class="btn sm" id="expBtn">Copier</button><button class="btn sm" id="impBtn">Importer</button><button class="btn sm red" id="resetBtn">Effacer</button></div></div>
     ${DEV_TOOLS?`<div class="card"><h2>🧪 Outils de test</h2><div class="small" style="margin-bottom:8px">Remplace votre partie par une partie avancée (étape 26, fief débloqué) pour tester rapidement.</div>
@@ -2992,11 +3018,12 @@ function frameUI(){
   const hp = Math.max(0,S.hp), hpP = hp/C.hp*100;
   if(view==="combat"){
     $("#ehpFill").style.width = ep+"%";
+    { const en=$("#enemy"); if(en){ const ch=!!(E && E.warn>0), sh=!!(E && E.shield>0); if(en.classList.contains("charge")!==ch) en.classList.toggle("charge", ch); if(en.classList.contains("shieldup")!==sh) en.classList.toggle("shieldup", sh); } }
     $("#ehpTxt").textContent = E ? (MODE && MODE.kind==="wboss" ? "Dégâts : "+fmt(E.max-E.hp) : fmt(Math.max(0,E.hp))) : "";
     if(E && E.boss) $("#timerFill").style.width = (E.timer/30*100)+"%";
     $("#hhpFill").style.width = hpP+"%";
     $("#hhpTxt").textContent = fmt(hp)+" / "+fmt(C.hp);
-    $("#heroLine").innerHTML = "⚡ "+fmt(heroPower()); const hn=$("#heroName"), nm=S.pseudo||"Vous"; if(hn.textContent!==nm) hn.textContent=nm;
+    $("#heroLine").innerHTML = "⚡ "+fmt(heroPower()); const hn=$("#heroName"), ttl=S.lbTitle && S.lbTitle.wk===weekId() ? S.lbTitle.t.split(" ")[0] : "", nm=(S.pseudo||"Vous")+"|"+ttl; if(hn.dataset.v!==nm){ hn.dataset.v=nm; hn.innerHTML=esc(S.pseudo||"Vous")+(ttl?" "+ico(ttl):""); }
   } else {
     $("#miniE").style.width = ep+"%";
     $("#miniH").style.width = hpP+"%";
@@ -3228,7 +3255,7 @@ $("#sActs").addEventListener("click", e=>{
 $("#summon").addEventListener("click", ()=>{ if(!summonReady){ rvSkip(); return; }
   if(performance.now()-(RV.readyAt||0) < 800) return;   /* un clic en rafale ne ferme pas les résultats aussitôt affichés */ $("#sLv").hidden=true; if(summonReady){ lastPull=0; $("#summon").classList.remove("on"); if(revealCb){ const f=revealCb; revealCb=null; f(); } } });
 function rebirth(){
-  const g=soulGain(); if(!g) return; Sfx.play("rebirth");
+  const g=soulGain(); if(!g) return; Sfx.play("rebirth"); evLog("rebirth", {p:S.prestiges+1, best:S.best});
   const played = S.cls;
   S.classes[played] = (S.classes[played]||1) + 1;                       // la classe jouée gagne un niveau
   const locked = CLASSES.filter(c=>!S.classes[c.id]);
@@ -3403,6 +3430,9 @@ document.addEventListener("click", e=>{
     case "evForce": eventForce=!eventForce; dirty.opts=true; break;
     case "pseudoBtn": askPseudo(false); break;
     case "lbDelete": lbDeleteAsk(); break;
+    case "recShow": recShow(); break;
+    case "recAsk": recAsk(); break;
+    case "statsOpt": S.opts.stats = S.opts.stats===false; if(S.opts.stats===false) evQ=[]; dirty.opts=true; save(); break;
     case "adPrivacy": if(NP.AdMob) NP.AdMob.showPrivacyOptionsForm().catch(()=>{}); break;
     case "rkRetry": LB.err=""; LB.at={}; renderRank(); break;
     case "eqUpAll": upgradeAll(); break;
@@ -3463,7 +3493,7 @@ $("#enemy").addEventListener("pointerdown", e=>{
 document.addEventListener("contextmenu", e=>e.preventDefault());
 
 /* ================= FIEF (construction de ville) ================= */
-const CITY_UNLOCK = 45, RAID_EVERY = 20, RAID_COOLDOWN = 120;   // assaut toutes les 20 nouvelles étapes, 2 min minimum entre deux
+const CITY_UNLOCK = 60, RAID_EVERY = 20, RAID_COOLDOWN = 120;   // assaut toutes les 20 nouvelles étapes, 2 min minimum entre deux
 const STOCK_H = 8;   // la production s'accumule jusqu'à 8 h dans les bâtiments, à récolter en les touchant
 const CRES = {or:{n:"Or du fief", ic:"💰"}, bois:{n:"Bois", ic:"🌲"}, pierre:{n:"Pierre", ic:"🪨"}};
 const BLD = [
@@ -3896,7 +3926,7 @@ const MAIL = [
    body:"Au programme : des bruitages et des animations de combat, 3 compétences actives, des quêtes du jour et des succès (bouton cadeau en haut), des ensembles d'équipement, deux nouvelles zones (Abysses et Cité céleste), 5 nouveaux familiers, et chaque week-end l'Invasion de dragons avec un familier exclusif à gagner. Bon jeu !",
    reward:{crystals:30}},
   {id:"m-fief", date:"2026-11-19", title:"Nouveauté : votre fief !", from:"L'équipe",
-   body:"Dès l'étape 45, fondez votre fief : mine, scierie, carrière, maisons, caserne, tours et remparts. Des pillards viennent toutes les 10 nouvelles étapes, et vous choisissez quand les affronter. Voici de quoi bien démarrer.",
+   body:"Dès l'étape 60, fondez votre fief : mine, scierie, carrière, maisons, caserne, tours et remparts. Des pillards viennent toutes les 20 nouvelles étapes, et vous choisissez quand les affronter. Voici de quoi bien démarrer.",
    reward:{crystals:20, city:150}},
   {id:"m-look", date:"2026-11-19", title:"Le royaume fait peau neuve", from:"L'équipe",
    body:"Nouvelles couleurs, interfaces simplifiées : touchez un objet, un familier ou un bâtiment pour ouvrir sa fiche. Dites-nous ce que vous en pensez !",
@@ -4276,7 +4306,7 @@ function simulatePurchase(id){
 }
 
 /* ---------- Récompenses ---------- */
-function grantProduct(id){
+function grantProduct(id){ evLog("buy", {id});
   const st=Math.max(1,S.best);
   switch(id){
     case "starter": S.crystals+=300; S.orbs+=20; S.ingots=(S.ingots||0)+60; S.scraps+=itemCost()*50; S.ads.boostUntil=Math.max(Date.now(),S.ads.boostUntil||0)+2*3600e3; S.iap.starter=true; break;
@@ -4774,14 +4804,14 @@ function track(ev, n=1){
 /* ---------- Déblocage progressif des onglets ---------- */
 const PREST_MIN = 100;
 const prestMin = () => PREST_MIN + 20*Math.min(S.prestiges||0, 20);   // 100, puis +20 étapes à chaque Renaissance (jusqu'à 500)
-const UNLOCK = {hero:3, loot:8, skills:15, fams:20, defis:30, city:CITY_UNLOCK, prest:PREST_MIN};
+const UNLOCK = {hero:3, loot:10, skills:20, fams:30, defis:45, city:CITY_UNLOCK, prest:PREST_MIN};   // un nouveau système toutes les 2 à 10 minutes environ
 const UNLOCK_TXT = {hero:"l'onglet Héros", fams:"les Familiers", loot:"la Forge d'équipement", skills:"les compétences", defis:"les Défis", prest:"la Renaissance", city:"votre Fief"};
 const unlocked = k => !(k in UNLOCK) || S.best>=UNLOCK[k] || S.prestiges>0 || (k==="fams" && S.pets && Object.keys(S.pets).length>0) || !!(S.tuto && S.tuto.seen && S.tuto.seen[k]) || (k==="city" && !!S.city);   // déjà débloqué une fois = reste ouvert   // qui a déjà des familiers les garde
 function checkUnlocks(silent){
   S.tuto.seen = S.tuto.seen || {};
   for(const k in UNLOCK){
     if(unlocked(k) && !S.tuto.seen[k]){
-      S.tuto.seen[k]=true;
+      S.tuto.seen[k]=true; evLog("unlock", {k});
       if(!silent){ log(`🔓 Vous débloquez ${UNLOCK_TXT[k]} !`, "boss"); Sfx.play("success"); guideQueue(k);
         if(k==="skills") sklStarter();
         if(k==="loot"){ S.ingots=(S.ingots||0)+15; log(`🎁 Cadeau : +15 §lingot§ Lingots pour vos premières forges !`, "good"); }
@@ -5845,6 +5875,8 @@ function slash(){
   fl.appendChild(el); setTimeout(()=>el.remove(), 260);
   const e=$("#enemy"); e.classList.remove("hurt"); void e.offsetWidth; e.classList.add("hurt");
 }
+let hsT=0;
+function hitStop(){ if(!MOTION) return; const now=performance.now(); if(now-hsT<250) return; hsT=now; const a=$("#arena"); a.classList.add("hitstop"); setTimeout(()=>a.classList.remove("hitstop"), 70); }
 function shake(){ if(!MOTION) return; const a=$("#arena"); a.classList.remove("shake"); void a.offsetWidth; a.classList.add("shake"); }
 function poof(){
   if(!fxOK()) return;
@@ -5875,18 +5907,23 @@ function scheduleNotifs(){
   try{
     const now=new Date(), tomorrow=new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 10, 0, 0);
     const list=[{id:101, title:"Lame : Idle RPG", body:"Votre chevalier a amassé un beau butin. Revenez le récupérer !", schedule:{at:new Date(Date.now()+3*3600e3)}},
-                {id:102, title:"Récompense du jour", body:"Votre cadeau quotidien vous attend dans le royaume.", schedule:{at:tomorrow}}];
+                {id:102, title:"Votre coffre du jour", body:"Un nouveau coffre quotidien vous attend. Ne cassez pas votre série !", schedule:{at:tomorrow}}];
     if(unlocked("defis")){
       const mon=new Date(now); mon.setDate(now.getDate()+((8-now.getDay())%7||7)); mon.setHours(10,0,0,0);
       list.push({id:104, title:"Le Titan est de retour", body:"Le Titan à trois têtes s'est réveillé : nouvelles récompenses de la semaine !", schedule:{at:mon}});
       if(S.chal.keys<3) list.push({id:105, title:"Clés rechargées", body:"Vos 3 clés de la Tour des épreuves vous attendent.", schedule:{at:new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 9, 0, 0)}});
     }
-    if(S.city) list.push({id:106, title:"Votre fief déborde", body:"La mine, la scierie et la carrière ont bien travaillé. Venez dépenser vos ressources !", schedule:{at:new Date(Date.now()+6*3600e3)}});
+    if(S.city && S.city.stock){   // le fief prévient quand un bâtiment est plein
+      let tMin=Infinity; for(const id of ["mine","scierie","carriere"]){ const rate=prodOf(id,S.city.lv[id])/60*prodMult(); if(rate>0) tMin=Math.min(tMin, (stockCap(id)-(S.city.stock[id]||0))/rate); }
+      if(tMin<Infinity) list.push({id:106, title:"Votre fief déborde", body:"La mine, la scierie et la carrière sont pleines : récoltez avant que la production ne s'arrête !", schedule:{at:new Date(Date.now()+Math.max(1800,tMin)*1000)}});
+    }
+    if(S.city && S.city.exp && S.city.exp.end>Date.now()+60e3){ const e=EXPS.find(x=>x.id===S.city.exp.id);
+      list.push({id:107, title:"Expédition de retour", body:`${e?e.n:"Vos soldats"} : vos soldats sont rentrés avec leur butin !`, schedule:{at:new Date(S.city.exp.end)}}); }
     if(eventActive()) list.push({id:103, title:"Invasion de dragons", body:"Les dragonnets attaquent encore ! Récoltez des écailles avant la fin de l'événement.", schedule:{at:new Date(Date.now()+6*3600e3)}});
     NP.LocalNotifications.schedule({notifications:list});
   }catch(_){}
 }
-function cancelNotifs(){ if(NATIVE && NP.LocalNotifications){ try{ NP.LocalNotifications.cancel({notifications:[101,102,103,104,105,106].map(id=>({id}))}); }catch(_){} } }
+function cancelNotifs(){ if(NATIVE && NP.LocalNotifications){ try{ NP.LocalNotifications.cancel({notifications:[101,102,103,104,105,106,107].map(id=>({id}))}); }catch(_){} } }
 document.addEventListener("visibilitychange", ()=>{ if(document.hidden) scheduleNotifs(); else cancelNotifs(); });
 
 /* ================= OUTILS DE TEST ================= */
@@ -5934,8 +5971,30 @@ const SB_URL = "https://jvpeyliecpwjfztqmcdc.supabase.co", SB_KEY = "sb_publisha
 const LB_ON = () => !!(SB_URL && SB_KEY) && typeof fetch === "function";
 const LB_AUTH = "lame-lb-auth";
 const LB = {ver:0, data:{}, at:{}, me:{}, err:"", busy:false, lastPush:0, lastSig:""};
-const RK = [{k:"power", n:"Puissance", u:v=>"⚡ "+fmt(v)}, {k:"best", n:"Étape", u:v=>"étape "+fmt(v)}, {k:"tower", n:"Tour", u:v=>"étage "+fmt(v)}, {k:"titan", n:"Titan", u:v=>"×"+(v>=1000?fmt(v):(+v).toFixed(1))}, {k:"rebirths", n:"Renais.", u:v=>fmt(v)+" ⟳"}];
-let rkTab = "power", pseudoOpen = false, lbNoPower = false;
+const RK = [{k:"week", n:"Semaine", u:v=>fmt(v)+" boss"}, {k:"power", n:"Puissance", u:v=>"⚡ "+fmt(v)}, {k:"best", n:"Étape", u:v=>"étape "+fmt(v)}, {k:"tower", n:"Tour", u:v=>"étage "+fmt(v)}, {k:"titan", n:"Titan", u:v=>"×"+(v>=1000?fmt(v):(+v).toFixed(1))}, {k:"rebirths", n:"Renais.", u:v=>fmt(v)+" ⟳"}];
+let rkTab = "week", pseudoOpen = false, lbNoPower = false, lbNoTitle = false;
+/* Semaine : boss vaincus depuis lundi */
+function weekIdOf(dt){ const d=new Date(dt); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return d.getFullYear()+"-S"+(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)); }
+function weekScore(){ const w=weekId(); if(!S.wkb || S.wkb.wk!==w) S.wkb={wk:w, b0:S.stats.bosses||0}; return Math.max(0,(S.stats.bosses||0)-S.wkb.b0); }
+let wkLast=0;
+async function weekPush(force){
+  if(!LB_ON() || !S.pseudo) return; const sc=weekScore(); if(!sc) return;
+  if(!force && Date.now()-wkLast<120000) return; wkLast=Date.now();
+  try{ const a=await lbToken(); await lbFetch("/rest/v1/weekly?on_conflict=id,wk", {method:"POST", headers:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:JSON.stringify({id:a.uid, wk:weekId(), name:S.pseudo, score:sc, updated_at:new Date().toISOString()})}); }catch(e){}
+}
+const WK_PRIZES = [{r:1, cr:500, t:"🥇 Champion"}, {r:3, cr:300, t:"🥈 Héros"}, {r:10, cr:150, t:"🥉 Vaillant"}];
+async function weekClaim(){   // récompense de la semaine passée, une fois
+  if(!LB_ON() || !S.pseudo) return; const prev=weekIdOf(Date.now()-7*864e5);
+  if(S.wkClaimed===prev) return;
+  try{
+    const a=lbAuthGet(); if(!a) return;
+    const r=await lbFetch(`/rest/v1/weekly?select=id&wk=eq.${encodeURIComponent(prev)}&score=gt.0&order=score.desc,updated_at.asc&limit=10`, {}, false);
+    if(!r.ok) return; const rows=await r.json(); S.wkClaimed=prev;
+    const i=rows.findIndex(x=>x.id===a.uid); if(i<0){ save(); return; }
+    const pz=WK_PRIZES.find(p=>i+1<=p.r); S.crystals+=pz.cr; S.lbTitle={wk:weekId(), t:pz.t}; LB.lastSig=""; save();
+    modal("🏆 Classement de la semaine", `<div class="sheeticon">🏆</div><div class="small" style="font-size:15px">Vous avez terminé <b>${i+1}${i?"e":"er"}</b> la semaine dernière !<br><br>+${pz.cr} 💎 et le titre <b>${pz.t}</b> à côté de votre nom pendant toute cette semaine.</div>`, [{t:"Super !", cls:"gold"}]);
+  }catch(e){}
+}
 const esc = t => String(t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const BAD = ["merde","pute","putain","connard","connasse","salop","salaud","encul","batard","bâtard","nique","niqu","fdp","ntm","bite","couille","chatte","nazi","hitler","negr","nègre","bougnoul","youpin","pédé","pedo","pédo","tapette","gouine","trisom","mongol","débile","abruti","enfoiré","enfoire","branle","suce","sucer","zizi","cul","fuck","shit","bitch","cunt","dick","cock","pussy","nigg","nigga","fag","whore","slut","porn","sex","rape","kkk","isis","daesh","jihad","terror","suicide","admin","moderat","staff","anthropic","apple","support"];
 const BAD_SHORT = ["pd","tg","fdp","ntm","cul","kkk","sex","ass","viol"];   // seulement comme mot entier
@@ -5974,6 +6033,12 @@ async function pseudoSubmit(first){
   if(first) talk([{t:`Enchanté, <b>${esc(n)}</b> ! Allons-y, les monstres n'attendront pas.`, mood:"happy"}], {title:"Bienvenue"});
 }
 /* --- accès réseau --- */
+let evQ=[];
+function evLog(kind, data){ if(!LB_ON() || (S.opts && S.opts.stats===false)) return; evQ.push({kind, stage:Math.floor(S.best||0), data:data||null}); if(evQ.length>40) evQ.shift(); }
+async function evFlush(){
+  if(!evQ.length || !LB_ON() || (S.opts && S.opts.stats===false)) { if(S.opts && S.opts.stats===false) evQ=[]; return; }
+  const batch=evQ.splice(0); try{ const a=await lbToken(); const r=await lbFetch("/rest/v1/events", {method:"POST", headers:{Prefer:"return=minimal"}, body:JSON.stringify(batch.map(e=>({...e, uid:a.uid})))}); if(!r.ok && r.status>=500) evQ.unshift(...batch); }catch(e){ evQ.unshift(...batch.slice(-20)); }
+}
 function lbAuthGet(){ try{ return JSON.parse(localStorage.getItem(LB_AUTH)||"null"); }catch(e){ return null; } }
 function lbAuthSet(a){ try{ localStorage.setItem(LB_AUTH, JSON.stringify(a)); }catch(e){} }
 async function lbFetch(path, opt={}, auth=true){
@@ -5993,15 +6058,55 @@ async function lbToken(){
   const j=await r.json(); a={at:j.access_token, rt:j.refresh_token, exp:Math.floor(Date.now()/1000)+(j.expires_in||3600), uid:j.user&&j.user.id};
   lbAuthSet(a); return a;
 }
+let cloudLast=0, cloudSig="", cloudOK=0;
+async function cloudPush(force){
+  if(!LB_ON() || saveLocked) return;
+  if(!force && Date.now()-cloudLast<180000) return;
+  const json=JSON.stringify(S); const sig=json.length+":"+(S.stats.kills||0)+":"+S.best;
+  if(sig===cloudSig) return; cloudLast=Date.now();
+  try{ const a=await lbToken(); const body={id:a.uid, data:S, stage:Math.floor(S.best||0), updated_at:new Date().toISOString()}; if(S.recHash) body.recovery=S.recHash;
+    const r=await lbFetch("/rest/v1/saves?on_conflict=id", {method:"POST", headers:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:JSON.stringify(body)});
+    if(r.ok){ cloudSig=sig; cloudOK=Date.now(); dirty.opts=true; } }catch(e){}
+}
+async function sha256hex(t){ const b=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+function recCodeNew(){ const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r=new Uint8Array(16); crypto.getRandomValues(r); const c=[...r].map(x=>A[x%A.length]).join(""); return c.match(/.{4}/g).join("-"); }
+async function recShow(){
+  if(!LB_ON()){ toast("La sauvegarde en ligne n'est pas disponible."); return; }
+  if(!S.recCode){ S.recCode=recCodeNew(); S.recHash=await sha256hex(S.recCode.replace(/-/g,"")); save(); }
+  cloudSig=""; await cloudPush(true);
+  modal("Mon code de récupération", `<div class="small">Notez ce code en lieu sûr. Sur un autre téléphone (ou après avoir réinstallé le jeu), entrez-le dans Options → Sauvegarde → « Récupérer ma partie » pour retrouver toute votre progression, vos achats compris.</div>
+    <div class="reccode">${S.recCode}</div><div class="small">${cloudOK?"☁️ Partie envoyée en ligne à l'instant.":"⚠️ Pas de connexion : la partie sera envoyée dès que possible."}</div>`,
+    [{t:"Copier", f:()=>{ try{ navigator.clipboard.writeText(S.recCode); toast("Code copié !"); }catch(e){} }}, {t:"OK", cls:"gold"}]);
+}
+function recAsk(err=""){
+  modal("Récupérer ma partie", `<div class="small">Entrez votre code de récupération. ⚠️ La partie de cet appareil sera remplacée.</div><input id="recIn" class="pin" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><div class="perr">${esc(err)}</div>`,
+    [{t:"Annuler"}, {t:"Récupérer", cls:"gold", f:recDo}]);
+}
+async function recDo(){
+  const code=($("#recIn").value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(code.length!==16){ recAsk("Le code fait 16 caractères."); return; }
+  toast("Recherche de la partie…");
+  try{
+    const r=await lbFetch("/rest/v1/rpc/restore_with_code", {method:"POST", body:JSON.stringify({code_hash:await sha256hex(code)})});
+    if(!r.ok) throw new Error(r.status); const d=await r.json();
+    if(!d || !d.forge){ recAsk("Aucune partie trouvée avec ce code."); return; }
+    modal("Partie trouvée !", `<div class="small">Étape record <b>${fmt(d.best||1)}</b>, ${d.prestiges||0} Renaissance${(d.prestiges||0)>1?"s":""}${d.pseudo?`, nom <b>${esc(d.pseudo)}</b>`:""}.<br>Remplacer la partie de cet appareil ?</div>`,
+      [{t:"Annuler"}, {t:"Remplacer", cls:"red", f:()=>{ saveLocked=false; load(d); S.last=Date.now(); save(); LB.lastSig=""; cloudSig=""; LB.data={}; LB.at={}; calc(); S.hp=C.hp; E=null; spawn(); Object.keys(dirty).forEach(k=>dirty[k]=true); showView("combat"); toast("✅ Partie récupérée !"); }}]);
+  }catch(e){ recAsk("Impossible de joindre le serveur. Vérifiez votre connexion."); }
+}
 function lbRow(name){
   const c=S.chal||{};
   const r={name, power:Math.floor(heroPower()), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
   if(lbNoPower) delete r.power;
+  r.week = weekScore();
   return r;
 }
 async function lbUpsert(row){
   const a=await lbToken();
-  const r=await lbFetch("/rest/v1/players?on_conflict=id", {method:"POST", headers:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:JSON.stringify({id:a.uid, ...row})});
+  const {week, ...prow} = row; if(S.lbTitle && S.lbTitle.wk===weekId()) prow.title=S.lbTitle.t; else prow.title="";
+  if(lbNoTitle) delete prow.title;
+  const r=await lbFetch("/rest/v1/players?on_conflict=id", {method:"POST", headers:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:JSON.stringify({id:a.uid, ...prow})});
+  if(r.status===400 && !lbNoTitle && "title" in prow){ const tx=await r.clone().text(); if(/title/.test(tx)){ lbNoTitle=true; return lbUpsert(row); } }
   if(r.status===409) return "taken";
   if(r.status===400 && !lbNoPower && "power" in row){ const tx=await r.text(); if(/power/.test(tx)){ lbNoPower=true; delete row.power; return lbUpsert(row); } }   // colonne pas encore créée
   return r.ok ? "ok" : "err";
@@ -6024,14 +6129,18 @@ async function lbLoad(k){
   LB.busy=true; LB.at[k]=Date.now();
   try{
     await (async()=>{ LB.busy=false; await lbPush(true); LB.busy=true; })();
+    if(k==="week") await weekPush(true);
     const wk = k==="titan" ? `&titan_wk=eq.${encodeURIComponent(S.chal.wk||"")}` : "";
-    const r=await lbFetch(`/rest/v1/players?select=id,name,${k}&${k}=gt.0${wk}&order=${k}.desc,updated_at.asc&limit=100`, {}, false);
+    const r = k==="week"
+      ? await lbFetch(`/rest/v1/weekly?select=id,name,week:score&wk=eq.${encodeURIComponent(weekId())}&score=gt.0&order=score.desc,updated_at.asc&limit=100`, {}, false)
+      : await lbFetch(`/rest/v1/players?select=id,name,title,${k}&${k}=gt.0${wk}&order=${k}.desc,updated_at.asc&limit=100`, {}, false);
     if(!r.ok) throw new Error("load "+r.status);
     const rows=await r.json(); LB.data[k]=rows; LB.err="";
     const a=lbAuthGet(), mine=lbRow(S.pseudo)[k], idx=rows.findIndex(x=>a && x.id===a.uid);
     if(idx>=0) LB.me[k]=idx+1;
     else if(S.pseudo && mine>0){
-      const c=await lbFetch(`/rest/v1/players?select=id&${k}=gt.${mine}${wk}`, {method:"HEAD", headers:{Prefer:"count=exact"}}, false);
+      const c = k==="week" ? await lbFetch(`/rest/v1/weekly?select=id&wk=eq.${encodeURIComponent(weekId())}&score=gt.${mine}`, {method:"HEAD", headers:{Prefer:"count=exact"}}, false)
+                           : await lbFetch(`/rest/v1/players?select=id&${k}=gt.${mine}${wk}`, {method:"HEAD", headers:{Prefer:"count=exact"}}, false);
       const cr=c.headers.get("content-range")||""; const tot=+(cr.split("/")[1]||NaN); LB.me[k]=isNaN(tot)?0:tot+1;
     } else LB.me[k]=0;
   }catch(e){ LB.err="Impossible de joindre le classement. Vérifiez votre connexion."; LB.at[k]=0; }
@@ -6048,21 +6157,21 @@ function reportAsk(id, name){
       }catch(e){ toast("Pas de connexion : réessayez plus tard."); } }}]);
 }
 function lbDeleteAsk(){
-  modal("Supprimer mes données du classement ?", `<div class="small">Votre nom et vos scores seront effacés du classement en ligne, ainsi que votre identifiant anonyme. Votre partie sur cet appareil n'est pas touchée. Vous pourrez revenir dans le classement en choisissant un nouveau nom.</div>`,
+  modal("Supprimer mes données en ligne ?", `<div class="small">Votre nom, vos scores, votre sauvegarde en ligne, vos statistiques anonymes et votre identifiant anonyme seront effacés. ⚠️ Votre code de récupération ne marchera plus. Votre partie sur cet appareil n'est pas touchée. Vous pourrez revenir dans le classement en choisissant un nouveau nom.</div>`,
     [{t:"Annuler"}, {t:"Supprimer", cls:"red", f:async()=>{
       try{
         const r=await lbFetch("/rest/v1/rpc/delete_me", {method:"POST", body:"{}"});
         if(!r.ok) throw new Error(r.status);
         try{ localStorage.removeItem(LB_AUTH); }catch(e){}
-        S.pseudo=""; S.pseudoSkip=true; LB.lastSig=""; LB.data={}; LB.at={}; LB.me={}; save(); dirty.opts=true;
+        S.pseudo=""; S.pseudoSkip=true; S.recCode=""; S.recHash=""; LB.lastSig=""; LB.data={}; LB.at={}; LB.me={}; save(); dirty.opts=true;
         toast("Vos données du classement ont été supprimées.");
       }catch(e){ toast("La suppression n'a pas pu se faire. Vérifiez votre connexion et réessayez."); } }}]);
 }
 function renderRank(){
   const box=$("#tab-rank"), R=RK.find(r=>r.k===rkTab)||RK[0]; if(!box) return;
   const sub=`<div class="seg rksub">${RK.map(r=>`<button data-rk="${r.k}" class="${r.k===R.k?"on":""}">${r.n}</button>`).join("")}</div>`;
-  const myV=R.k==="power"?Math.floor(heroPower()):lbRow(S.pseudo||"")[R.k];
-  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="titan"?"cette semaine":R.k==="power"?"attaque, vie et défense":"tous les joueurs"}</span></div>${sub}
+  const myV=R.k==="power"?Math.floor(heroPower()):R.k==="week"?weekScore():lbRow(S.pseudo||"")[R.k];
+  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="week"?"boss vaincus depuis lundi":R.k==="titan"?"cette semaine":R.k==="power"?"attaque, vie et défense":"tous les joueurs"}</span></div>${sub}
     <div class="rkme"><span class="rkn">${LB.me[R.k]?"#"+LB.me[R.k]:"–"}</span><span class="rkname">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"} <small class="small">(vous)</small></span><span class="rkv">${myV>0?R.u(myV):"–"}</span></div>${S.pseudo?"":`<button class="btn gold sm wide" id="pseudoBtn" style="margin-top:6px">Choisir un nom pour apparaître au classement</button>`}</div>`;
   let body;
   if(!LB_ON()) body=`<div class="small" style="text-align:center;padding:24px 8px">🏆<br><b>Le classement en ligne arrive bientôt.</b><br>Votre nom est déjà réservé sur cet appareil : vos records y apparaîtront dès son ouverture.</div>`;
@@ -6070,15 +6179,17 @@ function renderRank(){
   else if(!LB.data[R.k]) body=`<div class="small" style="text-align:center;padding:24px 8px">Chargement du classement…</div>`;
   else {
     const a=lbAuthGet(), rows=LB.data[R.k];
-    body = rows.length ? `<div class="pager" data-pg="rank-${R.k}"><div class="pgsrc list">${rows.map((x,i)=>`<div class="rkrow ${a&&x.id===a.uid?"me":""}" ${a&&x.id===a.uid?"":`data-rkp="${x.id}" data-rkn="${esc(x.name)}"`}><span class="rkn ${i<3?"m"+(i+1):""}">${i<3?["🥇","🥈","🥉"][i]:"#"+(i+1)}</span><span class="rkname">${esc(x.name)}</span><span class="rkv">${R.u(x[R.k])}</span></div>`).join("")}</div></div>`
+    body = rows.length ? `<div class="pager" data-pg="rank-${R.k}"><div class="pgsrc list">${rows.map((x,i)=>`<div class="rkrow ${a&&x.id===a.uid?"me":""}" ${a&&x.id===a.uid?"":`data-rkp="${x.id}" data-rkn="${esc(x.name)}"`}><span class="rkn ${i<3?"m"+(i+1):""}">${i<3?["🥇","🥈","🥉"][i]:"#"+(i+1)}</span><span class="rkname">${esc(x.name)}${x.title?` <small class="rktitle">${esc(x.title)}</small>`:""}</span><span class="rkv">${R.u(x[R.k])}</span></div>`).join("")}</div></div>`
       : `<div class="small" style="text-align:center;padding:24px 8px">Personne encore. Soyez le premier !</div>`;
   }
-  box.innerHTML = head + `<div class="card grow">${body}</div><div class="small" style="text-align:center;margin-top:4px;opacity:.85">Touchez un nom pour le signaler.</div>`;
+  const prize = R.k==="week" ? `<div class="small" style="text-align:center;margin-top:4px">Lundi : top 1 → 500 💎 · top 3 → 300 💎 · top 10 → 150 💎, et un titre pour la semaine</div>` : "";
+  box.innerHTML = head + `<div class="card grow">${body}</div>${prize}<div class="small" style="text-align:center;margin-top:2px;opacity:.85">Touchez un nom pour le signaler.</div>`;
   lbLoad(R.k);
 }
 setTimeout(function adBoot(){ if(!NATIVE || !NP.AdMob) return; if(!S.tuto.intro || !S.pseudo || TK.story){ setTimeout(adBoot, 5000); return; } Ads.init(); }, 4000);
-setInterval(()=>lbPush(false), 30000);
-document.addEventListener("visibilitychange", ()=>{ if(document.hidden) lbPush(true); });
+setInterval(()=>{ lbPush(false); weekPush(false); cloudPush(false); evFlush(); }, 30000);
+setTimeout(()=>{ weekClaim(); evLog("start", {v:BUILD_ID, plat:NATIVE?(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()):"web", p:S.prestiges}); }, 6000);
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden){ lbPush(true); weekPush(true); cloudPush(true); evFlush(); } });
 
 let cloudRef = null, cloudReady = false, cloudBusy = false, cloudLastJson = "";
 async function initCloud(hadLocal, localAt){
