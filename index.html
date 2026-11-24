@@ -978,23 +978,12 @@ header .pill>span:last-child{overflow:hidden;text-overflow:ellipsis}
 .hbtns .iconbtn .dot{top:-6px;right:-4px}
 @media (max-width:360px){header .pill{font-size:14px;padding:3px 5px}.hbtns .hl{font-size:12px}}
 /* ===== Tour : chargement, combat, fin ===== */
-#tload,#tend{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:calc(var(--st) + 16px) 18px calc(var(--sb) + 16px)}
-#tload{background:radial-gradient(ellipse at 50% 30%,#3b2f6b 0%,#1a1533 60%,#0d0b1c 100%);color:#fff;text-align:center}
-#tload.on,#tend.on{display:flex}
-#tload.on .tlin{animation:tlIn .45s cubic-bezier(.2,1.4,.4,1)}#tload.out{animation:tlOut .38s ease forwards}
+#tend{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:calc(var(--st) + 16px) 18px calc(var(--sb) + 16px)}
+#tend.on{display:flex}
 @keyframes tlIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}@keyframes tlOut{to{opacity:0;transform:scale(1.08)}}
-.tlin{width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:8px}
-.tltower{width:120px;height:150px;animation:tlFloat 2.4s ease-in-out infinite}.tltower svg{width:100%;height:100%}
-@keyframes tlFloat{50%{transform:translateY(-6px)}}
-.tlkick{font-weight:900;font-size:13px;color:#c9b8ff;letter-spacing:.5px}
-.tlfloor{font-family:var(--disp);font-size:38px;line-height:1;color:#ffd43b;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffd43b66}
-.tlguard{display:flex;align-items:center;gap:10px;background:#ffffff14;border:2px solid #ffffff22;border-radius:14px;padding:8px 14px;text-align:left;margin-top:4px}
-.tlguard .tlic{font-size:40px;line-height:1}.tlguard .tlic .sp{width:44px;height:44px}.tlguard div>b{display:block;font-family:var(--disp);font-weight:400;font-size:17px}.tlguard small{font-size:12px;font-weight:800;color:#d8d0ff}
-.tlrew,.terew{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
-.tlrew span,.terew span{background:#ffffff1c;border:1.5px solid #ffffff30;border-radius:10px;padding:3px 9px;font-weight:900;font-size:13px}
-.tlrew .sp,.terew .sp{width:15px;height:15px;vertical-align:-3px}
-.tlbar{width:100%;height:14px;border-radius:99px;background:#0006;border:2px solid #ffd43b88;overflow:hidden;margin-top:10px}.tlbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f59f00,#ffd43b,#fff3bf);box-shadow:0 0 12px #ffd43b}
-.tltip{font-size:13px;font-weight:800;color:#d8d0ff;min-height:18px}
+.terew{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.terew span{background:#ffffff1c;border:1.5px solid #ffffff30;border-radius:10px;padding:3px 9px;font-weight:900;font-size:13px}
+.terew .sp{width:15px;height:15px;vertical-align:-3px}
 #tend{background:#0d0b1ccc;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 .tein{position:relative;width:min(360px,100%);border-radius:22px;padding:22px 16px 16px;text-align:center;overflow:hidden;color:#fff;display:flex;flex-direction:column;gap:10px;animation:tlIn .5s cubic-bezier(.2,1.4,.4,1)}
 #tend.win .tein{background:linear-gradient(180deg,#3d2a85,#24195a);border:4px solid #ffd43b;box-shadow:0 0 0 3px #7a4a00,0 0 40px #ffd43b55}
@@ -1033,10 +1022,6 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 .row.focusflash{animation:focusFlash 2.2s ease}@keyframes focusFlash{0%,40%{box-shadow:0 0 0 3px #ffd43b,0 0 18px #ffd43b;background:#fff3bf}100%{box-shadow:none}}
 .nokey{flex-direction:column;line-height:1.1}.nokey small{font-size:10px;opacity:.9}
 .rhtop.lack{background:#ffe3e3}.rhtop.lack b{color:#c92a2a}.rhtop small{display:block}
-#tload.titan{background:radial-gradient(ellipse at 50% 30%,#7a1f1f 0%,#3a0d12 60%,#160508 100%)}
-#tload.titan .tlkick{color:#ffc9c9}#tload.titan .tlfloor{font-size:30px;color:#ffa94d;text-shadow:0 3px 0 #6a1a00,0 0 24px #ff6b3d88}
-#tload.titan .tlguard small,#tload.titan .tltip{color:#ffd8d8}#tload.titan .tlbar{border-color:#ff922b88}#tload.titan .tlbar i{background:linear-gradient(90deg,#c92a2a,#ff922b,#ffd43b);box-shadow:0 0 12px #ff6b3d}
-.tltit{display:flex;align-items:center;justify-content:center;width:100%;height:100%}.tltit .sp{width:130px;height:130px;filter:drop-shadow(0 0 18px #ff6b3daa)}
 </style>
 </head>
 <body>
@@ -1052,7 +1037,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1453";
+var BUILD_ID = "20261124-1516";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1196,15 +1181,6 @@ var BUILD_ID = "20261124-1453";
 <div id="spot"><span class="sparrow">▼</span></div>
 <div class="dimp" id="dimT"></div><div class="dimp" id="dimB"></div><div class="dimp" id="dimL"></div><div class="dimp" id="dimR"></div>
 <div id="hand">§doigt§</div>
-<div id="tload" aria-live="polite"><div class="tlin">
-  <div class="tltower" id="tlTower"></div>
-  <div class="tlkick" id="tlKick">Tour des épreuves</div>
-  <div class="tlfloor" id="tlFloor">Étage 1</div>
-  <div class="tlguard"><span class="tlic" id="tlIc"></span><div><b id="tlName">Gardien</b><small id="tlDiff"></small></div></div>
-  <div class="tlrew" id="tlRew"></div>
-  <div class="tlbar"><i id="tlFill"></i></div>
-  <div class="tltip" id="tlTip">Ouverture de la porte…</div>
-</div></div>
 <div id="tend"><div class="tein">
   <div class="terays"></div>
   <div class="tetitle" id="teTitle">Victoire !</div>
@@ -5096,7 +5072,7 @@ function guideQueue(k){
   if(!GUIDES[k] || S.tuto.gs[k] || S.tuto.gq.includes(k)) return;
   S.tuto.gq.push(k);
 }
-function guideBusy(){ return TK.story || towerLoading || ["#modal","#summon","#raid","#adov","#tend","#tload"].some(q=>{ const e=$(q); return e && e.classList.contains("on"); }) || pausedForPick; }
+function guideBusy(){ return TK.story || ["#modal","#summon","#raid","#adov","#tend"].some(q=>{ const e=$(q); return e && e.classList.contains("on"); }) || pausedForPick; }
 function guideWatch(){
   if(talentPending()) guideQueue("talents");
   if(view==="shop") guideQueue("shop");
@@ -5151,48 +5127,16 @@ function modeEnemy(){
   MODE.ref=e.hp; e.hp=e.max=e.hp*1e15; e.atk*=1.1; e.boss=true; e.timer=30; e.n="Titan de la semaine"; e.ic="§dragontri§"; e.ev=false; return e;
 }
 /* Tour : écran de chargement, puis combat, puis écran de fin (victoire ou défaite) */
-let towerLoading = false;
-const TL_TIPS = ["Ouverture de la porte de l'étage…","Les torches s'allument…","Le gardien se réveille…","En garde !"];
-function towerLaunch(){
+function towerLaunch(){   // pas d'écran de chargement : le combat s'ouvre directement sur le 3, 2, 1
   chalReset();
-  if(towerLoading || MODE || deadT>0 || !unlocked("defis") || S.chal.keys<=0) return;
-  towerLoading = true; $("#tend").classList.remove("on"); $("#tload").classList.remove("titan"); $("#tlKick").textContent="Tour des épreuves";
-  const f=S.chal.floor, st=towerStage(f), bb=biomeOf(st).boss, rw=towerReward(f), d=towerDiff(f);
-  setH($("#tlTower"), towerArt(f));
-  $("#tlFloor").textContent = (f%5===0?"Palier · ":"")+"Étage "+f;
-  setH($("#tlIc"), bb[1]); $("#tlName").textContent = "Gardien de la Tour";
-  setH($("#tlDiff"), `Difficulté : <b style="color:${d.c}">${d.t}</b> · 30 s pour le vaincre`);
-  setH($("#tlRew"), [`+${rw.cr} 💎`,`+${rw.ob} 🔮`,`+${rw.ig} §lingot§`,`+${fmt(rw.sc)} 🔩`].map(x=>`<span>${x}</span>`).join(""));
-  const el=$("#tload"), fill=$("#tlFill"), tip=$("#tlTip");
-  fill.style.transition="none"; fill.style.width="0%"; void fill.offsetWidth;
-  el.classList.add("on"); Sfx.play("reveal");
-  const T = MOTION ? 1100 : 500;
-  fill.style.transition=`width ${T}ms cubic-bezier(.3,.1,.3,1)`; fill.style.width="100%";
-  TL_TIPS.forEach((t,i)=>setTimeout(()=>{ tip.textContent=t; }, i*T/TL_TIPS.length));
-  setTimeout(()=>{ towerLoading=false; chalStart("tower"); if(MODE && MODE.kind==="tower") towerCountdown(MODE);
-    el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out"), 380); }, T+150);
+  if(MODE || deadT>0 || !unlocked("defis") || S.chal.keys<=0) return;
+  $("#tend").classList.remove("on");
+  chalStart("tower"); if(MODE && MODE.kind==="tower") towerCountdown(MODE);
 }
-/* Titan : même chargement (aux couleurs du Titan) et même 3, 2, 1 */
-const TT_TIPS = ["Le sol se met à trembler…","Le Titan s'éveille…","Trois têtes vous fixent…","Frappez fort !"];
 function titanLaunch(){
   chalReset();
-  if(towerLoading || MODE || deadT>0 || !unlocked("defis") || S.chal.wtries<=0) return;
-  towerLoading = true; $("#tend").classList.remove("on");
-  const c=S.chal, nxt=W_TIERS.find(t=>c.wbest<t.r), done=W_TIERS.filter(t=>c.wbest>=t.r).length;
-  const el=$("#tload"), fill=$("#tlFill"), tip=$("#tlTip");
-  el.classList.add("titan"); $("#tlKick").textContent="Titan de la semaine";
-  setH($("#tlTower"), `<span class="tltit">§dragontri§</span>`);
-  $("#tlFloor").textContent = "Le Titan à trois têtes";
-  setH($("#tlIc"), "🐲"); $("#tlName").textContent = `Votre record : ×${c.wbest<1000?c.wbest.toFixed(1):fmt(c.wbest)}`;
-  setH($("#tlDiff"), `${c.wtries} essai${c.wtries>1?"s":""} restant${c.wtries>1?"s":""} aujourd'hui · 30 s pour frapper le plus fort possible`);
-  setH($("#tlRew"), nxt ? `<span>Prochain palier : ×${fmt(nxt.r)}</span><span>+${nxt.cr} 💎</span><span>+${nxt.ob} 🔮</span>` : `<span>Tous les paliers sont atteints (${done}/${W_TIERS.length})</span>`);
-  fill.style.transition="none"; fill.style.width="0%"; void fill.offsetWidth;
-  el.classList.add("on"); Sfx.play("reveal");
-  const T = MOTION ? 1100 : 500;
-  fill.style.transition=`width ${T}ms cubic-bezier(.3,.1,.3,1)`; fill.style.width="100%";
-  TT_TIPS.forEach((t,i)=>setTimeout(()=>{ tip.textContent=t; }, i*T/TT_TIPS.length));
-  setTimeout(()=>{ towerLoading=false; chalStart("wboss"); if(MODE && MODE.kind==="wboss") towerCountdown(MODE);
-    el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out","titan"), 380); }, T+150);
+  if(MODE || deadT>0 || !unlocked("defis") || S.chal.wtries<=0) return;
+  chalStart("wboss"); if(MODE && MODE.kind==="wboss") towerCountdown(MODE);
 }
 function towerCountdown(m){   // 3, 2, 1, Combat ! : on voit le gardien avant que ça parte
   m.hold = true; const cd=$("#tcd"); let n=3;
@@ -5203,11 +5147,6 @@ function towerCountdown(m){   // 3, 2, 1, Combat ! : on voit le gardien avant qu
     show("Combat !"); setTimeout(()=>{ cd.classList.remove("on"); if(MODE===m) m.hold=false; }, 650);
   };
   setTimeout(tick, 350);
-}
-function towerArt(f){   // tour de pierre vue de face : l'étage visé brille
-  let rows=""; for(let i=0;i<6;i++){ const y=150-i*22, cur=i===2; rows += `<rect x="40" y="${y}" width="80" height="20" rx="3" fill="${cur?"#ffd43b":i<2?"#6c6a8a":"#3b3858"}" ${cur?'filter="url(#tlg)"':""}/><rect x="72" y="${y+5}" width="16" height="11" rx="2" fill="${cur?"#7a4a00":"#1d1b2e"}"/>`; }
-  return `<svg viewBox="0 0 160 200" aria-hidden="true"><defs><filter id="tlg"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-    <path d="M34 40 L80 6 L126 40 Z" fill="#8f5cf6"/><rect x="36" y="38" width="88" height="6" fill="#2a2740"/>${rows}<rect x="30" y="172" width="100" height="10" rx="3" fill="#2a2740"/></svg>`;
 }
 function towerEndShow(win, m, e, quit){
   const f=m.floor, rw=towerReward(f), el=$("#tend");
@@ -5267,7 +5206,7 @@ function modeEnd(win, quit){
     const best = Math.max(S.chal.wbest, ratio), rec = ratio>S.chal.wbest; S.chal.wbest = best;
     log(`🐲 Titan de la semaine : ${fmt(dmg)} dégâts (×${ratio<1000?ratio.toFixed(1):fmt(ratio)}).`, "boss");
     const ready = W_TIERS.filter((t,i)=>best>=t.r && !S.chal.wclaim[i]).length;
-    modal("Fin du combat", `<div class="sheeticon">🐲</div>Vous avez infligé <b>${fmt(dmg)}</b> dégâts, soit <b>×${ratio<1000?ratio.toFixed(1):fmt(ratio)}</b> les PV du boss de votre record.${rec?`<br><b style="color:var(--grn)">Nouveau record de la semaine !</b>`:""}${ready?`<br><br>${ready} récompense${ready>1?"s":""} à récupérer dans le panneau des défis.`:""}`, [{t:"OK", cls:"gold"}]);
+    modal("Fin du combat", `<div class="sheeticon">🐲</div>Vous avez infligé <b>${fmt(dmg)}</b> dégâts, soit <b>×${ratio<1000?ratio.toFixed(1):fmt(ratio)}</b> les PV du boss de votre record.${rec?`<br><b style="color:var(--grn)">Nouveau record de la semaine !</b>`:""}${ready?`<br><br>${ready} récompense${ready>1?"s":""} à récupérer dans le panneau des défis.`:""}`, [{t:"🐲 Retour au Titan", cls:"gold", f:()=>{ defTab="titan"; showView("defis"); renderDefis(true); }}]);
   }
   spawn(); dirty.enemy=true; save();
 }
@@ -5530,7 +5469,7 @@ function dimHide(){ if(!dimSig) return; dimSig=""; ["#dimT","#dimB","#dimL","#di
 function coachHide(){ if(!TK.story){ $("#talk").className=""; } TK.coachKey=""; $("#spot").style.display="none"; dimHide(); }
 function updTuto(){
   if(TK.story){ $("#spot").style.display="none"; dimHide(); return; }
-  const busy = $("#modal").classList.contains("on") || $("#summon").classList.contains("on") || $("#raid").classList.contains("on") || $("#adov").classList.contains("on") || $("#tend").classList.contains("on") || $("#tload").classList.contains("on");
+  const busy = $("#modal").classList.contains("on") || $("#summon").classList.contains("on") || $("#raid").classList.contains("on") || $("#adov").classList.contains("on") || $("#tend").classList.contains("on");
   if(busy){ coachHide(); return; }
   if(TK.happyT > performance.now()){ return; }            // Hubert savoure la réussite un instant
   if(!S.tuto.intro && S.tuto.step===0){ S.tuto.intro=true; save(); talk([
