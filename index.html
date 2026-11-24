@@ -977,6 +977,48 @@ header .pill>span:last-child{overflow:hidden;text-overflow:ellipsis}
 .hbtns .iconbtn.gift .hl{color:#5a3200}
 .hbtns .iconbtn .dot{top:-6px;right:-4px}
 @media (max-width:360px){header .pill{font-size:14px;padding:3px 5px}.hbtns .hl{font-size:12px}}
+/* ===== Tour : chargement, combat, fin ===== */
+#tload,#tend{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:calc(var(--st) + 16px) 18px calc(var(--sb) + 16px)}
+#tload{background:radial-gradient(ellipse at 50% 30%,#3b2f6b 0%,#1a1533 60%,#0d0b1c 100%);color:#fff;text-align:center}
+#tload.on,#tend.on{display:flex}
+#tload.on .tlin{animation:tlIn .45s cubic-bezier(.2,1.4,.4,1)}#tload.out{animation:tlOut .38s ease forwards}
+@keyframes tlIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}@keyframes tlOut{to{opacity:0;transform:scale(1.08)}}
+.tlin{width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:8px}
+.tltower{width:120px;height:150px;animation:tlFloat 2.4s ease-in-out infinite}.tltower svg{width:100%;height:100%}
+@keyframes tlFloat{50%{transform:translateY(-6px)}}
+.tlkick{font-weight:900;font-size:13px;color:#c9b8ff;letter-spacing:.5px}
+.tlfloor{font-family:var(--disp);font-size:38px;line-height:1;color:#ffd43b;text-shadow:0 3px 0 #7a4a00,0 0 24px #ffd43b66}
+.tlguard{display:flex;align-items:center;gap:10px;background:#ffffff14;border:2px solid #ffffff22;border-radius:14px;padding:8px 14px;text-align:left;margin-top:4px}
+.tlguard .tlic{font-size:40px;line-height:1}.tlguard .tlic .sp{width:44px;height:44px}.tlguard div>b{display:block;font-family:var(--disp);font-weight:400;font-size:17px}.tlguard small{font-size:12px;font-weight:800;color:#d8d0ff}
+.tlrew,.terew{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.tlrew span,.terew span{background:#ffffff1c;border:1.5px solid #ffffff30;border-radius:10px;padding:3px 9px;font-weight:900;font-size:13px}
+.tlrew .sp,.terew .sp{width:15px;height:15px;vertical-align:-3px}
+.tlbar{width:100%;height:14px;border-radius:99px;background:#0006;border:2px solid #ffd43b88;overflow:hidden;margin-top:10px}.tlbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f59f00,#ffd43b,#fff3bf);box-shadow:0 0 12px #ffd43b}
+.tltip{font-size:13px;font-weight:800;color:#d8d0ff;min-height:18px}
+#tend{background:#0d0b1ccc;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.tein{position:relative;width:min(360px,100%);border-radius:22px;padding:22px 16px 16px;text-align:center;overflow:hidden;color:#fff;display:flex;flex-direction:column;gap:10px;animation:tlIn .5s cubic-bezier(.2,1.4,.4,1)}
+#tend.win .tein{background:linear-gradient(180deg,#3d2a85,#24195a);border:4px solid #ffd43b;box-shadow:0 0 0 3px #7a4a00,0 0 40px #ffd43b55}
+#tend.lose .tein{background:linear-gradient(180deg,#3a2333,#1f1420);border:4px solid #a3a0b5;box-shadow:0 0 0 3px #2a2533}
+.terays{position:absolute;left:50%;top:40px;width:420px;height:420px;margin:-210px 0 0 -210px;background:repeating-conic-gradient(#ffd43b22 0 10deg,transparent 10deg 20deg);animation:teSpin 14s linear infinite;pointer-events:none}#tend.lose .terays{display:none}
+@keyframes teSpin{to{transform:rotate(360deg)}}
+.tetitle{position:relative;font-family:var(--disp);font-size:42px;line-height:1}#tend.win .tetitle{color:#ffd43b;text-shadow:0 3px 0 #7a4a00,0 0 20px #ffd43b88}#tend.lose .tetitle{color:#ff8787;text-shadow:0 3px 0 #5a1010}
+.tesub{position:relative;font-weight:800;font-size:15px}
+.testats{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.testats>div{background:#ffffff14;border-radius:12px;padding:6px 2px}.testats b{display:block;font-family:var(--disp);font-weight:400;font-size:19px}.testats small{font-size:10.5px;font-weight:800;color:#d8d0ff}.testats .sp{width:12px;height:12px;vertical-align:-2px}
+.terew{position:relative}.tetip{font-size:13px;font-weight:700;color:#eee;line-height:1.35}
+.tebtns{position:relative;display:flex;gap:8px;margin-top:4px}.tebtns .btn{flex:1;padding:11px 6px;font-size:14px}
+/* combat de la tour : interface dédiée */
+#twHud,#twRew{display:none}
+body.tw #zsub,body.tw #pips{display:none}
+body.tw #twHud{display:flex;position:absolute;left:12px;top:54px;z-index:4;align-items:center;gap:8px;pointer-events:none}
+.twt{display:flex;align-items:baseline;justify-content:center;gap:1px;min-width:62px;height:40px;padding:0 12px;border-radius:99px;background:#1a1533e6;border:3px solid #ffd43b;color:#ffd43b;font-family:var(--disp);font-size:24px;box-shadow:0 3px 0 #0006}
+.twt small{font-size:13px}#twHud.low .twt{border-color:#ff6b6b;color:#ff6b6b;animation:raidpulse .8s infinite}
+.twk{background:#1a1533e6;border:2px solid #c9b8ff;color:#fff;border-radius:99px;padding:3px 9px;font-weight:900;font-size:13px}.twk .sp{width:14px;height:14px;vertical-align:-2px}
+body.tw #arena{border-color:#c9b8ff!important;box-shadow:0 0 0 3px #3b2f6b,0 6px 0 #1a153366,inset 0 0 60px #1a153388!important}
+body.tw #zname{background:linear-gradient(#8f5cf6,#5b37c4)!important;border-color:#3b2f6b!important}
+body.tw #btnAuto,body.tw #goal,body.tw #heroPanel,body.tw #evBanner,body.tw #bossRow,body.tw #timerBar{display:none!important}
+body.tw #twRew{display:block;margin-top:8px;text-align:center;font-weight:900;font-size:13px;color:#3b2f6b;background:#efe9ff;border:2px solid #c9b8ff;border-radius:12px;padding:6px 8px}
+body.tw #twRew span{color:#7a6aa8}body.tw #twRew .sp{width:14px;height:14px;vertical-align:-2px}
+body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-color:#8a1c1c}
 </style>
 </head>
 <body>
@@ -992,7 +1034,7 @@ header .pill>span:last-child{overflow:hidden;text-overflow:ellipsis}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1356";
+var BUILD_ID = "20261124-1420";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1042,6 +1084,7 @@ var BUILD_ID = "20261124-1356";
         </div>
       </div>
       <div id="arenaBan"></div>
+      <div id="twHud"><div class="twt"><span id="twSec">30</span><small>s</small></div><div class="twk" id="twKeys"></div></div>
       <div class="fight"><div id="scene"></div>
         <div class="bar timer" id="timerBar" style="display:none"><i id="timerFill"></i></div>
         <div class="duel">
@@ -1064,6 +1107,7 @@ var BUILD_ID = "20261124-1356";
       </div>
       <div id="skills"></div>
       <div id="bossRow"><button class="btn red wide" id="btnBoss">👑 Défier le boss</button></div>
+      <div id="twRew"></div>
       <div id="modeRow"><button class="btn wide sm" id="btnQuit">Abandonner le défi</button></div>
       <button id="evBanner" style="display:none">§dragonnet§ <b>Invasion de dragons !</b> <span id="evTok"></span></button>
     </div>
@@ -1133,6 +1177,23 @@ var BUILD_ID = "20261124-1356";
 <div id="spot"><span class="sparrow">▼</span></div>
 <div class="dimp" id="dimT"></div><div class="dimp" id="dimB"></div><div class="dimp" id="dimL"></div><div class="dimp" id="dimR"></div>
 <div id="hand">§doigt§</div>
+<div id="tload" aria-live="polite"><div class="tlin">
+  <div class="tltower" id="tlTower"></div>
+  <div class="tlkick">Tour des épreuves</div>
+  <div class="tlfloor" id="tlFloor">Étage 1</div>
+  <div class="tlguard"><span class="tlic" id="tlIc"></span><div><b id="tlName">Gardien</b><small id="tlDiff"></small></div></div>
+  <div class="tlrew" id="tlRew"></div>
+  <div class="tlbar"><i id="tlFill"></i></div>
+  <div class="tltip" id="tlTip">Ouverture de la porte…</div>
+</div></div>
+<div id="tend"><div class="tein">
+  <div class="terays"></div>
+  <div class="tetitle" id="teTitle">Victoire !</div>
+  <div class="tesub" id="teSub"></div>
+  <div class="testats" id="teStats"></div>
+  <div class="terew" id="teRew"></div>
+  <div class="tebtns"><button class="btn" id="teMenu">🗼 Menu de la tour</button><button class="btn gold" id="teNext">⚔️ Étage suivant</button></div>
+</div></div>
 <div id="summon"><canvas id="sFx"></canvas><div id="sStage"><div id="sRays"></div><svg id="sCircle" viewBox="-130 -130 260 260" aria-hidden="true"></svg><div class="orb" id="orb"></div></div><div id="sFlash"></div><div id="cards"></div><div id="sLv" hidden></div><div id="sActs" hidden><button class="btn gold" id="sAgain"></button><button class="btn blue" id="sClose">Fermer</button></div><div id="sTap">Touchez pour continuer</div><div id="sSkip" hidden>Touchez pour passer</div></div>
 <div id="adov"><div class="adbox"><span class="adtag">PUBLICITÉ · SIMULATION</span><div style="font-size:54px">📺</div><div id="adCount">5</div>
   <div style="font-size:13px;padding:0 16px;opacity:.9">Ici s'affichera une vraie pub récompensée (AdMob) dans l'application Android.</div></div>
@@ -2980,10 +3041,12 @@ function renderScene(){
 }
 function renderEnemy(){
   const b = biomeOf(S.stage), cer = cercleOf(S.stage);
-  $("#arena").style.background = b.bg; renderScene();
-  $("#zname").textContent = MODE ? (MODE.kind==="tower" ? "Tour des épreuves" : "Boss de la semaine") : b.n + (cer>1 ? " "+roman(cer) : "");
+  $("#arena").style.background = (MODE && MODE.kind==="tower") ? "linear-gradient(180deg,#5a4a92 0%,#3b2f6b 55%,#241c45 100%)" : b.bg; renderScene();
+  const tw = !!(MODE && MODE.kind==="tower"); document.body.classList.toggle("tw", tw);
+  if(tw){ const rw=towerReward(MODE.floor); setH($("#twRew"), `<span>Victoire :</span> +${rw.cr} 💎 · +${rw.ob} 🔮 · +${rw.ig} §lingot§ · +${fmt(rw.sc)} 🔩`); setH($("#twKeys"), `🔑 ${S.chal.keys}`); }
+  $("#zname").textContent = MODE ? (MODE.kind==="tower" ? "🗼 "+(MODE.floor%5===0?"Palier ":"Étage ")+MODE.floor : "Boss de la semaine") : b.n + (cer>1 ? " "+roman(cer) : "");
   $("#modeRow").style.display = MODE ? "block" : "none";
-  $("#zsub").textContent = MODE ? (MODE.kind==="tower" ? "Étage "+MODE.floor : "Frappez le plus fort possible") : isBoss(S.stage) ? "Étape "+S.stage+" · Boss !" : "Étape "+S.stage;
+  $("#zsub").textContent = MODE ? (MODE.kind==="tower" ? "Tour des épreuves"+(MODE.floor%5===0?" · palier":"") : "Frappez le plus fort possible") : isBoss(S.stage) ? "Étape "+S.stage+" · Boss !" : "Étape "+S.stage;
   $("#pips").innerHTML = (MODE || isBoss(S.stage)) ? "" : Array.from({length:KPS},(_,i)=>`<div class="pip ${i<S.kills?"on":""}"></div>`).join("");
   if(E){
     setH($("#enemy"), E.ic); setH($("#miniIc"), E.ic);
@@ -3059,6 +3122,7 @@ function frameUI(){
     { const en=$("#enemy"); if(en){ const ch=!!(E && E.warn>0), sh=!!(E && E.shield>0); if(en.classList.contains("charge")!==ch) en.classList.toggle("charge", ch); if(en.classList.contains("shieldup")!==sh) en.classList.toggle("shieldup", sh); } }
     $("#ehpTxt").textContent = E ? (MODE && MODE.kind==="wboss" ? "Dégâts : "+fmt(MODE.dealt||0) : fmt(Math.max(0,E.hp))) : "";
     if(E && E.boss) $("#timerFill").style.width = (E.timer/30*100)+"%";
+    if(E && MODE && MODE.kind==="tower"){ const sec=Math.max(0,Math.ceil(E.timer)), el=$("#twSec"); if(el.textContent!==String(sec)){ el.textContent=sec; $("#twHud").classList.toggle("low", sec<=10); } }
     $("#hhpFill").style.width = hpP+"%";
     $("#hhpTxt").textContent = fmt(hp)+" / "+fmt(C.hp);
     $("#heroLine").innerHTML = "⚡ "+fmt(heroPower()); const hn=$("#heroName"), ttl=S.lbTitle && S.lbTitle.wk===weekId() ? S.lbTitle.t.split(" ")[0] : "", nm=(S.pseudo||"Vous")+"|"+ttl; if(hn.dataset.v!==nm){ hn.dataset.v=nm; hn.innerHTML=esc(S.pseudo||"Vous")+(ttl?" "+ico(ttl):""); }
@@ -3379,7 +3443,9 @@ document.addEventListener("click", e=>{
   if(t.dataset.guide){ guideShow(t.dataset.guide, false); return; }
   if(t.dataset.altar){ altarBuy(t.dataset.altar); renderPrest(); return; }
   if(t.id==="altarReset"){ S.souls += altarSpent(); S.altar={}; calc(); dirty.stats=true; renderPrest(); save(); return; }
-  if(t.dataset.chal){ chalStart(t.dataset.chal); return; }
+  if(t.dataset.chal){ if(t.dataset.chal==="tower") towerLaunch(); else chalStart(t.dataset.chal); return; }
+  if(t.id==="teMenu"){ towerEndClose(false); return; }
+  if(t.id==="teNext"){ towerEndClose(true); return; }
   if(t.dataset.dtab){ defTab=t.dataset.dtab; renderDefis(true); return; }
   if(t.dataset.rk){ rkTab=t.dataset.rk; renderRank(); return; }
   if(t.dataset.rkp){ reportAsk(t.dataset.rkp, t.dataset.rkn); return; }
@@ -4944,7 +5010,7 @@ function guideQueue(k){
   if(!GUIDES[k] || S.tuto.gs[k] || S.tuto.gq.includes(k)) return;
   S.tuto.gq.push(k);
 }
-function guideBusy(){ return TK.story || ["#modal","#summon","#raid","#adov"].some(q=>{ const e=$(q); return e && e.classList.contains("on"); }) || pausedForPick; }
+function guideBusy(){ return TK.story || towerLoading || ["#modal","#summon","#raid","#adov","#tend","#tload"].some(q=>{ const e=$(q); return e && e.classList.contains("on"); }) || pausedForPick; }
 function guideWatch(){
   if(talentPending()) guideQueue("talents");
   if(view==="shop") guideQueue("shop");
@@ -4993,10 +5059,55 @@ function modeEnemy(){
   if(MODE.kind==="tower"){
     const st=towerStage(MODE.floor), e=enemyFor(st), bb=biomeOf(st).boss;
     if(!e.boss){ e.hp*=6; e.atk*=1.5; }
-    e.max=e.hp; e.boss=true; e.timer=30; e.n="Gardien de l'étage "+MODE.floor; e.ic=bb[1]; e.ev=false; return e;
+    e.max=e.hp; e.boss=true; e.timer=30; e.n="Gardien de la Tour"; e.ic=bb[1]; e.ev=false; return e;
   }
   const st=Math.max(10, Math.ceil(S.best/10)*10), e=enemyFor(st);
   MODE.ref=e.hp; e.hp=e.max=e.hp*1e15; e.atk*=1.1; e.boss=true; e.timer=30; e.n="Titan de la semaine"; e.ic="§dragontri§"; e.ev=false; return e;
+}
+/* Tour : écran de chargement, puis combat, puis écran de fin (victoire ou défaite) */
+let towerLoading = false;
+const TL_TIPS = ["Ouverture de la porte de l'étage…","Les torches s'allument…","Le gardien se réveille…","En garde !"];
+function towerLaunch(){
+  chalReset();
+  if(towerLoading || MODE || deadT>0 || !unlocked("defis") || S.chal.keys<=0) return;
+  towerLoading = true; $("#tend").classList.remove("on");
+  const f=S.chal.floor, st=towerStage(f), bb=biomeOf(st).boss, rw=towerReward(f), d=towerDiff(f);
+  setH($("#tlTower"), towerArt(f));
+  $("#tlFloor").textContent = (f%5===0?"Palier · ":"")+"Étage "+f;
+  setH($("#tlIc"), bb[1]); $("#tlName").textContent = "Gardien de l'étage "+f;
+  setH($("#tlDiff"), `Difficulté : <b style="color:${d.c}">${d.t}</b> · 30 s pour le vaincre`);
+  setH($("#tlRew"), [`+${rw.cr} 💎`,`+${rw.ob} 🔮`,`+${rw.ig} §lingot§`,`+${fmt(rw.sc)} 🔩`].map(x=>`<span>${x}</span>`).join(""));
+  const el=$("#tload"), fill=$("#tlFill"), tip=$("#tlTip");
+  fill.style.transition="none"; fill.style.width="0%"; void fill.offsetWidth;
+  el.classList.add("on"); Sfx.play("reveal");
+  const T = MOTION ? 1900 : 300;
+  fill.style.transition=`width ${T}ms cubic-bezier(.3,.1,.3,1)`; fill.style.width="100%";
+  TL_TIPS.forEach((t,i)=>setTimeout(()=>{ tip.textContent=t; }, i*T/TL_TIPS.length));
+  setTimeout(()=>{ towerLoading=false; chalStart("tower"); el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out"), 380); }, T+150);
+}
+function towerArt(f){   // tour de pierre vue de face : l'étage visé brille
+  let rows=""; for(let i=0;i<6;i++){ const y=150-i*22, cur=i===2; rows += `<rect x="40" y="${y}" width="80" height="20" rx="3" fill="${cur?"#ffd43b":i<2?"#6c6a8a":"#3b3858"}" ${cur?'filter="url(#tlg)"':""}/><rect x="72" y="${y+5}" width="16" height="11" rx="2" fill="${cur?"#7a4a00":"#1d1b2e"}"/>`; }
+  return `<svg viewBox="0 0 160 200" aria-hidden="true"><defs><filter id="tlg"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <path d="M34 40 L80 6 L126 40 Z" fill="#8f5cf6"/><rect x="36" y="38" width="88" height="6" fill="#2a2740"/>${rows}<rect x="30" y="172" width="100" height="10" rx="3" fill="#2a2740"/></svg>`;
+}
+function towerEndShow(win, m, e, quit){
+  const f=m.floor, rw=towerReward(f), el=$("#tend");
+  el.classList.toggle("win", win); el.classList.toggle("lose", !win);
+  $("#teTitle").textContent = win ? "Victoire !" : quit ? "Abandon" : "Défaite";
+  setH($("#teSub"), win ? `Étage ${f} conquis !${f%25===0?" Grand palier !":f%5===0?" Palier franchi !":""}` : quit ? `Vous avez quitté l'étage ${f}.` : `Le gardien de l'étage ${f} vous a repoussé.`);
+  const used = e ? Math.max(0, 30-e.timer) : 0, pct = e && e.max ? Math.round(Math.min(100, Math.max(0, 1-e.hp/e.max)*100)) : 0;
+  setH($("#teStats"), `<div><b>${used.toFixed(1)} s</b><small>⏳ Durée</small></div><div><b>${win?100:pct} %</b><small>⚔️ Vie retirée</small></div><div><b>${S.chal.keys}</b><small>🔑 Clés restantes</small></div>`);
+  setH($("#teRew"), win ? [`+${rw.cr} 💎`,`+${rw.ob} 🔮`,`+${rw.ig} §lingot§`,`+${fmt(rw.sc)} 🔩`,`+2 🍖`].map(x=>`<span>${x}</span>`).join("")
+    : `<div class="tetip">🔑 Une clé utilisée. ${S.chal.keys>0?"Vous pouvez réessayer, ou vous renforcer d'abord (Forge, équipement, familiers, compétences).":"Plus de clé aujourd'hui : elles reviennent demain."} Une victoire ne coûte jamais de clé.</div>`);
+  const nx=$("#teNext"), can = S.chal.keys>0;
+  setH(nx, win ? `⚔️ Étage ${S.chal.floor}` : `⚔️ Réessayer`); nx.disabled = !can;
+  if(!can) setH(nx, "🔑 Plus de clé");
+  el.classList.add("on");
+}
+function towerEndClose(next){
+  $("#tend").classList.remove("on");
+  if(next){ towerLaunch(); return; }
+  defTab="tower"; showView("defis"); renderDefis(true); requestAnimationFrame(()=>towerScrollToCur(true));
 }
 function chalStart(kind){
   chalReset();
@@ -5027,13 +5138,11 @@ function modeEnd(win, quit){
       const f=m.floor, rw=towerReward(f), cr=rw.cr, mt=rw.sc, ob=rw.ob;
       S.chal.floor++; S.crystals+=cr; S.scraps+=mt; S.orbs+=ob; S.treats+=2; S.ingots=(S.ingots||0)+rw.ig; track("tower");
       log(`🗼 Étage ${f} de la tour conquis ! +${cr} 💎`, "boss");
-      lastPull=0; revealCb = ()=>{ defTab="tower"; showView("defis"); requestAnimationFrame(()=>towerScrollToCur(true)); };
-      showReveal([{ic:"🗼", n:"Étage "+f+" conquis", ri:f%5===0?3:2, rn:"Tour des épreuves", tag:`+${cr} 💎 · +${fmt(mt)} 🔩${ob?` · +${ob} 🔮`:""}`}]);
     } else {
       S.chal.keys--;
       log(quit?`🗼 Défi abandonné (une clé utilisée).`:`🗼 Le gardien de l'étage ${m.floor} vous a repoussé. Une clé utilisée.`, "bad");
-      modal(quit?"Défi abandonné":"Repoussé !", `Le gardien de l'étage ${m.floor} est trop fort pour l'instant. Il vous reste <b>${S.chal.keys}</b> clé${S.chal.keys>1?"s":""} aujourd'hui.<br><br>Renforcez-vous (Forge, équipement, familiers, compétences) puis réessayez. Une victoire ne coûte pas de clé.`, [{t:"OK", cls:"gold"}]);
     }
+    towerEndShow(win, m, e, quit);
   } else {
     const dmg = m.dealt||0, ratio = m.ref ? dmg/m.ref : 0;
     const best = Math.max(S.chal.wbest, ratio), rec = ratio>S.chal.wbest; S.chal.wbest = best;
@@ -5302,7 +5411,7 @@ function dimHide(){ if(!dimSig) return; dimSig=""; ["#dimT","#dimB","#dimL","#di
 function coachHide(){ if(!TK.story){ $("#talk").className=""; } TK.coachKey=""; $("#spot").style.display="none"; dimHide(); }
 function updTuto(){
   if(TK.story){ $("#spot").style.display="none"; dimHide(); return; }
-  const busy = $("#modal").classList.contains("on") || $("#summon").classList.contains("on") || $("#raid").classList.contains("on") || $("#adov").classList.contains("on");
+  const busy = $("#modal").classList.contains("on") || $("#summon").classList.contains("on") || $("#raid").classList.contains("on") || $("#adov").classList.contains("on") || $("#tend").classList.contains("on") || $("#tload").classList.contains("on");
   if(busy){ coachHide(); return; }
   if(TK.happyT > performance.now()){ return; }            // Hubert savoure la réussite un instant
   if(!S.tuto.intro && S.tuto.step===0){ S.tuto.intro=true; save(); talk([
