@@ -524,7 +524,7 @@ nav button.locked{opacity:.38}
 nav button.locked .ni{filter:grayscale(1)}
 nav button.locked::after{content:"";position:absolute;top:8px;right:calc(50% - 18px);width:12px;height:12px;border-radius:3px;background:#ffc93c;box-shadow:0 0 0 2px var(--roi)}
 /* Bandeau, coach, main */
-#toast{position:fixed;left:50%;top:calc(var(--st) + 64px);transform:translate(-50%,-20px);opacity:0;z-index:80;background:#fff4d6;border:3px solid var(--or);border-radius:14px;padding:8px 14px;font-weight:800;font-size:14px;box-shadow:0 6px 20px #0006;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
+#toast{position:fixed;left:50%;top:calc(var(--st) + 100px);transform:translate(-50%,-20px);opacity:0;z-index:80;background:#fff4d6;border:3px solid var(--or);border-radius:14px;padding:8px 14px;font-weight:800;font-size:14px;box-shadow:0 6px 20px #0006;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 #coach{position:fixed;left:50%;bottom:calc(var(--sb) + 74px);transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;width:min(440px,94vw);z-index:45;display:flex;gap:10px;align-items:center;background:#fff4d6;border:3px solid var(--violet);border-radius:16px;padding:9px 12px;box-shadow:0 8px 24px #0007;transition:.25s}
 #coach.on{opacity:1;transform:translateX(-50%);pointer-events:auto}
@@ -954,7 +954,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .reccode{font-family:ui-monospace,Menlo,monospace;font-size:21px;font-weight:900;letter-spacing:1px;text-align:center;background:#fff;border:2px dashed #c9a35a;border-radius:12px;padding:12px 6px;margin:10px 0;user-select:all}
 .rktitle{font-size:10.5px;color:#7a5a20;background:#ffe9a8;border-radius:6px;padding:0 5px;font-weight:900}
 
-@media (max-width:380px){header{gap:4px;padding-left:6px;padding-right:6px}.res{gap:4px}.pill,header .pill{font-size:13px;padding:3px 6px 3px 4px;gap:3px;min-width:0}.pill .pi .sp,.pill .sp{width:15px;height:15px}.pill.g{min-width:0;flex:1 0 auto}.pill.c,.pill.s{flex:0 1 auto}.iconbtn{width:34px;height:34px}.nw{display:none}.nw2{display:inline}.tfloor .tic{display:none}}
+@media (max-width:380px){.nw{display:none}.nw2{display:inline}.tfloor .tic{display:none}}
 body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 /* Petits écrans : chaque liste garde au moins une rangée visible, et l'onglet défile si besoin */
 .pager{min-height:84px}
@@ -964,8 +964,19 @@ body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 .card .chips{flex:none}
 .setsA .setline{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
 @media (max-width:340px){.seg4c button{font-size:11px;letter-spacing:-.2px}.seg4c button .sp{display:none}.talmore{display:none}.seg button{font-size:12.5px}}
-@media (max-width:340px){header .pill{font-size:12px;padding:2px 5px 2px 3px;gap:2px}header .pill .sp{width:13px;height:13px}.pill.g{flex:1 1 auto;min-width:0;overflow:hidden}.pill.c,.pill.s{flex:none}.iconbtn{width:31px;height:31px}}
 .claimall{display:block;width:100%;margin:0 0 8px;padding:8px}
+/* En-tête sur deux lignes : les monnaies en entier, puis Cadeaux / Classement / Options */
+header{flex-wrap:wrap;row-gap:6px}
+header .res{flex:1 1 100%;gap:6px}
+header .pill,header .pill.g,header .pill.c,header .pill.s{flex:1 1 auto;min-width:0;justify-content:center;font-size:16px;padding:4px 8px}
+header .pill>span:last-child{overflow:hidden;text-overflow:ellipsis}
+.hbtns{flex:1 1 100%;display:flex;gap:6px}
+.hbtns .iconbtn{flex:1 1 0;width:auto;height:32px;gap:6px;font-size:15px;border-radius:11px}
+.hbtns .iconbtn .sp{width:18px;height:18px}
+.hbtns .hl{font-family:var(--disp);font-size:13.5px;color:#fff;white-space:nowrap}
+.hbtns .iconbtn.gift .hl{color:#5a3200}
+.hbtns .iconbtn .dot{top:-6px;right:-4px}
+@media (max-width:360px){header .pill{font-size:14px;padding:3px 5px}.hbtns .hl{font-size:12px}}
 </style>
 </head>
 <body>
@@ -981,7 +992,7 @@ body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1340";
+var BUILD_ID = "20261124-1356";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1002,9 +1013,11 @@ var BUILD_ID = "20261124-1340";
     <button class="pill c" id="btnShop" aria-label="Boutique"><span class="pi">💎</span><span id="crys">0</span></button>
     <button class="pill s" data-view="prest"><span class="pi">👻</span><span id="souls">0</span></button>
   </div>
-  <button class="iconbtn gift" id="btnDaily" aria-label="Récompenses et courrier">🎁<span class="dot" id="dot-daily">!</span></button>
-  <button class="iconbtn" data-view="rank" aria-label="Classement">🏆</button>
-  <button class="iconbtn" data-view="opts" aria-label="Options">⚙️</button>
+  <div class="hbtns">
+  <button class="iconbtn gift" id="btnDaily" aria-label="Récompenses et courrier">🎁<span class="hl">Cadeaux</span><span class="dot" id="dot-daily">!</span></button>
+  <button class="iconbtn" data-view="rank" aria-label="Classement">🏆<span class="hl">Classement</span></button>
+  <button class="iconbtn" data-view="opts" aria-label="Options">⚙️<span class="hl">Options</span></button>
+  </div>
 </header>
 
 <div id="mini" hidden>
