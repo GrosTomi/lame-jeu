@@ -663,9 +663,15 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 .pgtrack{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .pgtrack::-webkit-scrollbar{display:none}
 .pgpage{flex:0 0 100%;width:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden}
-.pgdots{flex:none;display:flex;justify-content:center;align-items:center;gap:6px;height:16px;padding-top:2px}
-.pgdots span{width:7px;height:7px;border-radius:4px;background:#0002;transition:width .2s,background .2s;cursor:pointer}
-.pgdots span.on{background:var(--or2);width:18px}
+.pgdots{flex:none;display:flex;justify-content:center;align-items:center;gap:12px;height:26px;padding-top:2px}
+.pgdin{display:flex;align-items:center;gap:6px}.pgnum{display:none}
+.pga{flex:none;width:36px;height:25px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:26px;line-height:1;padding-bottom:4px;color:#fff;background:linear-gradient(#ffc94d,#f59f00);border:2px solid #b86400;box-shadow:0 2px 0 #b86400;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .2s,transform .1s}
+.pga:active{transform:translateY(2px);box-shadow:none}
+.pga.off{opacity:.25;pointer-events:none;filter:grayscale(1)}
+.pga.next:not(.off){animation:pgNudge 1.8s ease-in-out infinite}@keyframes pgNudge{0%,70%,100%{transform:none}80%{transform:translateX(3px)}90%{transform:translateX(-1px)}}
+@media (prefers-reduced-motion:reduce){.pga.next{animation:none!important}}
+.pgdin span{width:7px;height:7px;border-radius:4px;background:#0002;transition:width .2s,background .2s;cursor:pointer}
+.pgdin span.on{background:var(--or2);width:18px}
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.grid5 .tile .ti{font-size:24px}.grid5 .tile .ti .sp{width:30px;height:30px}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
 .list>*{margin-bottom:6px}
@@ -1037,7 +1043,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1604";
+var BUILD_ID = "20261124-1612";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2820,7 +2826,7 @@ function pgBuild(pager){
   const cs=getComputedStyle(src), isGrid=cs.display==="grid";
   const cols=isGrid ? (cs.gridTemplateColumns.split(" ").filter(Boolean).length||1) : 1, gap=isGrid ? (parseFloat(cs.rowGap)||0) : 0;
   const heights=items.map(e=>e.offsetHeight + (isGrid ? 0 : (parseFloat(getComputedStyle(e).marginBottom)||0)));
-  let HP=H-20, rowsCap=Infinity, track=null, dots=null;
+  let HP=H-30, rowsCap=Infinity, track=null, dots=null;
   for(let attempt=0; attempt<6; attempt++){
     const chunks=[];
     if(isGrid){
@@ -2843,10 +2849,15 @@ function pgBuild(pager){
   }
   const n=track.children.length;
   if(n<2){ dots.remove(); return; }
-  dots.innerHTML="";
-  for(let i=0;i<n;i++){ const d=document.createElement("span"); d.addEventListener("click", ev=>{ ev.stopPropagation(); track.scrollTo({left:i*track.clientWidth, behavior:"smooth"}); }); dots.appendChild(d); }
+  // flèches ‹ › bien visibles autour des points, avec le numéro de page
+  dots.innerHTML=`<span class="pga prev" role="button" aria-label="Page précédente">‹</span><span class="pgdin"></span><span class="pgnum"></span><span class="pga next" role="button" aria-label="Page suivante">›</span>`;
+  const din=dots.querySelector(".pgdin"), go=i=>{ i=Math.max(0,Math.min(n-1,i)); track.scrollTo({left:i*track.clientWidth, behavior:"smooth"}); };
+  for(let i=0;i<n;i++){ const d=document.createElement("span"); d.addEventListener("click", ev=>{ ev.stopPropagation(); go(i); }); din.appendChild(d); }
+  dots.querySelector(".prev").addEventListener("click", ev=>{ ev.stopPropagation(); go((PGI[key]||0)-1); Sfx.play("ui"); });
+  dots.querySelector(".next").addEventListener("click", ev=>{ ev.stopPropagation(); go((PGI[key]||0)+1); Sfx.play("ui"); });
   const idx=Math.min(PGI[key]||0, n-1);
-  const mark=i=>[...dots.children].forEach((d,j)=>d.classList.toggle("on", j===i));
+  const mark=i=>{ [...din.children].forEach((d,j)=>d.classList.toggle("on", j===i)); dots.querySelector(".pgnum").textContent=`${i+1}/${n}`;
+    dots.querySelector(".prev").classList.toggle("off", i<=0); dots.querySelector(".next").classList.toggle("off", i>=n-1); };
   track.scrollLeft = idx*track.clientWidth; mark(idx);
   track.addEventListener("scroll", ()=>{ const i=Math.round(track.scrollLeft/Math.max(1,track.clientWidth)); if(PGI[key]!==i){ PGI[key]=i; mark(i); } }, {passive:true});
 }
