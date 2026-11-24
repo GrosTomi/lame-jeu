@@ -1019,6 +1019,12 @@ body.tw #btnAuto,body.tw #goal,body.tw #heroPanel,body.tw #evBanner,body.tw #bos
 body.tw #twRew{display:block;margin-top:8px;text-align:center;font-weight:900;font-size:13px;color:#3b2f6b;background:#efe9ff;border:2px solid #c9b8ff;border-radius:12px;padding:6px 8px}
 body.tw #twRew span{color:#7a6aa8}body.tw #twRew .sp{width:14px;height:14px;vertical-align:-2px}
 body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-color:#8a1c1c}
+#tcd{display:none;position:absolute;inset:0;z-index:6;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(circle,#1a153355 0%,transparent 70%)}
+#tcd.on{display:flex}
+#tcd span{font-family:var(--disp);font-size:96px;line-height:1;color:#ffd43b;text-shadow:0 5px 0 #7a4a00,0 0 30px #ffd43baa,0 0 2px #000;animation:tcdPop .7s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes tcdPop{0%{transform:scale(2.4);opacity:0}35%{transform:scale(.92);opacity:1}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@media (max-height:700px){#tcd span{font-size:72px}}
+#tcd span.go{font-size:58px;color:#fff;text-shadow:0 4px 0 #b84a00,0 0 26px #ff922bcc}
 </style>
 </head>
 <body>
@@ -1034,7 +1040,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1420";
+var BUILD_ID = "20261124-1425";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1084,6 +1090,7 @@ var BUILD_ID = "20261124-1420";
         </div>
       </div>
       <div id="arenaBan"></div>
+      <div id="tcd"></div>
       <div id="twHud"><div class="twt"><span id="twSec">30</span><small>s</small></div><div class="twk" id="twKeys"></div></div>
       <div class="fight"><div id="scene"></div>
         <div class="bar timer" id="timerBar" style="display:none"><i id="timerFill"></i></div>
@@ -2370,6 +2377,7 @@ function dmgE(d){   // les dégâts passent d'abord par le bouclier runique
 }
 function step(dt, vis){
   if(deadT>0){ deadT-=dt; if(deadT<=0){ S.hp=C.hp; spawn(); } return; }
+  if(MODE && MODE.hold) return;   // compte à rebours avant le combat de la Tour
   if(!E) spawn();
   S.hp = Math.min(C.hp, S.hp + C.hp*C.regen*dt);
   skillsTick(dt); autoForgeTick(dt);
@@ -3590,7 +3598,7 @@ $("#modal").addEventListener("click", e=>{ if(e.target.id==="modal" && sheet) cl
 /* Frappe au toucher : pointerdown pour une réaction immédiate */
 $("#enemy").addEventListener("pointerdown", e=>{
   e.preventDefault();
-  if(!E || deadT>0) return;
+  if(!E || deadT>0 || (MODE && MODE.hold)) return;
   const el=$("#enemy"); el.classList.remove("hitfx"); void el.offsetWidth; el.classList.add("hitfx");
   vibe(6); track("tap");
   hit(C.atk*0.5, true, "click");
@@ -5074,16 +5082,27 @@ function towerLaunch(){
   const f=S.chal.floor, st=towerStage(f), bb=biomeOf(st).boss, rw=towerReward(f), d=towerDiff(f);
   setH($("#tlTower"), towerArt(f));
   $("#tlFloor").textContent = (f%5===0?"Palier · ":"")+"Étage "+f;
-  setH($("#tlIc"), bb[1]); $("#tlName").textContent = "Gardien de l'étage "+f;
+  setH($("#tlIc"), bb[1]); $("#tlName").textContent = "Gardien de la Tour";
   setH($("#tlDiff"), `Difficulté : <b style="color:${d.c}">${d.t}</b> · 30 s pour le vaincre`);
   setH($("#tlRew"), [`+${rw.cr} 💎`,`+${rw.ob} 🔮`,`+${rw.ig} §lingot§`,`+${fmt(rw.sc)} 🔩`].map(x=>`<span>${x}</span>`).join(""));
   const el=$("#tload"), fill=$("#tlFill"), tip=$("#tlTip");
   fill.style.transition="none"; fill.style.width="0%"; void fill.offsetWidth;
   el.classList.add("on"); Sfx.play("reveal");
-  const T = MOTION ? 1900 : 300;
+  const T = MOTION ? 1100 : 500;
   fill.style.transition=`width ${T}ms cubic-bezier(.3,.1,.3,1)`; fill.style.width="100%";
   TL_TIPS.forEach((t,i)=>setTimeout(()=>{ tip.textContent=t; }, i*T/TL_TIPS.length));
-  setTimeout(()=>{ towerLoading=false; chalStart("tower"); el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out"), 380); }, T+150);
+  setTimeout(()=>{ towerLoading=false; chalStart("tower"); if(MODE && MODE.kind==="tower") towerCountdown(MODE);
+    el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out"), 380); }, T+150);
+}
+function towerCountdown(m){   // 3, 2, 1, Combat ! : on voit le gardien avant que ça parte
+  m.hold = true; const cd=$("#tcd"); let n=3;
+  const show = t => { cd.innerHTML = `<span class="${t.length>2?"go":""}">${t}</span>`; cd.classList.add("on"); Sfx.play(t==="Combat !"?"boss":"ui"); vibe(t==="Combat !"?30:10); };
+  const tick = () => {
+    if(MODE!==m){ cd.classList.remove("on"); return; }
+    if(n>0){ show(String(n)); n--; setTimeout(tick, 750); return; }
+    show("Combat !"); setTimeout(()=>{ cd.classList.remove("on"); if(MODE===m) m.hold=false; }, 650);
+  };
+  setTimeout(tick, 350);
 }
 function towerArt(f){   // tour de pierre vue de face : l'étage visé brille
   let rows=""; for(let i=0;i<6;i++){ const y=150-i*22, cur=i===2; rows += `<rect x="40" y="${y}" width="80" height="20" rx="3" fill="${cur?"#ffd43b":i<2?"#6c6a8a":"#3b3858"}" ${cur?'filter="url(#tlg)"':""}/><rect x="72" y="${y+5}" width="16" height="11" rx="2" fill="${cur?"#7a4a00":"#1d1b2e"}"/>`; }
@@ -5474,7 +5493,7 @@ const bm = k => BF[k].t>0 ? BF[k].m : 1;
 let rageT = 0;   // ancien nom gardé : > 0 quand un bonus d'attaque ou de vitesse est actif
 function buff(k, m, dur){ BF[k].m = Math.max(BF[k].t>0?BF[k].m:1, m); BF[k].t = Math.max(BF[k].t, dur); }
 function useSkill(id){
-  if(!unlocked("skills") || (skCd[id]||0)>0 || deadT>0 || !E || !S.skl.eq.includes(id)) return;
+  if(!unlocked("skills") || (skCd[id]||0)>0 || deadT>0 || !E || !S.skl.eq.includes(id) || (MODE && MODE.hold)) return;
   const sk=sklDef(id), pw=sklPow(id); skCd[id]=sk.cd*(1-0.025*al("cdr"))*(1-(C.cdr||0)/100);
   switch(sk.t){
     case "dmg":   hit(C.atk*sk.m*pw, true, "crit"); shake(); Sfx.play("crit"); break;
