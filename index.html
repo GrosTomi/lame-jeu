@@ -965,6 +965,7 @@ body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 .setsA .setline{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
 @media (max-width:340px){.seg4c button{font-size:11px;letter-spacing:-.2px}.seg4c button .sp{display:none}.talmore{display:none}.seg button{font-size:12.5px}}
 @media (max-width:340px){header .pill{font-size:12px;padding:2px 5px 2px 3px;gap:2px}header .pill .sp{width:13px;height:13px}.pill.g{flex:1 1 auto;min-width:0;overflow:hidden}.pill.c,.pill.s{flex:none}.iconbtn{width:31px;height:31px}}
+.claimall{display:block;width:100%;margin:0 0 8px;padding:8px}
 </style>
 </head>
 <body>
@@ -980,7 +981,7 @@ body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1333";
+var BUILD_ID = "20261124-1340";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2844,6 +2845,7 @@ function sheetAct(act){
   if(act==="wqbonus"){ claimWQBonus(); revealCb=()=>openSheet("rewards"); return; }
   if(act==="qbonus"){ claimQuestBonus(); revealCb=()=>openSheet("rewards"); return; }
   if(act.startsWith("a:")){ claimAch(act.slice(2)); openSheet("rewards"); return; }
+  if(act==="claimAll"){ claimAll(rewTab); openSheet("rewards"); return; }
   if(act.startsWith("ev:")){ eventBuy(act.slice(3)); return; }
   if(act.startsWith("buy:")){ buyProduct(act.slice(4)); return; }
   if(act==="adgems"){ closeSheet(); adForGems(); return; }
@@ -5545,9 +5547,32 @@ function claimQuest(i){
   q.claimed=true; const r=questReward(q); grant(r); bpXP(40); Sfx.play("success");
   toast(`${spr("coche")} Quête accomplie : ${rewardTxt(r)}`);
 }
+const Q_BONUS = {crystals:10, orbs:3, mats:5, ingots:8};
+/* « Tout récupérer » : quêtes du jour, de la semaine, succès, courrier */
+function readyCount(tab){
+  if(tab==="quests") return S.quests.list.filter(q=>!q.claimed && q.prog>=q.goal).length + (!S.quests.bonus && S.quests.list.length && S.quests.list.every(q=>q.claimed||q.prog>=q.goal)?1:0);
+  if(tab==="week") return S.wq.list.filter(q=>!q.claimed && q.prog>=q.goal).length + (!S.wq.bonus && S.wq.list.length && S.wq.list.every(q=>q.claimed||q.prog>=q.goal)?1:0);
+  if(tab==="ach") return ACH.filter(achReady).length;
+  if(tab==="mail") return mailList().filter(m=>m.reward && !S.mail.claimed[m.id]).length;
+  return 0;
+}
+function claimAll(tab){
+  const tot={}; let n=0;
+  const add=r=>{ grant(r); n++; for(const k in r) tot[k]=(tot[k]||0)+r[k]; };
+  if(tab==="quests"){ S.quests.list.forEach(q=>{ if(!q.claimed && q.prog>=q.goal){ q.claimed=true; add(questReward(q)); bpXP(40); } });
+    if(!S.quests.bonus && S.quests.list.length && S.quests.list.every(q=>q.claimed)){ S.quests.bonus=true; add(Q_BONUS); bpXP(60); } }
+  if(tab==="week"){ S.wq.list.forEach(q=>{ if(!q.claimed && q.prog>=q.goal){ q.claimed=true; add(WQ_REWARD); bpXP(120); } });
+    if(!S.wq.bonus && S.wq.list.length && S.wq.list.every(q=>q.claimed)){ S.wq.bonus=true; add(WQ_BONUS); bpXP(200); } }
+  if(tab==="ach"){ for(let g=0; g<200; g++){ const a=ACH.find(achReady); if(!a) break; const r=achRew(a); S.ach.tier[a.id]=achTier(a)+1; add({crystals:r}); } }
+  if(tab==="mail"){ for(const m of mailList()) if(m.reward && !S.mail.claimed[m.id]){ S.mail.claimed[m.id]=true; S.mail.read[m.id]=true; add(m.reward); } }
+  if(!n) return;
+  Sfx.play("legend"); vibe(20);
+  toast(`🎁 ${n} récompense${n>1?"s":""} : ${rewardTxt(tot)}`); log(`🎁 Tout récupéré : ${rewardTxt(tot)}`, "good");
+  calc(); Object.keys(dirty).forEach(k=>dirty[k]=true); save();
+}
 function claimQuestBonus(){
   if(S.quests.bonus || !S.quests.list.every(q=>q.claimed)) return;
-  S.quests.bonus=true; const r={crystals:10, orbs:3, mats:5, ingots:8}; grant(r); bpXP(60); Sfx.play("legend");
+  S.quests.bonus=true; const r=Q_BONUS; grant(r); bpXP(60); Sfx.play("legend");
   showReveal([{ic:"🎁", n:"Coffre des quêtes", ri:4, rn:"Bonus du jour", tag:rewardTxt(r)}]);
 }
 function questsBody(){
@@ -5621,14 +5646,16 @@ function rewardsSheet(){
   const qN=S.quests.list.filter(q=>!q.claimed && q.prog>=q.goal).length + (!S.quests.bonus && S.quests.list.every(q=>q.claimed)?1:0), aN=ACH.filter(achReady).length;
   const tab=(id,t,n)=>`<button data-act="rtab:${id}" class="${rewTab===id?"on":""}">${t}${n?` <span class="tdot">${n}</span>`:""}</button>`;
   const wN = S.wq.list.filter(q=>!q.claimed && q.prog>=q.goal).length + (!S.wq.bonus && S.wq.list.length && S.wq.list.every(q=>q.claimed)?1:0);
-  const head=`<div class="seg seg4r">${tab("cal","Jour",dailyReady()?1:0)}${tab("quests","Quêtes",qN)}${tab("week","Semaine",wN)}${tab("ach","Succès",aN)}${tab("mail","Courrier",mailUnread())}</div>`;
+  let head=`<div class="seg seg4r">${tab("cal","Jour",dailyReady()?1:0)}${tab("quests","Quêtes",qN)}${tab("week","Semaine",wN)}${tab("ach","Succès",aN)}${tab("mail","Courrier",mailUnread())}</div>`;
   const nx = [7,30].map(k=>Math.ceil((S.streak.n+0.5)/k)*k).sort((a,b)=>a-b)[0];
   const streak = `<div class="streakbox">🔥 <b>Série : ${S.streak.n} jour${S.streak.n>1?"s":""}</b><span>Revenez chaque jour : coffre au jour ${nx} (encore ${nx-S.streak.n})</span></div>`;
-  if(rewTab==="mail") return {title:"📬 Courrier", body:head+`<div style="text-align:left">${mailBody()}</div>`, acts:[]};
+  const rn=readyCount(rewTab), all=[], top = rn ? `<button class="btn gold claimall" data-act="claimAll">🎁 Tout récupérer (${rn})</button>` : "";
+  head += top;
+  if(rewTab==="mail") return {title:"📬 Courrier", body:head+`<div style="text-align:left">${mailBody()}</div>`, acts:all};
   if(rewTab==="cal") return {title:"🎁 Récompenses", body:head+streak+dailyBody(), acts: dailyReady()?[{t:"Récupérer", act:"claimDaily", cls:"gold"}]:[]};
-  if(rewTab==="week") return {title:"📅 Quêtes de la semaine", body:head+`<div style="text-align:left">${wqBody()}</div>`, acts:[]};
-  if(rewTab==="quests") return {title:"📜 Quêtes du jour", body:head+`<div style="text-align:left">${questsBody()}</div>`, acts:[]};
-  return {title:"🏆 Succès", body:head+`<div style="text-align:left">${achBody()}</div>`, acts:[]};
+  if(rewTab==="week") return {title:"📅 Quêtes de la semaine", body:head+`<div style="text-align:left">${wqBody()}</div>`, acts:all};
+  if(rewTab==="quests") return {title:"📜 Quêtes du jour", body:head+`<div style="text-align:left">${questsBody()}</div>`, acts:all};
+  return {title:"🏆 Succès", body:head+`<div style="text-align:left">${achBody()}</div>`, acts:all};
 }
 
 /* ---------- Ensembles d'équipement ---------- */
