@@ -1033,6 +1033,10 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 .row.focusflash{animation:focusFlash 2.2s ease}@keyframes focusFlash{0%,40%{box-shadow:0 0 0 3px #ffd43b,0 0 18px #ffd43b;background:#fff3bf}100%{box-shadow:none}}
 .nokey{flex-direction:column;line-height:1.1}.nokey small{font-size:10px;opacity:.9}
 .rhtop.lack{background:#ffe3e3}.rhtop.lack b{color:#c92a2a}.rhtop small{display:block}
+#tload.titan{background:radial-gradient(ellipse at 50% 30%,#7a1f1f 0%,#3a0d12 60%,#160508 100%)}
+#tload.titan .tlkick{color:#ffc9c9}#tload.titan .tlfloor{font-size:30px;color:#ffa94d;text-shadow:0 3px 0 #6a1a00,0 0 24px #ff6b3d88}
+#tload.titan .tlguard small,#tload.titan .tltip{color:#ffd8d8}#tload.titan .tlbar{border-color:#ff922b88}#tload.titan .tlbar i{background:linear-gradient(90deg,#c92a2a,#ff922b,#ffd43b);box-shadow:0 0 12px #ff6b3d}
+.tltit{display:flex;align-items:center;justify-content:center;width:100%;height:100%}.tltit .sp{width:130px;height:130px;filter:drop-shadow(0 0 18px #ff6b3daa)}
 </style>
 </head>
 <body>
@@ -1048,7 +1052,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1445";
+var BUILD_ID = "20261124-1453";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1194,7 +1198,7 @@ var BUILD_ID = "20261124-1445";
 <div id="hand">§doigt§</div>
 <div id="tload" aria-live="polite"><div class="tlin">
   <div class="tltower" id="tlTower"></div>
-  <div class="tlkick">Tour des épreuves</div>
+  <div class="tlkick" id="tlKick">Tour des épreuves</div>
   <div class="tlfloor" id="tlFloor">Étage 1</div>
   <div class="tlguard"><span class="tlic" id="tlIc"></span><div><b id="tlName">Gardien</b><small id="tlDiff"></small></div></div>
   <div class="tlrew" id="tlRew"></div>
@@ -3524,7 +3528,7 @@ document.addEventListener("click", e=>{
   if(t.dataset.guide){ guideShow(t.dataset.guide, false); return; }
   if(t.dataset.altar){ altarBuy(t.dataset.altar); renderPrest(); return; }
   if(t.id==="altarReset"){ S.souls += altarSpent(); S.altar={}; calc(); dirty.stats=true; renderPrest(); save(); return; }
-  if(t.dataset.chal){ if(t.dataset.chal==="tower") towerLaunch(); else chalStart(t.dataset.chal); return; }
+  if(t.dataset.chal){ if(t.dataset.chal==="tower") towerLaunch(); else if(t.dataset.chal==="wboss") titanLaunch(); else chalStart(t.dataset.chal); return; }
   if(t.id==="teMenu"){ towerEndClose(false); return; }
   if(t.id==="teNext"){ if(t.dataset.gomkt){ $("#tend").classList.remove("on"); goShopMkt(t.dataset.gomkt); } else towerEndClose(true); return; }
   if(t.dataset.gomkt){ goShopMkt(t.dataset.gomkt); return; }
@@ -5152,7 +5156,7 @@ const TL_TIPS = ["Ouverture de la porte de l'étage…","Les torches s'allument�
 function towerLaunch(){
   chalReset();
   if(towerLoading || MODE || deadT>0 || !unlocked("defis") || S.chal.keys<=0) return;
-  towerLoading = true; $("#tend").classList.remove("on");
+  towerLoading = true; $("#tend").classList.remove("on"); $("#tload").classList.remove("titan"); $("#tlKick").textContent="Tour des épreuves";
   const f=S.chal.floor, st=towerStage(f), bb=biomeOf(st).boss, rw=towerReward(f), d=towerDiff(f);
   setH($("#tlTower"), towerArt(f));
   $("#tlFloor").textContent = (f%5===0?"Palier · ":"")+"Étage "+f;
@@ -5167,6 +5171,28 @@ function towerLaunch(){
   TL_TIPS.forEach((t,i)=>setTimeout(()=>{ tip.textContent=t; }, i*T/TL_TIPS.length));
   setTimeout(()=>{ towerLoading=false; chalStart("tower"); if(MODE && MODE.kind==="tower") towerCountdown(MODE);
     el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out"), 380); }, T+150);
+}
+/* Titan : même chargement (aux couleurs du Titan) et même 3, 2, 1 */
+const TT_TIPS = ["Le sol se met à trembler…","Le Titan s'éveille…","Trois têtes vous fixent…","Frappez fort !"];
+function titanLaunch(){
+  chalReset();
+  if(towerLoading || MODE || deadT>0 || !unlocked("defis") || S.chal.wtries<=0) return;
+  towerLoading = true; $("#tend").classList.remove("on");
+  const c=S.chal, nxt=W_TIERS.find(t=>c.wbest<t.r), done=W_TIERS.filter(t=>c.wbest>=t.r).length;
+  const el=$("#tload"), fill=$("#tlFill"), tip=$("#tlTip");
+  el.classList.add("titan"); $("#tlKick").textContent="Titan de la semaine";
+  setH($("#tlTower"), `<span class="tltit">§dragontri§</span>`);
+  $("#tlFloor").textContent = "Le Titan à trois têtes";
+  setH($("#tlIc"), "🐲"); $("#tlName").textContent = `Votre record : ×${c.wbest<1000?c.wbest.toFixed(1):fmt(c.wbest)}`;
+  setH($("#tlDiff"), `${c.wtries} essai${c.wtries>1?"s":""} restant${c.wtries>1?"s":""} aujourd'hui · 30 s pour frapper le plus fort possible`);
+  setH($("#tlRew"), nxt ? `<span>Prochain palier : ×${fmt(nxt.r)}</span><span>+${nxt.cr} 💎</span><span>+${nxt.ob} 🔮</span>` : `<span>Tous les paliers sont atteints (${done}/${W_TIERS.length})</span>`);
+  fill.style.transition="none"; fill.style.width="0%"; void fill.offsetWidth;
+  el.classList.add("on"); Sfx.play("reveal");
+  const T = MOTION ? 1100 : 500;
+  fill.style.transition=`width ${T}ms cubic-bezier(.3,.1,.3,1)`; fill.style.width="100%";
+  TT_TIPS.forEach((t,i)=>setTimeout(()=>{ tip.textContent=t; }, i*T/TT_TIPS.length));
+  setTimeout(()=>{ towerLoading=false; chalStart("wboss"); if(MODE && MODE.kind==="wboss") towerCountdown(MODE);
+    el.classList.add("out"); setTimeout(()=>el.classList.remove("on","out","titan"), 380); }, T+150);
 }
 function towerCountdown(m){   // 3, 2, 1, Combat ! : on voit le gardien avant que ça parte
   m.hold = true; const cd=$("#tcd"); let n=3;
