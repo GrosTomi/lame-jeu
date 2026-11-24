@@ -651,6 +651,7 @@ nav button.locked::after{content:"";position:absolute;top:8px;right:calc(50% - 1
 main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10px 6px!important}
 .view{flex:1;min-height:0;display:flex;flex-direction:column}
 .view>[id^=tab-],#defis{flex:1;min-height:0;display:flex;flex-direction:column}
+#defis{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}#defis::-webkit-scrollbar{display:none}
 #view-forge .vtitle,#view-fams .vtitle,#view-loot .vtitle{display:none}
 .vtitle{font-size:21px;margin:0 0 6px}
 .seg{margin-bottom:8px}
@@ -896,8 +897,8 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .dunghero b{font-family:var(--disp);font-weight:400;font-size:18px;display:block}.dunghero small{font-size:12px;font-weight:800;opacity:.9}
 .dbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.dbtn.locked{opacity:.75}
 .btn.orange{background:linear-gradient(#ffb04d,#f08c00);color:#fff;border-color:#b86400}.btn.dark{background:linear-gradient(#4a3f63,#1c1530);color:#ffd8a8;border-color:#0d0a18}.dbtn{flex:1;display:flex;flex-direction:column;padding:8px 4px;line-height:1.15}.dbtn b{font-family:var(--disp);font-weight:400;font-size:15px}.dbtn small{font-size:11px;font-weight:800}.dbtn small .sp{width:14px;height:14px;vertical-align:-2px}
-.dweek{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dday{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;border-radius:10px}.dday small{font-size:10px;font-weight:800;color:var(--mut)}.dday.on{background:#fff3bf;box-shadow:inset 0 0 0 2px #f2c94c}
-.dday .rune{padding:1px 4px 1px 2px;font-size:12px}
+.dweek{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.dday{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;border-radius:10px}.dday small{font-size:10px;font-weight:800;color:var(--mut)}.dday.on{background:#fff3bf;box-shadow:inset 0 0 0 2px #f2c94c}
+.dday .rune{flex-direction:column;width:100%;max-width:46px;padding:3px 0 2px;gap:0;font-size:12px;justify-content:center}.dday .rune b{font-size:12px;line-height:1.1}
 
 .cbtns{display:flex;gap:5px;flex:none}.cbtns .btn{padding:5px 8px;font-size:12.5px}.fnb{display:inline-block;background:#fff;color:#7048e8;border-radius:8px;padding:0 5px;font-size:11px;margin-left:2px}
 .eqrow .tile{height:58px}.eqrow .tile.itile .ti{width:64%}
@@ -966,7 +967,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1215";
+var BUILD_ID = "20261124-1221";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -5786,7 +5787,7 @@ function renderDungeon(){
   box.innerHTML = `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
     <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small">Essais : <b>${t}</b>/${dungTries()}</span></div>
       <div class="dbtns">${diffs}</div><div class="small" style="margin-top:6px">Un essai est utilisé même en cas de défaite. Les essais reviennent chaque jour.</div></div>
-    <div class="card grow"><div class="chead"><h2>Vos runes</h2></div><div class="dweek">${week}</div>
+    <div class="card"><div class="chead"><h2>Vos runes</h2></div><div class="dweek">${week}</div>
       <div class="small" style="margin-top:8px">Les runes enchantent vos objets <b style="color:${RAR[4].c}">Légendaires</b> (1 emplacement) et <b style="color:${RAR[5].c}">Mythiques</b> (2). Touchez un objet porté pour l'enchanter. Chaque niveau coûte autant de runes que son numéro (jusqu'au niveau ${RUNE_MAX}).</div></div>`;
 }
 /* ================= PARTICULES ================= */
