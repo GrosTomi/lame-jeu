@@ -1037,7 +1037,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1516";
+var BUILD_ID = "20261124-1604";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1703,6 +1703,17 @@ const $ = s => document.querySelector(s);
 const rnd = n => Math.floor(Math.random()*n);
 const pick = a => a[rnd(a.length)];
 const SUF = ["","K","M","Md","Bn","Bd","Tn","Td","Qn","Qd","Sx","Sp","Oc","No","Dc"];
+/* Prix : jamais de virgule. Nombre entier (espaces fins), et au-delà de 100 000 une unité plus petite pour rester entier
+   (« 1 950 K », « 12 200 Md »). Arrondi au-dessus : avoir le montant affiché suffit toujours pour acheter. */
+const grp3 = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+function fmtP(n){
+  if(!isFinite(n)) return "∞"; n=Math.max(0, n);
+  if(n<1e5) return grp3(Math.ceil(n));
+  const e=Math.floor(Math.log10(n)/3)-1; if(e<1) return grp3(Math.ceil(n));
+  const m=Math.ceil(n/Math.pow(1000,e));
+  let suf; if(e<SUF.length) suf=SUF[e]; else { const k=e-SUF.length, A="abcdefghijklmnopqrstuvwxyz"; suf = k<676 ? A[Math.floor(k/26)]+A[k%26] : "e"+(e*3); }
+  return grp3(m)+" "+suf;
+}
 const nfK = v => v>=10000 ? fmt(v) : String(Math.floor(v));
 function fmt(n){
   if(!isFinite(n)) return "∞";
@@ -1809,7 +1820,7 @@ function resHelp(k, lack, short){
   const r=RES_INFO[k]; if(!r) return;
   const rn = lack && lack.rune && RUNES[lack.rune] ? "runes de "+RUNES[lack.rune].n : null;
   const li = r.get.map(g=>`<li>${typeof g==="function"?g():g}</li>`).join("");
-  const top = lack ? `<div class="rhtop lack"><span class="rhic">${r.ic}</span><div><small>Il vous manque</small><b>${fmt(Math.max(0,lack.need-lack.have))} ${rn||r.n.toLowerCase()}</b><small>Il en faut ${fmt(lack.need)}, vous en avez ${fmt(lack.have)}.</small></div></div>`
+  const top = lack ? `<div class="rhtop lack"><span class="rhic">${r.ic}</span><div><small>Il vous manque</small><b>${fmtP(Math.max(0,lack.need-lack.have))} ${rn||r.n.toLowerCase()}</b><small>Il en faut ${fmtP(lack.need)}, vous en avez ${fmt(lack.have)}.</small></div></div>`
     : short ? `<div class="rhtop lack"><span class="rhic">${r.ic}</span><div><small>Il ne vous en reste plus</small><b>${r.have()}</b></div></div>`
     : `<div class="rhtop"><span class="rhic">${r.ic}</span><div><small>Vous en avez</small><b>${r.have()}</b></div></div>`;
   const body = `<div class="reshelp">${top}
@@ -2698,7 +2709,7 @@ function updateShop(){
     const f=FORGE.find(x=>x.id===b.dataset.forge), maxed = f.max && S.forge[f.id]>=f.max, r=forgeBulk(f);
     if(maxed){ delete b.dataset.need; b.classList.remove("lack"); b.disabled=true; b.querySelector(".q").textContent="MAX"; b.querySelector(".cost").textContent="—"; return; }
     b.querySelector(".q").textContent = "+"+r.n+" niv.";
-    b.querySelector(".cost").textContent = fmt(r.total);
+    b.querySelector(".cost").textContent = fmtP(r.total);
     b.disabled = false; b.dataset.need = "go:"+r.total; b.classList.toggle("lack", S.gold < r.total);
   });
 }
@@ -2743,14 +2754,14 @@ function renderRes(){
   el.innerHTML = `<div class="rchip" title="Lingots : pour forger">§lingot§ ${S.ingots||0}</div><div class="rchip" title="Scraps : pour renforcer et fusionner">🔩 ${fmt(S.scraps)}</div>`;
 }
 function fuseRowsHTML(){
-  return fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${artSVG(g.slot, null, g.ri)}</div><div class="mid"><div class="t">${FUSE_NEED[g.ri]} ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b> · <b class="fcost ${S.scraps>=fuseCost(g.ri)?"":"no"}" data-needc="sc:${fuseCost(g.ri)}">🔩 ${fmt(fuseCost(g.ri))}</b></div></div>
+  return fusionGroups().map(g=>`<div class="row fuse"><div class="ic">${artSVG(g.slot, null, g.ri)}</div><div class="mid"><div class="t">${FUSE_NEED[g.ri]} ${SLOTS[g.slot].n} ${RAR[g.ri].n}</div><div class="d">deviennent 1 <b style="color:${RAR[g.ri+1].c}">${RAR[g.ri+1].n}</b> · <b class="fcost ${S.scraps>=fuseCost(g.ri)?"":"no"}" data-needc="sc:${fuseCost(g.ri)}">🔩 ${fmtP(fuseCost(g.ri))}</b></div></div>
     <button class="btn violet sm" data-fuse="${g.slot}|${g.ri}" data-need="sc:${fuseCost(g.ri)}" ${S.scraps>=fuseCost(g.ri)?"":"disabled"}>Fusionner</button></div>`).join("");
 }
 function openFusions(){
   const rows=fuseRowsHTML(), n=fusionGroups().length;
   modal("✨ Fusions", `<div class="small" style="margin-bottom:8px">3 objets identiques de même rareté (5 Épiques, 8 Légendaires) donnent 1 objet de la rareté au-dessus, au niveau 1, contre des scraps (vous avez <b>${fmt(S.scraps)} 🔩</b>). Les moins avancés sont sacrifiés en premier.</div>
     <div style="text-align:left">${rows || `<div class="empty-msg">Rien à fusionner pour l'instant.</div>`}</div>`,
-    n>1 ? [{t:"Fermer"},{t:"Tout fusionner", cls:"violet", f:()=>{ const p=fusePlan(); if(!p.n) return; modal("Tout fusionner ?", `${p.n} fusion${p.n>1?"s":""} pour <b>${fmt(p.cost)} 🔩</b> (vous avez ${fmt(S.scraps)}).<br><small>Les objets obtenus repartent au niveau 1.</small>`, [{t:"Annuler", f:openFusions},{t:"Fusionner", cls:"violet", f:fuseAll}]); }}] : [{t:"Fermer"}]);
+    n>1 ? [{t:"Fermer"},{t:"Tout fusionner", cls:"violet", f:()=>{ const p=fusePlan(); if(!p.n) return; modal("Tout fusionner ?", `${p.n} fusion${p.n>1?"s":""} pour <b>${fmtP(p.cost)} 🔩</b> (vous avez ${fmt(S.scraps)}).<br><small>Les objets obtenus repartent au niveau 1.</small>`, [{t:"Annuler", f:openFusions},{t:"Fusionner", cls:"violet", f:fuseAll}]); }}] : [{t:"Fermer"}]);
 }
 function equipBestAll(){   // « Les meilleurs » : comme pour les familiers, équipe le meilleur objet de chaque emplacement (à niveau égal)
   let n=0;
@@ -2889,8 +2900,8 @@ function openSheet(kind, id){
     body = `<div class="sheeticon iarth">${itemArt(it)}</div>${rarTag(it.ri)}<div class="small">Niveau ${it.ilvl} / ${cap} · 🔩 ${fmt(S.scraps)}</div>${statList(it)}
       <div class="small" style="margin-top:6px">Chaque niveau coûte des scraps, jusqu'au niveau de votre zone.</div>${enchantHTML(it,"eq")}`;
     acts = maxed ? [{t:"Niveau max de la zone", dis:true}] : [
-      {t:`⬆️ +1 niveau<small>🔩 ${fmt(c1)}${m1?` · ${mic} ${m1}`:""}</small>`, act:"up1", need:"sc:"+Math.ceil(c1)},
-      {t:`⏫ +${mx.n} niveaux<small>🔩 ${fmt(mx.tot)}${mx.mt?` · ${mic} ${mx.mt}`:""}</small>`, act:"upmax", cls:"gold", ...(mx.n<1 ? {need:"sc:"+Math.ceil(c1)} : {})}];
+      {t:`⬆️ +1 niveau<small>🔩 ${fmtP(c1)}${m1?` · ${mic} ${m1}`:""}</small>`, act:"up1", need:"sc:"+Math.ceil(c1)},
+      {t:`⏫ +${mx.n} niveaux<small>🔩 ${fmtP(mx.tot)}${mx.mt?` · ${mic} ${mx.mt}`:""}</small>`, act:"upmax", cls:"gold", ...(mx.n<1 ? {need:"sc:"+Math.ceil(c1)} : {})}];
   } else if(kind==="inv"){
     const it=S.inv.find(x=>x.id===id); if(!it){ closeSheet(); return; }
     const cur=S.equip[it.slot];
@@ -3558,7 +3569,7 @@ document.addEventListener("click", e=>{
   if(t.id==="ingBuy"){ mktReset();
     const P=["ing50","ing100","ing500","ing1000"].map(id=>PREMIUM.find(x=>x.id===id));
     modal("Acheter des lingots", `Vous avez <b>${S.ingots||0} §lingot§</b> et <b>${S.crystals} 💎</b>.<br><small>1 lingot = 1 objet forgé.</small>`,
-      P.map((m,k)=>({t:`${m.n.replace(/^[^0-9]*/,"").replace(" lingots","")} §lingot§<small>💎 ${fmt(m.cost)}</small>`, cls:k>=2?"violet":"gold", f:()=>{ if(S.crystals<m.cost){ toast("Pas assez de cristaux"); return; } premiumBuy(m.id); renderLoot(); }}))); return; }
+      P.map((m,k)=>({t:`${m.n.replace(/^[^0-9]*/,"").replace(" lingots","")} §lingot§<small>💎 ${fmtP(m.cost)}</small>`, cls:k>=2?"violet":"gold", f:()=>{ if(S.crystals<m.cost){ toast("Pas assez de cristaux"); return; } premiumBuy(m.id); renderLoot(); }}))); return; }
   if(t.id==="invBuy"){ const m=PREMIUM.find(x=>x.id==="invx"), c=m.cost; modal("Agrandir l'inventaire", `+10 places (${invMax()} → ${invMax()+10}) pour <b>${c} 💎</b>. Vous avez ${S.crystals} 💎.`, [{t:"Annuler"},{t:`Acheter · ${c} 💎`, cls:"gold", f:()=>{ if(S.crystals<c){ toast("Pas assez de cristaux"); return; } premiumBuy("invx"); dirty.loot=true; renderLoot(); }}]); return; }
   if(t.id==="invSelBtn"){ invSel = invSel ? null : new Set(); renderLoot(); return; }
   if(t.id==="invSelCom"){ S.inv.filter(it=>it.ri===0 && (invFilter==="all"||it.slot===invFilter)).forEach(it=>invSel.add(it.id)); renderLoot(); return; }
@@ -3584,7 +3595,7 @@ document.addEventListener("click", e=>{
   if(t.id==="btnMail"){ rewTab="mail"; openSheet("rewards"); return; }
   if(t.dataset.atab){ invSel=null; atelierTab=t.dataset.atab; dirty.loot=true; lastPointer=0; frameUI(); return; }
   if(t.dataset.fn){ forgeN(+t.dataset.fn); return; }
-  if(t.id==="fuseAll"){ const p=fusePlan(); if(!p.n) return; modal("Tout fusionner ?", `${p.n} fusion${p.n>1?"s":""} pour <b>${fmt(p.cost)} 🔩</b> (vous avez ${fmt(S.scraps)}).<br><small>Les objets obtenus repartent au niveau 1. Les moins avancés sont sacrifiés en premier.</small>`, [{t:"Annuler"},{t:"Fusionner", cls:"violet", f:fuseAll}]); return; }
+  if(t.id==="fuseAll"){ const p=fusePlan(); if(!p.n) return; modal("Tout fusionner ?", `${p.n} fusion${p.n>1?"s":""} pour <b>${fmtP(p.cost)} 🔩</b> (vous avez ${fmt(S.scraps)}).<br><small>Les objets obtenus repartent au niveau 1. Les moins avancés sont sacrifiés en premier.</small>`, [{t:"Annuler"},{t:"Fusionner", cls:"violet", f:fuseAll}]); return; }
   if(t.dataset.fuse){ const [sl,ri]=t.dataset.fuse.split("|"); fuse(sl,+ri); return; }
   if(t.dataset.filter){ invFilter=t.dataset.filter; dirty.loot=true; lastPointer=0; frameUI(); return; }
   if(t.dataset.opt){ S.opts[t.dataset.opt]=!S.opts[t.dataset.opt]; dirty.opts=true; if(t.dataset.opt==="music"){ S.opts.music?Music.start():Music.stop(); updMusicBtn(); } return; }
@@ -3768,7 +3779,7 @@ function cityMil(){ const c=S.city; return c.soldiers*soldierPow(c.lv.caserne) +
 function cityMaxHP(){ return wallHP(S.city.lv.mur); }
 function bldCost(b){ const L=S.city.lv[b.id], g=Math.pow(1.55,L); return {or:Math.ceil(b.cost[0]*g), bois:Math.ceil(b.cost[1]*g), pierre:Math.ceil(b.cost[2]*g)}; }
 const affordC = c => S.city.res.or>=c.or && S.city.res.bois>=c.bois && S.city.res.pierre>=c.pierre;
-const costTxt = c => ["or","bois","pierre"].map(k=>`${CRES[k].ic} ${fmt(c[k])}`).join("  ");
+const costTxt = c => ["or","bois","pierre"].map(k=>`${CRES[k].ic} ${fmtP(c[k])}`).join("  ");
 function raidStats(n){ return {hp:150*Math.pow(1.32,n-1), dps:12*Math.pow(1.28,n-1)}; }
 function raidForecast(){
   const e=raidStats(S.city.raid), mil=cityMil();
@@ -4735,7 +4746,7 @@ function renderShop(){
       ${owned?`<span class="badge bup">Acheté</span>`:`<button class="btn gold sm" data-shopbuy="${p.id}">${p.price}</button>`}</div>`; };
   // tuile achetée en cristaux
   const ctile = m => { if(m.ok && !m.ok()) return ""; const can=S.crystals>=m.cost;
-    return `<div class="ptile cr"><span class="pic">${m.ic}</span><b>${m.n}</b><small>${m.d()}</small><button class="btn violet sm" data-prem="${m.id}" data-need="cr:${m.cost}" ${can?"":"disabled"}>💎 ${fmt(m.cost)}</button></div>`; };
+    return `<div class="ptile cr"><span class="pic">${m.ic}</span><b>${m.n}</b><small>${m.d()}</small><button class="btn violet sm" data-prem="${m.id}" data-need="cr:${m.cost}" ${can?"":"disabled"}>💎 ${fmtP(m.cost)}</button></div>`; };
   const grp = (t, inner) => `<div class="ptgrp">${t}</div>${inner}`;
   let tiles="";
   if(shopTab==="gems"){
@@ -4761,7 +4772,7 @@ function renderShop(){
       ${done?`<span class="badge bup">Acquis</span>`:`<button class="btn violet sm" data-prem="${m.id}" ${!done && left>0?`data-need="cr:${m.cost}"`:""} ${can?"":"disabled"}>💎 ${m.cost}</button>`}</div>`; };
   const mrow = m => { if(m.ok && !m.ok()) return ""; const c=m.cost(), n=S.market.n[m.id]||0, left=m.max-n, can = left>0 && (m.cur==="cr"?S.crystals>=c:S.gold>=c);
     return `<div class="row shoprow"><div class="ic">${m.ic}</div><div class="mid"><div class="t">${m.n}</div><div class="d">${m.d()} · ${left}/${m.max} aujourd'hui</div></div>
-      <button class="btn ${m.cur==="cr"?"blue":"gold"} sm" data-mkt="${m.id}" ${left>0?`data-need="${m.cur==="cr"?"cr":"go"}:${c}"`:""} ${can?"":"disabled"}>${m.cur==="cr"?"💎":"🪙"} ${fmt(c)}</button></div>`; };
+      <button class="btn ${m.cur==="cr"?"blue":"gold"} sm" data-mkt="${m.id}" ${left>0?`data-need="${m.cur==="cr"?"cr":"go"}:${c}"`:""} ${can?"":"disabled"}>${m.cur==="cr"?"💎":"🪙"} ${fmtP(c)}</button></div>`; };
   const skin = k => { const own=S.skins.owned[k.id], on=S.skins.hero===k.id;
     return `<button class="skintile ${on?"on":""}" data-skin="${k.id}" ${!own && (k.bp || S.crystals<k.cost)?"disabled":""}><span class="skprev">${knightSVG(k.pal)}</span><b>${k.n}</b><small>${on?"Portée":own?"Porter":k.bp?"Passe":"💎 "+k.cost}</small></button>`; };
   const aura = S.skins.owned.aura ? `<button class="btn ${S.skins.aura?"gold":""} sm" data-aura="1">${S.skins.aura?"Activée":"Activer"}</button>` : `<button class="btn violet sm" data-aura="1" ${S.crystals<150?"disabled":""}>💎 150</button>`;
