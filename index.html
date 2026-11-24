@@ -86,7 +86,7 @@ h2{font-family:var(--disp);font-weight:400;font-size:20px;margin:0 0 10px;color:
 .btn{display:inline-block;text-align:center;vertical-align:middle;border-radius:14px;padding:10px 14px;font-family:var(--disp);font-size:15px;line-height:1.1;
   background:linear-gradient(#fff,#ecdcb4);color:var(--ink);border-bottom:4px solid #b8955a;box-shadow:0 2px 0 #0002;transition:transform .07s}
 .btn:active:not(:disabled){transform:translateY(2px);filter:brightness(.96)}
-.btn:disabled{filter:grayscale(.85);opacity:.55}
+.btn:disabled,.btn.lack{filter:grayscale(.85);opacity:.55}
 .btn.gold{background:linear-gradient(var(--or),var(--or2));color:#4a2a00;border-bottom-color:var(--or3)}
 .btn.blue{background:linear-gradient(#5f82ff,#3557d6);color:#fff;border-bottom-color:#1f3b8f}
 .btn.red{background:linear-gradient(#ff5a63,#d21f2f);color:#fff;border-bottom-color:#8c0f1b}
@@ -966,7 +966,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-0815";
+var BUILD_ID = "20261124-1204";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1536,8 +1536,8 @@ const RATE_KEYS = [
   [9,  [40, 33, 20,  7,  0,   0  ]],
   [10, [37, 33, 21,  8,  1,   0  ]],
   [14, [28, 32, 25, 12,  3,   0  ]],
-  [15, [25, 32, 26, 13,  3.5, 0.5]],
-  [20, [15, 28, 30, 18,  6,   3  ]],
+  [15, [25, 32, 26, 13.5, 3.49, 0.01]],
+  [20, [16, 29, 31, 19.5, 4.43, 0.0667]],   // Mythique : 1 sur 1 500 au niveau max
 ];
 const rarOpen = (lv, ri) => lv >= RAR_UNLOCK[ri];
 /* Forge d'équipement : taux bien plus bas pour les raretés hautes (Légendaire 0,1 % au niv. 10 → 3 % au niv. 20 ; Mythique 0,01 % au niv. 15 → 0,5 %) */
@@ -1548,8 +1548,8 @@ const FORGE_RATE_KEYS = [
   [9,  [45, 32, 19, 4,    0,   0   ]],
   [10, [43, 32, 20, 4.9,  0.1, 0   ]],
   [14, [35, 32, 25, 7.5,  0.5, 0   ]],
-  [15, [33, 32, 26, 8.49, 0.5, 0.01]],
-  [20, [22, 30, 32, 12.5, 3,   0.5 ]],
+  [15, [33, 32, 26, 8.495, 0.5, 0.005]],
+  [20, [22, 30.43, 32, 12.5, 3, 0.0667]],   // Mythique : 1 sur 1 500 au niveau max
 ];
 function ratesFrom(keys, lv){
   lv=Math.max(1, Math.min(SUM_MAX, lv));
@@ -1557,7 +1557,7 @@ function ratesFrom(keys, lv){
   const [l0,a]=keys[k], nx=keys[k+1];
   if(!nx || l0===lv) return a.slice();
   const [l1,b]=nx, t=(lv-l0)/(l1-l0);
-  return a.map((v,i)=> rarOpen(lv,i) ? Math.round((v+(b[i]-v)*t)*100)/100 : 0);
+  return a.map((v,i)=> rarOpen(lv,i) ? Math.round((v+(b[i]-v)*t)*10000)/10000 : 0);
 }
 const forgeRates = lv => ratesFrom(FORGE_RATE_KEYS, lv);
 const sumNeed = lv => 10 + 15*(lv-1);
@@ -1573,7 +1573,7 @@ function petRates(lv){
   const [l0,a]=RATE_KEYS[k], nx=RATE_KEYS[k+1];
   if(!nx || l0===lv) return a.slice();
   const [l1,b]=nx, t=(lv-l0)/(l1-l0);
-  return a.map((v,i)=>{ if(!rarOpen(lv,i)) return 0; return Math.round((v+(b[i]-v)*t)*10)/10; });
+  return a.map((v,i)=>{ if(!rarOpen(lv,i)) return 0; return Math.round((v+(b[i]-v)*t)*10000)/10000; });
 }
 /* Texte sous les boutons d'invocation : prochain déblocage ou garantie */
 function sumNextTxt(lv, pity, skl){
@@ -1820,7 +1820,7 @@ const goldFor = s => 2*Math.pow(1.165,s-1);
    de leur vie, et leurs coups ne peuvent pas enlever plus d'une part fixe de la vôtre : un combat de boss dure 10 à 15 s. */
 const EN_HP0=18, EN_HPG=1.18, EN_ATK0=3, EN_ATKG=1.165, BOSS_HPM=3.3, BOSS_ATKM=1.35, ECO_PACE=1;
 const BOSS_CAP_HIT=0.07, BOSS_CAP_SKILL=0.18, BOSS_CAP_FAM=0.05, BOSS_CAP_TAKEN=0.2;
-const bossCapped = () => E && E.boss && !(MODE && (MODE.kind==="wboss" || MODE.kind==="tower"));   // Tour : épreuve de force, vos stats comptent en entier
+const bossCapped = () => E && E.boss && !(MODE && (MODE.kind==="wboss" || MODE.kind==="tower" || MODE.kind==="dungeon"));   // Tour : épreuve de force, vos stats comptent en entier
 function enemyFor(s){
   const b=biomeOf(s), boss=isBoss(s);
   let [n,ic] = boss ? b.boss : pick(b.e), ev=false;
@@ -1886,7 +1886,7 @@ function canAfford(scr, mat, mn){ return S.scraps>=scr && (!mat || S.mats[mat]>=
 /* Renforcement : uniquement des scraps */
 const upMat = lv => 0;   // les matériaux ont été retirés du jeu
 /* Forge d'équipement : un objet au hasard parmi les 6, rareté selon le niveau de forge (même tableau que les invocations) */
-const FORGE_NEED = lv => 6 + 6*(lv-1);
+const FORGE_NEED = lv => 12 + 12*(lv-1);   // 2× plus lent qu'avant
 function forgeLevel(n){
   let lv=1, left = n ?? (S.stats.craft||0);
   while(lv<SUM_MAX && left>=FORGE_NEED(lv)){ left-=FORGE_NEED(lv); lv++; }
@@ -1931,8 +1931,13 @@ function autoForgeTick(dt){   // palier 2 : un objet forgé toutes les 15 s, san
   if(out[0] && out[0].placed==="equip") log(`🔨 Forge automatique : ${out[0].it.name} équipé !`, "loot");
   calc(); dirty.loot=dirty.equip=dirty.stats=true;
 }
+function askBuy(kind, need){
+  const ing = kind==="ing";
+  modal(ing?"Pas assez de lingots":"Pas assez d'orbes", `<div class="small" style="font-size:15px">Vous n'avez pas assez ${ing?"de lingots d'or":"d'orbes d'invocation"} (il en faut <b>${need}</b>, vous en avez <b>${ing?(S.ingots||0):S.orbs}</b>).<br>Voulez-vous en acheter ?</div>`,
+    [{t:"Non merci"}, {t:ing?"Acheter des lingots":"Acheter des orbes", cls:"gold", f:()=>{ shopTab=ing?"ing":"orb"; showView("shop"); }}]);
+}
 function forgeN(n){
-  const cost=ingCost(n); if((S.ingots||0)<cost) return;
+  const cost=ingCost(n); if((S.ingots||0)<cost){ askBuy("ing", cost); return; }
   S.ingots-=cost;
   const lv0=forgeLevel().lv, {out, dism, back} = forgeItems(n);
   if(dism) log(`♻️ Inventaire plein : ${dism} objet${dism>1?"s":""} démonté${dism>1?"s":""} automatiquement (+${fmt(back)} 🔩).`, "loot");
@@ -2093,7 +2098,7 @@ function summonOne(minR){
 const pullCost = n => n===100 ? PULL100_COST : n===10 ? PULL10_COST : PULL_COST;
 function summon(n){
   const cost = pullCost(n);
-  if(S.orbs<cost) return;
+  if(S.orbs<cost){ askBuy("orb", cost); return; }
   S.orbs -= cost;
   const lv0 = sumLevel().lv;
   const res = [];
@@ -2127,7 +2132,7 @@ function hit(base, vis, cls){
 function checkRecord(){
   if(S.stage<=S.maxStage) return;
   S.maxStage = S.stage; dirty.prest = true;
-  if(S.maxStage>S.best){ S.best = S.maxStage; S.crystals += 3; }   // nouveau record absolu : +3 💎
+  if(S.maxStage>S.best){ S.best = S.maxStage; S.crystals += 1; }   // nouveau record absolu : +1 💎
   track("stage"); cityOnStage(); checkUnlocks();
   if(S.best===S.maxStage && S.best%25===0) evLog("record", {joined:S.joined||"", p:S.prestiges});
 }
@@ -2140,7 +2145,7 @@ function kill(vis){
   if(E.ev || (boss && eventActive())){ const tk = boss ? 5 : 1+rnd(2); S.event.tokens += tk; if(vis) floatTxt("+"+tk+" §ecaille§","fam",true); }
   if(boss){
     S.stats.bosses++; track("boss"); if(vis) Sfx.play("boss");
-    const cr = 3+Math.floor(S.stage/25); S.crystals += cr;
+    const cr = Math.ceil((3+Math.floor(S.stage/25))/2); S.crystals += cr;
     const ob = 1 + (S.stage>=S.best ? 1 : 0); S.orbs += ob; S.treats += 3;   // orbes : +1 par boss, +1 de plus pour un nouveau record
     const ig = 5 + (S.stage>=S.best ? 5 : 0); S.ingots = (S.ingots||0) + ig;   // lingots : 5 par boss, +5 pour un nouveau record
     if(vis){ floatTxt(`+${ob} 🔮`,"fam",true); setTimeout(()=>floatTxt(`+${ig} §lingot§`,"gold",true), 250); }
@@ -2151,7 +2156,7 @@ function kill(vis){
   } else {
     S.kills = Math.min(KPS, S.kills+1);
     dropMats(false, vis);
-    if(Math.random()<0.01){ S.crystals++; if(vis) floatTxt("+1 💎","fam",true); }
+    if(Math.random()<0.005){ S.crystals++; if(vis) floatTxt("+1 💎","fam",true); }
     if(Math.random()<0.015){ S.orbs++; if(vis) floatTxt("+1 🔮","fam",true); }
     if(Math.random()<ING_DROP){ S.ingots=(S.ingots||0)+1; if(vis) floatTxt("+1 §lingot§","gold",true); }
     if(Math.random()<0.06){ S.treats++; }
@@ -2268,6 +2273,7 @@ const MECH = {
 };
 const MECH_ORDER = ["rage","carapace","regen","fracas","bouclier"];
 function dmgE(d){   // les dégâts passent d'abord par le bouclier runique
+  if(MODE && MODE.kind==="wboss"){ MODE.dealt=(MODE.dealt||0)+d; return; }
   if(E.shield>0){ const a=Math.min(E.shield,d); E.shield-=a; d-=a;
     if(E.shield<=0){ E.shield=0; E.shT=0; floatTxt("BOUCLIER BRISÉ !","crit"); shake(); Sfx.play("crit"); } }
   E.hp -= d;
@@ -2366,7 +2372,7 @@ function bulk(base, g, lvl, maxLvl){
   return {n,total};
 }
 const forgeBulk = f => bulk(f.base, f.g, S.forge[f.id], f.max);
-const qtyBar = () => `<div class="seg">${[1,10,"max"].map(q=>`<button data-qty="${q}" class="${S.opts.qty===q?"on":""}">${q==="max"?"Max":"×"+q}</button>`).join("")}</div>`;
+const qtyBar = () => `<div class="seg">${[1,10,50,"max"].map(q=>`<button data-qty="${q}" class="${S.opts.qty===q?"on":""}">${q==="max"?"Max":"×"+q}</button>`).join("")}</div>`;
 
 /* ---------- Héros ---------- */
 function renderClass(){
@@ -2398,7 +2404,7 @@ function moreStats(){
     ${R("§epees§","Double coup",p(c.dbl),"max 50 %")}
     ${R("§epees§","Triple coup",p(c.tpl),"ensembles · max 25 %")}
     ${R("§nuage§","Esquive",p(c.dodge),"max 50 %")}
-    ${R("🩸","Vol de vie",p(c.vol),"max 40 %")}
+    ${R("🩸","Vol de vie",p(c.vol),(()=>{ const eq=SLOTKEYS.reduce((a,k)=>a+((S.equip[k]&&S.equip[k].vol)||0),0); return `équipement ${p(eq)} · ensembles ${p(sb.vol||0)} · familiers ${p(teamBonus("vol"))} · classe et talents ${p(Math.max(0,c.vol-eq-(sb.vol||0)-teamBonus("vol")-0.05*S.forge.vol))} · forge ${p(0.05*S.forge.vol)} · max 40 %`; })())}
     ${R("💚","Régénération",p(c.regen*100)+"/s")}
     ${R("⏳","Recharge des compétences","−"+p((1-(1-0.025*al("cdr"))*(1-(c.cdr||0)/100))*100))}
     <h3>Économie</h3>
@@ -2546,8 +2552,8 @@ function renderForge(){
 }
 function updateShop(){
   if(view!=="fams" && view!=="forge") return;
-  if(view==="fams"){ const sa=$("#spull1"); if(sa){ sa.disabled=S.orbs<PULL_COST; $("#spull10").disabled=S.orbs<PULL10_COST; $("#spull100").disabled=S.orbs<PULL100_COST; $("#crys3").textContent=S.orbs; }
-    const a=$("#pull1"), b=$("#pull10"); if(a){ a.disabled=S.orbs<PULL_COST; b.disabled=S.orbs<PULL10_COST; const c=$("#pull100"); if(c) c.disabled=S.orbs<PULL100_COST; $("#crys2").textContent=S.orbs; } return; }
+  if(view==="fams"){ const sa=$("#spull1"); if(sa){ sa.classList.toggle("lack",S.orbs<PULL_COST); $("#spull10").classList.toggle("lack",S.orbs<PULL10_COST); $("#spull100").classList.toggle("lack",S.orbs<PULL100_COST); $("#crys3").textContent=S.orbs; }
+    const a=$("#pull1"), b=$("#pull10"); if(a){ a.classList.toggle("lack",S.orbs<PULL_COST); b.classList.toggle("lack",S.orbs<PULL10_COST); const c=$("#pull100"); if(c) c.classList.toggle("lack",S.orbs<PULL100_COST); $("#crys2").textContent=S.orbs; } return; }
   document.querySelectorAll("#tab-forge .buy").forEach(b=>{
     const f=FORGE.find(x=>x.id===b.dataset.forge), maxed = f.max && S.forge[f.id]>=f.max, r=forgeBulk(f);
     if(maxed){ b.disabled=true; b.querySelector(".q").textContent="MAX"; b.querySelector(".cost").textContent="—"; return; }
@@ -2618,7 +2624,7 @@ let invSel = null;   // sélection multiple dans l'inventaire (null = désactiv�
 function renderLoot(){
   const F=forgeLevel(), fp = F.need ? F.cur/F.need*100 : 100, nf=fusionGroups().length;
   const band = sumBand({ic:spr("lingot"), cid:"ingB", val:S.ingots||0, lvT:`Niveau de forge ${F.lv}${F.lv>=SUM_MAX?" (max)":""}`, lvR:F.need?`${F.cur} / ${F.need}`:"Max", pct:fp,
-      btns:[1,10,100].map(n=>`<button class="btn gold" id="forge${n}" data-fn="${n}" ${(S.ingots||0)<ingCost(n)?"disabled":""}>×${n}<small>§lingot§ ${ingCost(n)}</small></button>`).join(""),
+      btns:[1,10,100].map(n=>`<button class="btn gold ${(S.ingots||0)<ingCost(n)?"lack":""}" id="forge${n}" data-fn="${n}">×${n}<small>§lingot§ ${ingCost(n)}</small></button>`).join(""),
       ft:`<button class="linkbtn" id="ingBuy">Acheter des lingots</button> · <button class="linkbtn" id="ingHelp">En gagner</button> · <button class="linkbtn" id="craftRates">Taux</button>`}).replace('band sumcard','band forgecard');
   const worn = SLOTKEYS.map(k=>{ const it=S.equip[k], sd=SLOTS[k];
     return it ? itemTile(it, `data-sheq="${k}" title="${sd.n} · ${it.name}"`, (it.set?`<span class="tset">${SETS[it.set].ic}</span>`:"")+`<span class="canup">▲</span>`) : `<div class="tile empty" title="${sd.n}"><span class="ti">${sd.ic}</span></div>`; }).join("");
@@ -2714,7 +2720,7 @@ function updateAtelier(){
   const now = performance.now();
   if(atelierLvl!==craftLvl() && now-atelierT>2500){ dirty.loot = true; }
   if(dirty.res){ renderRes(); dirty.res=false; }
-  document.querySelectorAll("#tab-loot [data-fn]").forEach(b=>{ b.disabled = (S.ingots||0) < ingCost(+b.dataset.fn); });
+  document.querySelectorAll("#tab-loot [data-fn]").forEach(b=>{ b.classList.toggle("lack", (S.ingots||0) < ingCost(+b.dataset.fn)); });
   { const ib=$("#ingB"); if(ib && ib.textContent!==String(S.ingots||0)) ib.textContent=S.ingots||0; }
 }
 
@@ -2851,7 +2857,7 @@ function updateDots(){
 const soulCurve = st => st>80 ? Math.pow((st-80)/7.5,2) : 0;   // 100 → 7, 110 → 16, 130 → 44
 function soulGain(){ if(S.maxStage<prestMin()) return 0; return Math.max(0, Math.floor((soulCurve(S.maxStage)-soulCurve(S.runStart||1))*(hasP(15)?1.25:1))); }
 const runClimb = () => S.maxStage - (S.runStart||1);
-const chestOf = st => ({crystals: 20 + st, orbs: 3 + Math.floor(st/10), scraps: Math.ceil(craftScrap(st)*0.4)*15});
+const chestOf = st => ({crystals: Math.round((20 + st)/2), orbs: 3 + Math.floor(st/10), scraps: Math.ceil(craftScrap(st)*0.4)*15});
 let prestTab = "reb";
 function renderPrest(){
   const g=soulGain();
@@ -3019,7 +3025,7 @@ function frameUI(){
   if(view==="combat"){
     $("#ehpFill").style.width = ep+"%";
     { const en=$("#enemy"); if(en){ const ch=!!(E && E.warn>0), sh=!!(E && E.shield>0); if(en.classList.contains("charge")!==ch) en.classList.toggle("charge", ch); if(en.classList.contains("shieldup")!==sh) en.classList.toggle("shieldup", sh); } }
-    $("#ehpTxt").textContent = E ? (MODE && MODE.kind==="wboss" ? "Dégâts : "+fmt(E.max-E.hp) : fmt(Math.max(0,E.hp))) : "";
+    $("#ehpTxt").textContent = E ? (MODE && MODE.kind==="wboss" ? "Dégâts : "+fmt(MODE.dealt||0) : fmt(Math.max(0,E.hp))) : "";
     if(E && E.boss) $("#timerFill").style.width = (E.timer/30*100)+"%";
     $("#hhpFill").style.width = hpP+"%";
     $("#hhpTxt").textContent = fmt(hp)+" / "+fmt(C.hp);
@@ -3266,7 +3272,8 @@ function rebirth(){
   const keep = Object.assign({}, S, {souls:S.souls+g, prestiges:S.prestiges+1});
   const paid = [...SLOTKEYS.map(k=>S.equip[k]), ...S.inv].filter(it=>it && (it.sov || it.set==="souverain"));   // objets payés : gardés
   S = newState(keep);
-  for(const it of paid){ if(!S.equip[it.slot] || S.equip[it.slot].ri<5) S.equip[it.slot]=it; else S.inv.push(it); }
+  for(const old of paid){ const it=Object.assign(sovItem(old.slot, false, 1), {id:old.id, ench:old.ench});   // revient au niveau 1
+    if(!S.equip[it.slot] || S.equip[it.slot].ri<5) S.equip[it.slot]=it; else S.inv.push(it); }
   S.crystals += chest.crystals; S.orbs += chest.orbs;                                       // coffre de Renaissance (plus de scraps ni d'or : on repart de zéro)
   const st = Math.min(10*al("start"), Math.floor(oldBest/2/10)*10);                         // départ avancé
   if(st>=10){ S.stage = S.maxStage = st+1; }
@@ -3654,7 +3661,7 @@ function launchRaid(){
     c.hp = hp0 - dmg;
     const lost = Math.round(c.soldiers*Math.min(0.5, dmg/rep.maxHP*0.5));
     c.soldiers -= lost;
-    const rw = Math.ceil(25*Math.pow(1.3,n)), cr = 5+Math.floor(n/2), ig = 8+2*n, ob = 1+Math.floor(n/3);
+    const rw = Math.ceil(25*Math.pow(1.3,n)), cr = Math.ceil((5+Math.floor(n/2))/2), ig = 8+2*n, ob = 1+Math.floor(n/3);
     c.res.or+=rw; c.res.bois+=rw; c.res.pierre+=rw; S.crystals+=cr; S.ingots=(S.ingots||0)+ig; S.orbs+=ob;
     c.raid++; c.wins++; track("raidwin");
     Object.assign(rep, {hp1:c.hp, lost, reward:`💎 ${cr}  ·  ${ig} lingots  ·  🔮 ${ob}  ·  ${CRES.or.ic}${CRES.bois.ic}${CRES.pierre.ic} ${fmt(rw)}`, eLeft:0});
@@ -3937,13 +3944,13 @@ const MAIL = [
 ];
 /* Calendrier de 7 jours : la progression ne repart pas à zéro si vous manquez un jour */
 const DAILY = [
-  {ic:"💎", n:"20 cristaux",      r:{crystals:20},  ri:2},
+  {ic:"💎", n:"10 cristaux",      r:{crystals:10},  ri:2},
   {ic:"🪙", n:"Bourse d'or",      r:{gold:60},      ri:2},
   {ic:"🔩", n:"Scraps",           r:{scraps:40},    ri:2},
   {ic:"🔮", n:"3 orbes",          r:{orbs:3},       ri:3},
   {ic:"🔩", n:"Scraps",           r:{mats:8},       ri:3},
   {ic:"🏰", n:"Coffre du fief",   r:{city:250, gold:40}, ri:3},
-  {ic:"👑", n:"Grand coffre",     r:{crystals:50, orbs:10}, ri:5},
+  {ic:"👑", n:"Grand coffre",     r:{crystals:25, orbs:10}, ri:5},
 ];
 const today = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 const dailyReady = () => S.daily.last !== today();
@@ -3987,7 +3994,7 @@ function dailyBody(){
     <div class="small">Connectez-vous chaque jour. Manquer un jour ne remet pas le calendrier à zéro. ${S.daily.total} récompense(s) récupérée(s).</div>`;
 }
 const dayStr = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-const STREAK_CHEST = n => n%30===0 ? {crystals:150, orbs:30, treats:40} : n%7===0 ? {crystals:40, orbs:10, treats:15} : null;
+const STREAK_CHEST = n => n%30===0 ? {crystals:75, orbs:30, treats:40} : n%7===0 ? {crystals:20, orbs:10, treats:15} : null;
 function streakTick(){
   if(!S.streak || S.streak.last===today()) return;
   const y = dayStr(new Date(Date.now()-864e5));
@@ -4201,17 +4208,17 @@ const PRODUCTS = [
   {id:"starter",  ic:"🎁", n:"Pack de démarrage", d:"300 💎 + 20 🔮 + 60 lingots + des scraps + vitesse ×3 pendant 2 h", price:"2,99 €", once:true, best:true},
   {id:"gems_s",   ic:"💎", n:"Poignée de cristaux", d:"100 💎", price:"0,99 €"},
   {id:"gems_m",   ic:"💰", n:"Sac de cristaux",     d:"550 💎 (+10 % offerts)", price:"4,99 €"},
-  {id:"gems_l",   ic:"👑", n:"Coffre de cristaux",  d:"1 200 💎 (+20 % offerts)", price:"9,99 €"},
-  {id:"gems_xl",  ic:"📦", n:"Malle de cristaux",   d:"2 600 💎 (+30 % offerts)", price:"19,99 €", tag:"Populaire"},
-  {id:"gems_xxl", ic:"🏆", n:"Trésor royal",        d:"7 000 💎 (+40 % offerts)", price:"49,99 €"},
-  {id:"gems_max", ic:"🐉", n:"Butin du dragon",     d:"15 000 💎 (+50 % offerts)", price:"99,99 €", tag:"Meilleure valeur"},
+  {id:"gems_l",   ic:"👑", n:"Coffre de cristaux",  d:"1 250 💎 (+25 % offerts)", price:"9,99 €"},
+  {id:"gems_xl",  ic:"📦", n:"Malle de cristaux",   d:"3 000 💎 (+50 % offerts)", price:"19,99 €", tag:"Populaire"},
+  {id:"gems_xxl", ic:"🏆", n:"Trésor royal",        d:"10 000 💎 (+100 % offerts)", price:"49,99 €"},
+  {id:"gems_max", ic:"🐉", n:"Butin du dragon",     d:"22 000 💎 (+120 % offerts)", price:"99,99 €", tag:"Meilleure valeur"},
   {id:"gold_s",   ic:"🪙", n:"Bourse d'or",         d:"Or pour environ 10 min de combat", price:"1,99 €", gold:500},
   {id:"gold_m",   ic:"💰", n:"Coffre d'or",         d:"Or pour environ 30 min de combat", price:"4,99 €", gold:1500, tag:"Populaire"},
   {id:"gold_l",   ic:"🏆", n:"Trésor du roi",       d:"Or pour environ 1 h 30 de combat", price:"9,99 €", gold:5000},
   {id:"orb_s",    ic:"§boule§", n:"Poignée d'orbes",   d:"10 🔮", price:"0,99 €", orbs:10},
   {id:"orb_m",    ic:"§boule§", n:"Sac d'orbes",       d:"55 🔮 (+10 % offerts)", price:"4,99 €", orbs:55},
-  {id:"orb_l",    ic:"§boule§", n:"Coffre d'orbes",    d:"120 🔮 (+20 % offerts)", price:"9,99 €", orbs:120, tag:"Populaire"},
-  {id:"orb_xl",   ic:"§boule§", n:"Malle d'orbes",     d:"260 🔮 (+30 % offerts)", price:"19,99 €", orbs:260},
+  {id:"orb_l",    ic:"§boule§", n:"Coffre d'orbes",    d:"125 🔮 (+25 % offerts)", price:"9,99 €", orbs:125, tag:"Populaire"},
+  {id:"orb_xl",   ic:"§boule§", n:"Malle d'orbes",     d:"300 🔮 (+50 % offerts)", price:"19,99 €", orbs:300},
   {id:"speed",    ic:"⚡", n:"Vitesse ×3",          d:"Vitesse ×3 (et ×2) débloquée pour toujours", price:"3,99 €", perm:true},
   {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier et la vitesse ×2 pour cette saison", price:"4,99 €", bp:true},
   {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), vitesse ×2, 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
@@ -4312,10 +4319,10 @@ function grantProduct(id){ evLog("buy", {id});
     case "starter": S.crystals+=300; S.orbs+=20; S.ingots=(S.ingots||0)+60; S.scraps+=itemCost()*50; S.ads.boostUntil=Math.max(Date.now(),S.ads.boostUntil||0)+2*3600e3; S.iap.starter=true; break;
     case "gems_s": S.crystals+=100; break;
     case "gems_m": S.crystals+=550; break;
-    case "gems_l": S.crystals+=1200; break;
-    case "gems_xl": S.crystals+=2600; break;
-    case "gems_xxl": S.crystals+=7000; break;
-    case "gems_max": S.crystals+=15000; break;
+    case "gems_l": S.crystals+=1250; break;
+    case "gems_xl": S.crystals+=3000; break;
+    case "gems_xxl": S.crystals+=10000; break;
+    case "gems_max": S.crystals+=22000; break;
     case "orb_s": case "orb_m": case "orb_l": case "orb_xl": S.orbs += PRODUCTS.find(x=>x.id===id).orbs; dirty.fams=true; break;
     case "gold_s": case "gold_m": case "gold_l": S.gold += goldPack(PRODUCTS.find(x=>x.id===id).gold); break;
     case "speed": S.iap.speed=true; break;
@@ -4391,7 +4398,7 @@ function bpBuyLv(n){
     [{t:"Annuler"}, {t:`Acheter · 💎 ${cost}`, cls:"gold", f:()=>{ if(S.crystals<cost) return; S.crystals-=cost; S.bp.xp=Math.max(S.bp.xp, bpCum(lv+n)); Sfx.play("buy"); toast(`⚔️ Palier ${lv+n} atteint !`); save(); renderShop(); }}]);
 }
 function bpReward(track, i){
-  if(track==="f") return i%10===0 ? {crystals:30, orbs:5} : i%5===0 ? {crystals:15} : i%3===0 ? {orbs:3} : i%2===0 ? {gold:0.6} : {treats:5};
+  if(track==="f") return i%10===0 ? {crystals:15, orbs:5} : i%5===0 ? {crystals:8} : i%3===0 ? {orbs:3} : i%2===0 ? {gold:0.6} : {treats:5};
   if(track==="c") return i===30 ? {skin:"champion", crystals:100} : i===20 ? {fav:"skl"} : i===10 ? {fav:"pet"} : i%5===0 ? {crystals:60} : i%2===0 ? {orbs:6} : {treats:12, scraps:1};
   const SOV=["arme","casque","armure","bottes","bouclier","talisman"];
   if(i%5===0) return Object.assign({item:SOV[i/5-1]}, i%10===0 ? {crystals:200} : {});
@@ -4414,12 +4421,12 @@ function bpMini(r){
   return p.join("<br>");
 }
 const SOV_BOOST = 1.3;   // +30 % de stats par rapport à un Mythique normal
-function sovItem(slot, preview){
-  const lv=Math.max(1, craftLvl()), sd=SLOTS[slot], sc=Math.pow(ITEM_G,lv-1)*RAR[5].m*1.15*SOV_BOOST;   // toujours le meilleur jet, +30 %
+function sovItem(slot, preview, lvl){
+  const lv=lvl || Math.max(1, craftLvl()), sd=SLOTS[slot], sc=Math.pow(ITEM_G,lv-1)*RAR[5].m*1.15*SOV_BOOST;   // toujours le meilleur jet, +30 %
   const it={id:preview?"preview":uid(), slot, ri:5, ilvl:lv, set:"souverain", sov:1, name:SLOTS[slot].names[0]+" du Souverain"};
   for(const k in sd.base) it[k]=sd.base[k]*sc;
   if(slot==="talisman") it.crit=6*1.2*SOV_BOOST;
-  it.crit=(it.crit||0)+7.5; it.vol=(it.vol||0)+5;   // deux bonus au lieu d'un
+  it.crit=(it.crit||0)+3; it.vol=(it.vol||0)+1.5;   // deux petits bonus au lieu d'un
   return it;
 }
 function bpPeek(key){
@@ -4502,17 +4509,17 @@ const PREMIUM = [
   {id:"lskl",   ic:"📜", n:"Faveur légendaire (compétences)", d:()=>"Votre prochaine invocation de compétence sera Légendaire ou mieux", cost:150, max:1, ok:()=>unlocked("skills"), give:()=>{ S.favSkl=1; }, once:()=>!!S.favSkl},
   {id:"slot",   ic:"➕", n:"Place de familier en plus", d:()=>S.extraSlot ? "Déjà achetée" : "Une place de plus dans l'équipe, pour toujours", cost:500, max:1, ok:()=>unlocked("fams"), once:()=>S.extraSlot>0, give:()=>{ S.extraSlot=1; calc(); dirty.fams=true; }},
   {id:"g40",   cat:"gold", ic:"🪙", n:"Petite bourse",      d:()=>`+${fmt(goldPack(200))} or`,  cost:40,  max:999, give:()=>{ S.gold+=goldPack(200); }},
-  {id:"g100",  cat:"gold", ic:"💰", n:"Sacoche d'or",       d:()=>`+${fmt(goldPack(550))} or`,  cost:100, max:999, give:()=>{ S.gold+=goldPack(550); }},
-  {id:"g250",  cat:"gold", ic:"👑", n:"Malle d'or",         d:()=>`+${fmt(goldPack(1500))} or`, cost:250, max:999, give:()=>{ S.gold+=goldPack(1500); }},
-  {id:"g600",  cat:"gold", ic:"🏆", n:"Caverne d'or",       d:()=>`+${fmt(goldPack(4000))} or`, cost:600, max:999, give:()=>{ S.gold+=goldPack(4000); }},
+  {id:"g100",  cat:"gold", ic:"💰", n:"Sacoche d'or",       d:()=>`+${fmt(goldPack(560))} or · −10 %`,  cost:100, max:999, give:()=>{ S.gold+=goldPack(560); }},
+  {id:"g250",  cat:"gold", ic:"👑", n:"Malle d'or",         d:()=>`+${fmt(goldPack(1560))} or · −20 %`, cost:250, max:999, give:()=>{ S.gold+=goldPack(1560); }},
+  {id:"g600",  cat:"gold", ic:"🏆", n:"Caverne d'or",       d:()=>`+${fmt(goldPack(4620))} or · −35 %`, cost:600, max:999, give:()=>{ S.gold+=goldPack(4620); }},
   {id:"orb10",  cat:"orb", ic:"§boule§", n:"10 orbes",  d:()=>"", cost:100,  max:999, give:()=>{ S.orbs+=10;  dirty.fams=true; }},
-  {id:"orb50",  cat:"orb", ic:"§boule§", n:"50 orbes",  d:()=>"", cost:500,  max:999, give:()=>{ S.orbs+=50;  dirty.fams=true; }},
-  {id:"orb100", cat:"orb", ic:"§boule§", n:"100 orbes", d:()=>"", cost:1000, max:999, give:()=>{ S.orbs+=100; dirty.fams=true; }},
-  {id:"orb500", cat:"orb", ic:"§boule§", n:"500 orbes", d:()=>"", cost:5000, max:999, give:()=>{ S.orbs+=500; dirty.fams=true; }},
+  {id:"orb50",  cat:"orb", ic:"§boule§", n:"50 orbes",  d:()=>"−10 %", cost:450,  max:999, give:()=>{ S.orbs+=50;  dirty.fams=true; }},
+  {id:"orb100", cat:"orb", ic:"§boule§", n:"100 orbes", d:()=>"−20 %", cost:800, max:999, give:()=>{ S.orbs+=100; dirty.fams=true; }},
+  {id:"orb500", cat:"orb", ic:"§boule§", n:"500 orbes", d:()=>"−35 %", cost:3250, max:999, give:()=>{ S.orbs+=500; dirty.fams=true; }},
   {id:"ing50", cat:"ing",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>"", cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
-  {id:"ing100", cat:"ing",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"", cost:480,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
-  {id:"ing500", cat:"ing",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"", cost:2200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
-  {id:"ing1000", cat:"ing", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"", cost:4200, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
+  {id:"ing100", cat:"ing",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"−10 %", cost:450,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
+  {id:"ing500", cat:"ing",  ic:"§lingot§", n:"Coffre de 500 lingots",   d:()=>"−20 %", cost:2000, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+500;  dirty.loot=true; }},
+  {id:"ing1000", cat:"ing", ic:"§lingot§", n:"Trésor de 1 000 lingots", d:()=>"−35 %", cost:3250, max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+1000; dirty.loot=true; }},
   {id:"invx",   ic:"📦", n:"+10 places d'inventaire",   d:()=>`Inventaire : ${invMax()} places${(S.invX||0)>=INV_BUY_MAX?" (maximum)":` · jusqu'à ${INV_BASE+INV_STEP*INV_BUY_MAX}`}`, get cost(){ return 80+40*(S.invX||0); }, max:99, once:()=>(S.invX||0)>=INV_BUY_MAX, give:()=>{ S.invX=(S.invX||0)+1; dirty.loot=true; }},
   {id:"cls",    ic:"🎭", n:"Changer de classe",         d:()=>"Choisissez une autre classe déjà débloquée, sans attendre la Renaissance", cost:100, max:3, ok:()=>Object.keys(S.classes||{}).length>1, give:()=>{ setTimeout(()=>classPicker(null,null), 200); }},
 ];
@@ -4931,7 +4938,7 @@ function guidesList(){
 /* ---------- Défis : tour des épreuves et boss de la semaine (combats réels dans l'arène) ---------- */
 let MODE = null;
 const TOWER_KEYS = 3, W_TRIES = 3;
-const W_TIERS = [{r:1,cr:20,ob:1},{r:3,cr:40,ob:2},{r:8,cr:60,ob:3},{r:20,cr:100,ob:5},{r:50,cr:150,ob:10},{r:150,cr:250,ob:15},{r:500,cr:400,ob:25},{r:1500,cr:600,ob:35},{r:5000,cr:900,ob:50},{r:15000,cr:1300,ob:70},{r:50000,cr:2000,ob:100}];   // dégâts en « boss de votre record »
+const W_TIERS = [{r:1,cr:10,ob:1},{r:3,cr:20,ob:2},{r:8,cr:30,ob:3},{r:20,cr:50,ob:5},{r:50,cr:75,ob:10},{r:150,cr:125,ob:15},{r:500,cr:200,ob:25},{r:1500,cr:300,ob:35},{r:5000,cr:450,ob:50},{r:15000,cr:650,ob:70},{r:50000,cr:1000,ob:100}];   // dégâts en « boss de votre record »
 function weekId(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return d.getFullYear()+"-S"+(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)); }
 function chalReset(){
   const c=S.chal, d=today(), w=weekId();
@@ -4992,7 +4999,7 @@ function modeEnd(win, quit){
       modal(quit?"Défi abandonné":"Repoussé !", `Le gardien de l'étage ${m.floor} est trop fort pour l'instant. Il vous reste <b>${S.chal.keys}</b> clé${S.chal.keys>1?"s":""} aujourd'hui.<br><br>Renforcez-vous (Forge, équipement, familiers, compétences) puis réessayez. Une victoire ne coûte pas de clé.`, [{t:"OK", cls:"gold"}]);
     }
   } else {
-    const dmg = e ? e.max-e.hp : 0, ratio = m.ref ? dmg/m.ref : 0;
+    const dmg = m.dealt||0, ratio = m.ref ? dmg/m.ref : 0;
     const best = Math.max(S.chal.wbest, ratio), rec = ratio>S.chal.wbest; S.chal.wbest = best;
     log(`🐲 Titan de la semaine : ${fmt(dmg)} dégâts (×${ratio<1000?ratio.toFixed(1):fmt(ratio)}).`, "boss");
     const ready = W_TIERS.filter((t,i)=>best>=t.r && !S.chal.wclaim[i]).length;
@@ -5011,7 +5018,7 @@ async function adKey(){
 }
 /* --- Onglet Défis : sous-onglets Tour / Titan. La tour se défile, étage par étage, et monte à l'infini. --- */
 let defTab = "tower", towerTop = 0;
-const towerReward = f => ({cr:5+Math.floor(f/2)+(f%5===0?20:0)+(f%25===0?100:0), sc:itemCost()*(f%5===0?15:5), ob:(f%5===0?3:1)+(f%25===0?10:0), ig:(f%5===0?12:4)+(f%25===0?25:0)});
+const towerReward = f => ({cr:Math.ceil((5+Math.floor(f/2)+(f%5===0?20:0)+(f%25===0?100:0))/2), sc:itemCost()*(f%5===0?15:5), ob:(f%5===0?3:1)+(f%25===0?10:0), ig:(f%5===0?12:4)+(f%25===0?25:0)});
 function towerDiff(f){
   const st=towerStage(f), e=enemyFor(st); let hp=e.hp, atk=e.atk; if(!e.boss){ hp*=6; atk*=1.5; }
   const dps=C.atk/C.interval*(1+C.crit/100) + C.famDps, ratio=dps*30/hp;
@@ -5400,7 +5407,7 @@ function sklRoll(minR){
   return addSkill(pick(SKILLS.filter(x=>x.r===ri)));
 }
 function summonSkill(n){
-  const cost=pullCost(n); if(S.orbs<cost) return;
+  const cost=pullCost(n); if(S.orbs<cost){ askBuy("orb", cost); return; }
   S.orbs-=cost;
   const lv0=sumLevel(S.skl.pulls).lv, res=[];
   for(let i=0;i<n;i++){ const g = n>=10 && i%10===9 && res.slice(i-9).every(r=>r.sk.r<2); res.push(sklRoll(g?2:0)); }
@@ -5483,7 +5490,7 @@ function questsRoll(){
   const pool = QUEST_POOL.filter(q=>!q.need || unlocked(q.need)).sort(()=>Math.random()-0.5).slice(0,3);
   S.quests = {day:today(), bonus:false, list: pool.map(q=>{ const d=rnd(3); return {id:q.id, diff:d, goal:q.g[d], prog:0, claimed:false}; })};
 }
-const questReward = q => ({crystals:15+q.diff*5, orbs:1+q.diff, gold:20*(q.diff+1)});
+const questReward = q => ({crystals:8+q.diff*3, orbs:1+q.diff, gold:20*(q.diff+1)});
 const WQ_POOL = [
   {id:"kill",  n:"Vaincre {n} monstres",            ev:"kill",    g:2500},
   {id:"boss",  n:"Terrasser {n} boss",              ev:"boss",    g:20},
@@ -5494,7 +5501,7 @@ const WQ_POOL = [
   {id:"tower", n:"Gravir {n} étages de la Tour",    ev:"tower",   g:5,   need:"defis"},
   {id:"raid",  n:"Repousser {n} assauts du fief",   ev:"raidwin", g:2,   need:"city"},
 ];
-const WQ_REWARD = {crystals:40, orbs:8, treats:10, ingots:15}, WQ_BONUS = {crystals:100, orbs:20, treats:25, ingots:40};
+const WQ_REWARD = {crystals:20, orbs:8, treats:10, ingots:15}, WQ_BONUS = {crystals:50, orbs:20, treats:25, ingots:40};
 function wqRoll(){
   if(S.wq.wk===weekId()) return;
   const pool = WQ_POOL.filter(q=>!q.need || unlocked(q.need)).sort(()=>Math.random()-0.5).slice(0,3);
@@ -5519,7 +5526,7 @@ function claimQuest(i){
 }
 function claimQuestBonus(){
   if(S.quests.bonus || !S.quests.list.every(q=>q.claimed)) return;
-  S.quests.bonus=true; const r={crystals:20, orbs:3, mats:5, ingots:8}; grant(r); bpXP(60); Sfx.play("legend");
+  S.quests.bonus=true; const r={crystals:10, orbs:3, mats:5, ingots:8}; grant(r); bpXP(60); Sfx.play("legend");
   showReveal([{ic:"🎁", n:"Coffre des quêtes", ri:4, rn:"Bonus du jour", tag:rewardTxt(r)}]);
 }
 function questsBody(){
@@ -5567,7 +5574,7 @@ const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 const achTier = a => (S.ach.tier && S.ach.tier[a.id]) || 0;                 // paliers déjà récupérés
 const achDone = a => achTier(a) >= a.t.length;
 const achGoal = a => { const g=a.t[Math.min(achTier(a), a.t.length-1)][0]; return typeof g==="function" ? g() : g; };
-const achRew  = a => a.t[Math.min(achTier(a), a.t.length-1)][1];
+const achRew  = a => Math.max(5, Math.round(a.t[Math.min(achTier(a), a.t.length-1)][1]/2));   // cristaux des succès : moitié
 const achReady = a => !achDone(a) && a.v()>=achGoal(a);
 function achMigrate(){   // anciens succès : les paliers déjà touchés sont comptés comme récupérés
   S.ach.tier = S.ach.tier || {};
@@ -5728,8 +5735,8 @@ const RUNE_DAY = ["or","feu","givre","foudre","vie","ombre","sang"];   // dimanc
 const JOURS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const RUNE_MAX = 10, DUNG_TRIES_BASE = 3;
 const dungTries = () => DUNG_TRIES_BASE + (hasP(3)?1:0);
-const DUNG_DIFF = [{n:"Normal", off:-10, r:2, c:"blue"}, {n:"Difficile", off:0, r:4, c:"gold"}, {n:"Héroïque", off:10, r:8, c:"red"},
-  {n:"Légendaire", off:25, r:14, c:"orange"}, {n:"Mythique", off:50, r:24, c:"violet"}, {n:"Cauchemar", off:100, r:40, c:"dark"}];
+const DUNG_DIFF = [{n:"Normal", off:-30, r:2, c:"blue"}, {n:"Difficile", off:-15, r:4, c:"gold"}, {n:"Héroïque", off:0, r:8, c:"red"},
+  {n:"Légendaire", off:15, r:14, c:"orange"}, {n:"Mythique", off:35, r:24, c:"violet"}, {n:"Cauchemar", off:70, r:40, c:"dark"}];
 const dungOpen = i => i <= 2 || i <= ((S.chal && S.chal.dmax) ?? -1) + 1;   // Légendaire, Mythique, Cauchemar : battre la difficulté d'avant
 const runeToday = () => RUNE_DAY[new Date().getDay()];
 const runeSlots = it => it && it.ri>=5 ? 2 : it && it.ri>=4 ? 1 : 0;
@@ -6349,7 +6356,7 @@ function offline(){
   const kills = Math.floor(el/tpk*0.5);
   const g = kills*goldFor(st)*C.gold*ECO_PACE;
   if(g<=0) return;
-  const cr = Math.floor(kills*0.01), ob = Math.floor(kills/70), tr = Math.floor(kills/20), ig = Math.floor(kills/45);
+  const cr = Math.floor(kills*0.005), ob = Math.floor(kills/70), tr = Math.floor(kills/20), ig = Math.floor(kills/45);
   const scr = Math.ceil(kills*scrapFor(st)*C.scrapMult*ECO_PACE), nm = 0;
   const gain = ()=>{ S.gold += g; S.crystals += cr; S.scraps += scr; S.orbs += ob; S.treats += tr; S.ingots = (S.ingots||0) + ig;
  };
