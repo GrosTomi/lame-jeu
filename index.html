@@ -1030,6 +1030,8 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 .rhtop b{display:block;font-family:var(--disp);font-weight:400;font-size:24px;line-height:1.1}.rhtop small{font-size:12.5px;font-weight:800;color:var(--mut)}#mBody .rhic .sp{width:46px!important;height:46px!important}.rhtop{background:#fff8e6;border-radius:12px;padding:8px 12px}
 .rhuse{background:#fff3d6;border-radius:10px;padding:7px 10px;font-weight:700;font-size:14px}
 .rhh{font-family:var(--disp);font-size:16px;margin:10px 0 4px}.reshelp ul{margin:0;padding-left:20px;font-size:14px;font-weight:600;line-height:1.45}.reshelp li{margin:2px 0}.reshelp .sp{width:15px;height:15px;vertical-align:-3px}
+.row.focusflash{animation:focusFlash 2.2s ease}@keyframes focusFlash{0%,40%{box-shadow:0 0 0 3px #ffd43b,0 0 18px #ffd43b;background:#fff3bf}100%{box-shadow:none}}
+.nokey{flex-direction:column;line-height:1.1}.nokey small{font-size:10px;opacity:.9}
 </style>
 </head>
 <body>
@@ -1045,7 +1047,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1433";
+var BUILD_ID = "20261124-1438";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1797,9 +1799,9 @@ const RES_INFO = {
   ingots: {ic:"§lingot§", n:"Lingots", have:()=>fmt(S.ingots||0), use:"Forger des objets à l'Atelier (1 par objet, 9 le ×10, 85 le ×100).",
            get:["Chaque boss : 5 lingots, 10 pour un nouveau record","Parfois sur les monstres normaux","Chaque étage de la Tour, quêtes, Passe","Fonderie du Fief, expéditions, assauts repoussés"], shop:"ing"},
   keys:   {ic:"🔑", n:"Clés de la Tour", have:()=>String(S.chal.keys), use:"Une défaite à la Tour coûte une clé. Une victoire n'en coûte jamais.",
-           get:[()=>`${TOWER_KEYS} clés offertes chaque jour`,"1 clé de plus par jour en regardant une pub (onglet Tour)","Marché du jour de la Boutique : 30 💎 la clé (3 par jour)"], shop:"bonus"},
+           get:[()=>`${TOWER_KEYS} clés offertes chaque jour`,"1 clé de plus par jour en regardant une pub (onglet Tour)","Marché du jour de la Boutique : 30 💎 la clé (3 par jour)"], mkt:"key"},
   wtry:   {ic:"🐲", n:"Essais contre le Titan", have:()=>`${S.chal.wtries}/${W_TRIES}`, use:"Chaque combat contre le Titan de la semaine utilise un essai.",
-           get:[()=>`${W_TRIES} essais offerts chaque jour`,"Marché du jour de la Boutique : 40 💎 l'essai (2 par jour)"], shop:"bonus"},
+           get:[()=>`${W_TRIES} essais offerts chaque jour`,"Marché du jour de la Boutique : 40 💎 l'essai (2 par jour)"], mkt:"wtry"},
   dtry:   {ic:"✨", n:"Essais du Donjon", have:()=>`${S.chal.dtries||0}/${dungTries()}`, use:"Chaque combat contre le gardien des runes utilise un essai, victoire ou défaite.",
            get:[()=>`${DUNG_TRIES_BASE} essais offerts chaque jour`,"+1 essai par jour avec le palier de Renaissance 3"], go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
   scraps: {ic:"🔩", n:"Scraps", have:()=>fmt(S.scraps), use:"Renforcer l'équipement et payer les fusions.",
@@ -1811,13 +1813,25 @@ const RES_INFO = {
   city:   {ic:"🏰", n:"Ressources du Fief", have:()=>S.city?`${fmt(S.city.res.or)} 💰 · ${fmt(S.city.res.bois)} 🌲 · ${fmt(S.city.res.pierre)} 🪨`:"0", use:"Améliorer les bâtiments du village et du royaume.",
            get:["Mine, scierie et carrière, même jeu fermé (à récolter, jusqu'à 8 h de stock)","Patrouilles (expéditions)","Assauts de pillards repoussés","Marché du jour : Convoi pour le fief"], shop:"bonus"},
 };
+/* Ouvre la Boutique (onglet Bonus) directement sur un article du marché du jour, mis en évidence */
+function goShopMkt(id){
+  shopTab="bonus"; showView("shop");
+  let tries=0;
+  const focus=()=>{ const b=document.querySelector(`#tab-shop [data-mkt="${id}"]`), row=b && b.closest(".row");
+    if(!row){ if(++tries<15) setTimeout(focus, 80); return; }
+    const pg=row.closest(".pgpage");
+    if(pg){ const tr=pg.parentElement, i=[...tr.children].indexOf(pg); tr.scrollTo({left:i*tr.clientWidth, behavior:"smooth"}); }
+    row.classList.remove("focusflash"); void row.offsetWidth; row.classList.add("focusflash"); };
+  setTimeout(focus, 60);
+}
 function resHelp(k){
   const r=RES_INFO[k]; if(!r) return;
   const li = r.get.map(g=>`<li>${typeof g==="function"?g():g}</li>`).join("");
   const body = `<div class="reshelp"><div class="rhtop"><span class="rhic">${r.ic}</span><div><small>Vous en avez</small><b>${r.have()}</b></div></div>
     <div class="rhuse">${r.use}</div><div class="rhh">Comment en gagner</div><ul>${li}</ul></div>`;
   const acts=[{t:"Fermer"}];
-  if(r.shop) acts.push({t:r.shopT||"🛒 Boutique", cls:"gold", f:()=>{ shopTab=r.shop; showView("shop"); }});
+  if(r.mkt) acts.push({t:"🛒 Boutique", cls:"gold", f:()=>goShopMkt(r.mkt)});
+  else if(r.shop) acts.push({t:r.shopT||"🛒 Boutique", cls:"gold", f:()=>{ shopTab=r.shop; showView("shop"); }});
   else if(r.go) acts.push({t:r.go.t, cls:"gold", f:r.go.f});
   Sfx.play("ui"); modal(ico(r.ic)+" "+r.n, ico(body), acts);
 }
@@ -3496,7 +3510,8 @@ document.addEventListener("click", e=>{
   if(t.id==="altarReset"){ S.souls += altarSpent(); S.altar={}; calc(); dirty.stats=true; renderPrest(); save(); return; }
   if(t.dataset.chal){ if(t.dataset.chal==="tower") towerLaunch(); else chalStart(t.dataset.chal); return; }
   if(t.id==="teMenu"){ towerEndClose(false); return; }
-  if(t.id==="teNext"){ towerEndClose(true); return; }
+  if(t.id==="teNext"){ if(t.dataset.gomkt){ $("#tend").classList.remove("on"); goShopMkt(t.dataset.gomkt); } else towerEndClose(true); return; }
+  if(t.dataset.gomkt){ goShopMkt(t.dataset.gomkt); return; }
   if(t.dataset.dtab){ defTab=t.dataset.dtab; renderDefis(true); return; }
   if(t.dataset.rk){ rkTab=t.dataset.rk; renderRank(); return; }
   if(t.dataset.rkp){ reportAsk(t.dataset.rkp, t.dataset.rkn); return; }
@@ -5163,7 +5178,7 @@ function towerEndShow(win, m, e, quit){
     : `<div class="tetip">🔑 Une clé utilisée. ${S.chal.keys>0?"Vous pouvez réessayer, ou vous renforcer d'abord (Forge, équipement, familiers, compétences).":"Plus de clé aujourd'hui : elles reviennent demain."} Une victoire ne coûte jamais de clé.</div>`);
   const nx=$("#teNext"), can = S.chal.keys>0;
   setH(nx, win ? `⚔️ Étage ${S.chal.floor}` : `⚔️ Réessayer`); nx.disabled = !can;
-  if(!can) setH(nx, "🔑 Plus de clé");
+  nx.dataset.gomkt = can ? "" : "key"; if(!can){ nx.disabled=false; setH(nx, "🔑 Plus de clé · En obtenir"); }
   el.classList.add("on");
 }
 function towerEndClose(next){
@@ -5236,7 +5251,7 @@ function towerFloorHTML(f){
   const rew = `+${rw.cr} 💎 · +${rw.ob} 🔮 · +${rw.ig} §lingot§`;
   let right;
   if(done) right=`<span class="tdone">${spr("coche")}</span>`;
-  else if(now){ const d=towerDiff(f); right = S.chal.keys>0 ? `<button class="btn gold sm" data-chal="tower" ${MODE?"disabled":""}>Combattre<small style="color:${d.c}">${d.t}</small></button>` : `<button class="btn sm" disabled>Plus de clé</button>`; }
+  else if(now){ const d=towerDiff(f); right = S.chal.keys>0 ? `<button class="btn gold sm" data-chal="tower" ${MODE?"disabled":""}>Combattre<small style="color:${d.c}">${d.t}</small></button>` : `<button class="btn sm red nokey" data-gomkt="key">Plus de clé<small>En obtenir</small></button>`; }
   else right=`<span class="tlock">${spr("cadenas")}</span>`;
   return `<div class="tfloor ${done?"done":now?"now":"lock"} ${pal?"pal":""} ${f%25===0?"gpal":""}" data-tfloor="${f}">
     <div class="twin"></div><div class="twin r"></div>
