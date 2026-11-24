@@ -37,10 +37,10 @@ textarea{-webkit-user-select:text;user-select:text}
 
 /* En-tête */
 header{flex:none;padding:calc(var(--st) + 8px) 10px 8px;display:flex;align-items:center;gap:6px;background:var(--roi);border-bottom:3px solid var(--or);z-index:5}
-.res{display:flex;gap:6px;flex:1;min-width:0}
+.res{display:flex;gap:6px;flex:1;min-width:0}.nw2{display:none}
 .pill{display:flex;align-items:center;gap:5px;background:#132a6e;border:2px solid #3f5cc0;padding:4px 10px 4px 7px;border-radius:999px;font-family:var(--disp);font-size:16px;color:#fff;white-space:nowrap}
 .pill .pi{font-size:16px}
-.pill.g{flex:1;min-width:0;color:var(--or)}
+.pill.g{flex:1;min-width:64px;color:var(--or)}
 .pill.c{color:#8ff0ff}.pill.s{color:#e3c9ff}
 .iconbtn{position:relative;width:38px;height:38px;border-radius:12px;background:#132a6e;border:2px solid #3f5cc0;font-size:18px;display:flex;align-items:center;justify-content:center;flex:none}
 .iconbtn .dot{top:-6px;right:-6px}
@@ -233,7 +233,7 @@ h2{font-family:var(--disp);font-weight:400;font-size:20px;margin:0 0 10px;color:
 #view-combat:not([hidden]){display:flex;flex-direction:column;min-height:100%}#view-combat>#arena{flex:1 0 auto}#view-combat>.card{margin-bottom:0}
 .hpanel{padding:10px 10px 8px}
 .clsline{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--mut);margin-bottom:6px;white-space:nowrap;overflow:hidden}
-.clsline .ci .sp{width:20px;height:20px}.clsline b{font-family:var(--disp);font-weight:400;font-size:15px;color:var(--ink,#2b1d0e)}.clsline .cb{color:var(--grn)}.clsline .ch{margin-left:auto;font-size:10.5px;opacity:.8}
+.clsline .ci .sp{width:20px;height:20px}.clsline b{font-family:var(--disp);font-weight:400;font-size:15px;color:var(--ink,#2b1d0e)}.clsline .cb{color:var(--grn);overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}.clsline .ch{margin-left:auto;font-size:10.5px;opacity:.8}
 .grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
 .grid6 .tile{border-radius:12px;border-width:2.5px;padding:2px}.grid6 .tile .ti{font-size:24px}.grid6 .tile .ti .sp{width:30px;height:30px}
 .grid6 .tile .tlv{font-size:10px}.tile .tset{position:absolute;top:1px;left:2px;font-size:10px}.tile .tset .sp{width:13px;height:13px}
@@ -242,7 +242,7 @@ h2{font-family:var(--disp);font-weight:400;font-size:20px;margin:0 0 10px;color:
 .stat5{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
 .st5{background:#fff;border-radius:9px;padding:4px 2px;text-align:center;box-shadow:0 1px 0 #0001;min-width:0}
 .st5 b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.st5 b .sp{width:12px;height:12px;vertical-align:-2px}
-.st5 span{display:block;font-size:9px;font-weight:800;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st5 span .sp{width:10px;height:10px;vertical-align:-1px}.st5 span{display:block;font-size:9px;line-height:1.3;font-weight:800;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .tev{position:absolute;bottom:4px;left:0;right:0;font-size:9px;font-weight:900;color:var(--c);text-align:center}
 .crys .orbl{display:block;font-family:Nunito,sans-serif;font-size:12px;font-weight:800;opacity:.85;margin-top:-2px}
 .orbrow{background:#f4eeff}
@@ -257,7 +257,7 @@ h2{font-family:var(--disp);font-weight:400;font-size:20px;margin:0 0 10px;color:
 .tfloor .twin.r{left:auto;right:-22px}
 .tfloor .tnum{flex:none;min-width:30px;height:30px;padding:0 4px;border-radius:9px;background:#5b5868;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:15px}
 .tfloor .tic{flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:28px}.tfloor .tic .sp{width:36px;height:36px}
-.tfloor .tmid{flex:1;min-width:0}.tfloor .tmid b{display:block;font-family:var(--disp);font-weight:400;font-size:15px}.tfloor .tmid span{font-size:11.5px;font-weight:800;color:var(--mut)}
+.tfloor .tmid{flex:1;min-width:0}.tfloor .tmid b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--disp);font-weight:400;font-size:15px}.tfloor .tmid span{font-size:11.5px;font-weight:800;color:var(--mut)}
 .tfloor .tdone .sp,.tfloor .tlock .sp{width:26px;height:26px}
 .tfloor.done{background:#eefbea;border-color:#2f9e44}.tfloor.done .tnum{background:#2f9e44}
 .tfloor.lock{filter:grayscale(1);opacity:.55}
@@ -691,7 +691,7 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 .ptile small{font-size:10.5px;font-weight:800;color:var(--mut);line-height:1.2;flex:1}
 .ptile .btn{width:100%;margin-top:4px;padding:6px 4px}
 .ptile.best{border-color:var(--or2);background:#fff4d1;box-shadow:0 0 0 2px #ffd43b66}
-.ptile .rib{position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-family:var(--disp);font-size:10.5px;padding:1px 8px;border-radius:7px;white-space:nowrap}
+.ptile:has(.rib){padding-top:14px}.ptile .rib{position:absolute;top:-2px;left:50%;transform:translateX(-50%);border-top-left-radius:0!important;border-top-right-radius:0!important;background:var(--red);color:#fff;font-family:var(--disp);font-size:10.5px;padding:1px 8px;border-radius:7px;white-space:nowrap}
 .ptile.free{border-color:#74c0fc;background:#e7f5ff}.ptile.pass{border-color:#b197fc;background:#f3f0ff}
 .ptile.owned{opacity:.6}
 .mgrp{font-family:var(--disp);font-size:15px;color:var(--ink);margin:2px 0 4px}
@@ -716,7 +716,8 @@ main{overflow:hidden!important;display:flex;flex-direction:column;padding:8px 10
 .citytop .reschips{margin-top:6px!important;flex-wrap:nowrap;overflow:hidden}.citytop .rchip{font-size:12.5px;padding:3px 7px}
 .villagewrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
 .villagewrap .vsvg{width:100%;height:100%}
-.vhint{position:absolute;bottom:6px;left:0;right:0;margin:0;font-size:12px}
+.vhint{position:static;flex:none;margin:0;padding:5px 8px;font-size:12px;background:#3f8f35;width:100%;box-sizing:border-box}
+.villagewrap{flex-direction:column}.villagewrap .vsvg{flex:1;min-height:0}
 .threat{flex:none;padding:8px 10px;margin-top:8px}.threat h2{font-size:16px;margin-bottom:2px}
 /* défis */
 .thead{position:static;flex:none}
@@ -952,6 +953,9 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .mstat h3{font-family:var(--disp);font-size:14px;margin:8px 0 2px;color:#7a5a20}.mstat>div{flex-wrap:wrap}.mstat small{width:100%;text-align:right;font-size:10.5px;color:var(--mut);margin-top:-2px}
 .reccode{font-family:ui-monospace,Menlo,monospace;font-size:21px;font-weight:900;letter-spacing:1px;text-align:center;background:#fff;border:2px dashed #c9a35a;border-radius:12px;padding:12px 6px;margin:10px 0;user-select:all}
 .rktitle{font-size:10.5px;color:#7a5a20;background:#ffe9a8;border-radius:6px;padding:0 5px;font-weight:900}
+
+@media (max-width:380px){header{gap:4px;padding-left:6px;padding-right:6px}.res{gap:4px}.pill,header .pill{font-size:13px;padding:3px 6px 3px 4px;gap:3px;min-width:0}.pill .pi .sp,.pill .sp{width:15px;height:15px}.pill.g{min-width:0;flex:1 0 auto}.pill.c,.pill.s{flex:0 1 auto}.iconbtn{width:34px;height:34px}.nw{display:none}.nw2{display:inline}.tfloor .tic{display:none}}
+body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 </style>
 </head>
 <body>
@@ -967,7 +971,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1221";
+var BUILD_ID = "20261124-1300";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1620,6 +1624,7 @@ const $ = s => document.querySelector(s);
 const rnd = n => Math.floor(Math.random()*n);
 const pick = a => a[rnd(a.length)];
 const SUF = ["","K","M","Md","Bn","Bd","Tn","Td","Qn","Qd","Sx","Sp","Oc","No","Dc"];
+const nfK = v => v>=10000 ? fmt(v) : String(Math.floor(v));
 function fmt(n){
   if(!isFinite(n)) return "∞";
   if(n<0) return "-"+fmt(-n);
@@ -2119,7 +2124,7 @@ function summon(n){
 /* ================= COMBAT ================= */
 let E=null, heroCd=0, deadT=0, famAcc=0, famT=0;
 function spawn(){ E = MODE ? modeEnemy() : enemyFor(S.stage);
-  if(!MODE && E.boss){ E.mech = S.stage<=100 ? MECH_ORDER[zoneIdx(S.stage)%3] : MECH_ORDER[Math.floor((S.stage-1)/10)%MECH_ORDER.length];   // coup dévastateur et bouclier : à partir de l'étape 100 E.fT=0; E.warn=0; E.shield=0; if(E.mech==="carapace") E.shell=true;
+  if(!MODE && E.boss){ E.mech = S.stage<=100 ? MECH_ORDER[zoneIdx(S.stage)%3] : MECH_ORDER[Math.floor((S.stage-1)/10)%MECH_ORDER.length];   // coup dévastateur et bouclier : à partir de l'étape 100 E.fT=0; E.warn=0; E.shield=0; if(E.mech==="carapace") E.shell=true; if(E.mech==="fracas"||E.mech==="bouclier") guideQueue("boss2");
     if(typeof view!=="undefined" && view==="combat" && !document.hidden){ E.timer += 1.6; arenaBanner(`<small>Boss</small><b>${E.n}</b><span>${MECH[E.mech].ic} ${MECH[E.mech].n} : ${MECH[E.mech].d}</span>`, "boss", 2400); } } heroCd = Math.max(heroCd,0.25); dirty.enemy = true; if(fxOK()) enterFx(); }
 function hit(base, vis, cls){
   let dmg = base*(E.shell?0.3:1), cr = Math.random()*100 < C.crit;
@@ -2419,7 +2424,7 @@ function renderStats(){
     ["⚔️","Attaque", fmt(c.atk)], ["❤️","PV", fmt(c.hp)], ["🧱","Défense", fmt(c.def)], ["⏱️","Coups/s", (1/c.interval).toFixed(2)], ["💥","Critique", c.crit.toFixed(1)+"%"],
     ["🩸","Vol de vie", c.vol.toFixed(1)+"%"], ["💚","Régén.", (c.regen*100).toFixed(1)+"%/s"], ["🐾","Familiers", fmt(c.famDps)+"/s"], ["🪙","Or", "×"+c.gold.toFixed(2)], ["🔩","Scraps", "×"+c.scrapMult.toFixed(2)],
   ];
-  $("#stats").innerHTML = rows.map(r=>`<div class="st5" title="${r[1]}"><b>${r[0]} ${r[2]}</b><span>${r[1]}</span></div>`).join("");
+  $("#stats").innerHTML = rows.map(r=>`<div class="st5" title="${r[1]}"><b>${r[2]}</b><span>${r[0]} ${r[1]}</span></div>`).join("");
 }
 
 /* ---------- Dessin des objets : la forme dépend de l'emplacement, les couleurs et ornements de l'ensemble (ou de la rareté) ---------- */
@@ -2553,8 +2558,8 @@ function renderForge(){
 }
 function updateShop(){
   if(view!=="fams" && view!=="forge") return;
-  if(view==="fams"){ const sa=$("#spull1"); if(sa){ sa.classList.toggle("lack",S.orbs<PULL_COST); $("#spull10").classList.toggle("lack",S.orbs<PULL10_COST); $("#spull100").classList.toggle("lack",S.orbs<PULL100_COST); $("#crys3").textContent=S.orbs; }
-    const a=$("#pull1"), b=$("#pull10"); if(a){ a.classList.toggle("lack",S.orbs<PULL_COST); b.classList.toggle("lack",S.orbs<PULL10_COST); const c=$("#pull100"); if(c) c.classList.toggle("lack",S.orbs<PULL100_COST); $("#crys2").textContent=S.orbs; } return; }
+  if(view==="fams"){ const sa=$("#spull1"); if(sa){ sa.classList.toggle("lack",S.orbs<PULL_COST); $("#spull10").classList.toggle("lack",S.orbs<PULL10_COST); $("#spull100").classList.toggle("lack",S.orbs<PULL100_COST); $("#crys3").textContent=nfK(S.orbs); }
+    const a=$("#pull1"), b=$("#pull10"); if(a){ a.classList.toggle("lack",S.orbs<PULL_COST); b.classList.toggle("lack",S.orbs<PULL10_COST); const c=$("#pull100"); if(c) c.classList.toggle("lack",S.orbs<PULL100_COST); $("#crys2").textContent=nfK(S.orbs); } return; }
   document.querySelectorAll("#tab-forge .buy").forEach(b=>{
     const f=FORGE.find(x=>x.id===b.dataset.forge), maxed = f.max && S.forge[f.id]>=f.max, r=forgeBulk(f);
     if(maxed){ b.disabled=true; b.querySelector(".q").textContent="MAX"; b.querySelector(".cost").textContent="—"; return; }
@@ -2722,7 +2727,7 @@ function updateAtelier(){
   if(atelierLvl!==craftLvl() && now-atelierT>2500){ dirty.loot = true; }
   if(dirty.res){ renderRes(); dirty.res=false; }
   document.querySelectorAll("#tab-loot [data-fn]").forEach(b=>{ b.classList.toggle("lack", (S.ingots||0) < ingCost(+b.dataset.fn)); });
-  { const ib=$("#ingB"); if(ib && ib.textContent!==String(S.ingots||0)) ib.textContent=S.ingots||0; }
+  { const ib=$("#ingB"), v=nfK(S.ingots||0); if(ib && ib.textContent!==v) ib.textContent=v; }
 }
 
 /* ---------- Fiches (objet, familier) ---------- */
@@ -3007,8 +3012,8 @@ function frameUI(){
   updNeed();
   if(view==="combat" || view==="loot") updEquipUp();
   tickNum("gold", S.gold, fmt);
-  tickNum("souls", S.souls, v=>String(v));
-  tickNum("crys", S.crystals, v=>String(v));
+  tickNum("souls", S.souls, v=>v>=10000?fmt(v):String(v));
+  tickNum("crys", S.crystals, v=>v>=10000?fmt(v):String(v));
   if(S.kills!==lastKills || S.stage!==lastStage){ lastKills=S.kills; lastStage=S.stage; dirty.enemy=true; }
   const hold = ptrDown;   // écrans reconstruits seulement entre deux clics
   if(dirty.stats && !hold){ renderStats(); dirty.stats=false; }
@@ -3310,7 +3315,7 @@ function pickClass(id){
 
 function sumBand(o){
   return `<div class="band sumcard">
-    <div class="bandtop"><div class="crys">${o.ic||"🔮"} <span id="${o.cid}">${o.val}</span></div>
+    <div class="bandtop"><div class="crys">${o.ic||"🔮"} <span id="${o.cid}">${nfK(o.val)}</span></div>
       <div class="bandlv"><div class="bandlvt"><b>${o.lvT}</b><span>${o.lvR}</span></div><div class="sumlvbar"><i style="width:${o.pct.toFixed(1)}%"></i></div></div></div>
     <div class="btnrow b3">${o.btns}</div>
     <div class="bandft">${o.ft}</div></div>`;
@@ -3748,12 +3753,12 @@ function renderCity(){
   const royN = ROY.filter(b=>royLv(b.id)<ROY_MAX && affordC(royCost(b))).length, expDone = c.exp && Date.now()>=c.exp.end;
   const seg = `<div class="seg seg4c"><button data-ctab="village" class="${cityTab==="village"?"on":""}">🏘️ Village${upN?` <span class="tdot">${upN}</span>`:""}</button><button data-ctab="royaume" class="${cityTab==="royaume"?"on":""}">👑 Royaume${royN?` <span class="tdot">${royN}</span>`:""}</button><button data-ctab="exp" class="${cityTab==="exp"?"on":""}">🏕️ Expé.${expDone||!c.exp?` <span class="tdot">${expDone?"✓":"!"}</span>`:""}</button><button data-ctab="gestion" class="${cityTab==="gestion"?"on":""}">🛡️ Défense${c.pending?` <span class="tdot">!</span>`:""}</button></div>`;
   if(cityTab==="village"){
-    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 Tout récolter</button></div>
+    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 <span class="nw">Tout r</span><span class="nw2">R</span>écolter</button></div>
       <div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez les bulles pour récolter, et un bâtiment pour l'améliorer</div></div>`;
     renderCityRes(); requestAnimationFrame(updBubbles); return;
   }
   if(cityTab==="royaume"){
-    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 Tout récolter</button></div>
+    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 <span class="nw">Tout r</span><span class="nw2">R</span>écolter</button></div>
       <div class="villagewrap">${royalSVG()}<div class="vhint">👆 Touchez un bâtiment royal : ils rendent votre chevalier plus fort pour toujours</div></div>`;
     renderCityRes(); requestAnimationFrame(updBubbles); return;
   }
@@ -4153,7 +4158,7 @@ function drawKeep(x,y,wins){
   <line x1="${x}" y1="${y-98}" x2="${x}" y2="${y-114}" stroke="#5e3a1d" stroke-width="2"/><path class="flag" d="M${x} ${y-114} l16 5 -16 5z" fill="#ffc93c"/>
   <path d="M${x-10} ${y} v-15 a10 10 0 0 1 20 0 v15z" fill="#4a2f17"/>
   <rect x="${x-43}" y="${y-46}" width="5" height="10" fill="#2b2140"/><rect x="${x+38}" y="${y-46}" width="5" height="10" fill="#2b2140"/><rect x="${x-3}" y="${y-64}" width="6" height="10" fill="#2b2140"/>
-  ${vLabel(x, y+14, `Donjon · ${wins} victoire${wins>1?"s":""}`)}`;
+  ${vLabel(x, y+14, `Château · ${wins} victoire${wins>1?"s":""}`)}`;
 }
 /* Positions sur la carte (ancre = bas du bâtiment) */
 const VPOS = {
@@ -4813,7 +4818,7 @@ function track(ev, n=1){
 const PREST_MIN = 100;
 const prestMin = () => PREST_MIN + 20*Math.min(S.prestiges||0, 20);   // 100, puis +20 étapes à chaque Renaissance (jusqu'à 500)
 const UNLOCK = {hero:3, loot:10, skills:20, fams:30, defis:45, city:CITY_UNLOCK, prest:PREST_MIN};   // un nouveau système toutes les 2 à 10 minutes environ
-const UNLOCK_TXT = {hero:"l'onglet Héros", fams:"les Familiers", loot:"la Forge d'équipement", skills:"les compétences", defis:"les Défis", prest:"la Renaissance", city:"votre Fief"};
+const UNLOCK_TXT = {hero:"la fiche de votre Héros", fams:"les Familiers", loot:"l'Atelier", skills:"les compétences", defis:"les Défis", prest:"la Renaissance", city:"votre Fief"};
 const unlocked = k => !(k in UNLOCK) || S.best>=UNLOCK[k] || S.prestiges>0 || (k==="fams" && S.pets && Object.keys(S.pets).length>0) || !!(S.tuto && S.tuto.seen && S.tuto.seen[k]) || (k==="city" && !!S.city);   // déjà débloqué une fois = reste ouvert   // qui a déjà des familiers les garde
 function checkUnlocks(silent){
   S.tuto.seen = S.tuto.seen || {};
@@ -4834,8 +4839,8 @@ function checkUnlocks(silent){
 /* ---------- Explications : une fiche claire à chaque nouveauté ---------- */
 const GUIDES = {
   hero:  {ic:"🛡️", t:"Le Héros est débloqué", s:"Le Héros", l:[
-    ["⚔️","Sous le combat, faites défiler : vous trouvez la classe, l'équipement porté par votre chevalier et toutes ses caractéristiques."],
-    ["⬆️","Touchez un objet équipé pour le renforcer avec des scraps : il gagne un niveau et devient plus fort."],
+    ["⚔️","Sous le combat, la fiche de votre héros montre sa classe et ses caractéristiques. Touchez « Plus de stats » pour tout le détail."],
+    ["⬆️","Son équipement se gère dans l'onglet Équipement, à l'Atelier : touchez un objet porté pour le renforcer avec des scraps, ou « Améliorer » pour tout renforcer d'un coup."],
     ["🛡️","Votre chevalier, dans l'arène, porte vraiment son équipement : la couleur de son casque, de son arme et de son bouclier suit leur rareté. D'autres armures existent à la Boutique."],
     ["🎭","Votre classe donne un bonus permanent (le Guerrier : +20 % d'attaque). Vous pourrez en changer à la Renaissance."]]},
   fams:  {ic:"🐾", t:"Les Familiers sont débloqués", s:"Les Familiers", go:"fams", sub:"pets", go_t:"Invoquer", l:[
@@ -4846,7 +4851,7 @@ const GUIDES = {
     ["🔮","Chaque invocation fait monter votre niveau d'invocation. Au départ, vous n'obtenez que des Communs (gris), des Peu communs (verts) et des Rares (bleus)."],
     ["⭐","Les Épiques (violets) se débloquent au niveau d'invocation "+RAR_UNLOCK[3]+", les Légendaires (orange) au niveau "+RAR_UNLOCK[4]+" et les Mythiques (rouges) au niveau "+RAR_UNLOCK[5]+", avec un taux très bas. Une fois les Légendaires débloqués, un Légendaire est garanti au plus tard à la "+PITY+"e invocation."]]},
   loot:  {ic:"🔨", t:"L'Atelier est ouvert", s:"L'Atelier", go:"loot", go_t:"Fabriquer", l:[
-    ["§lingot§","La forge coûte des Lingots, surtout lâchés par les boss et la Tour (1 lingot par objet, sans réduction en ×10 ou ×100). Chaque forge donne un objet au hasard parmi les 6 (arme, casque, armure, bottes, bouclier, talisman)."],
+    ["§lingot§","La forge coûte des Lingots, surtout lâchés par les boss et la Tour (1 lingot par objet, un peu moins cher en ×10 et ×100). Chaque forge donne un objet au hasard parmi les 6 (arme, casque, armure, bottes, bouclier, talisman)."],
     ["🔩","Les scraps, lâchés par tous les monstres, servent à renforcer vos objets et à payer les fusions."],
     ["🔨","Chaque objet forgé fait monter votre niveau de forge. Comme pour les invocations : Communs, Peu communs et Rares au départ, Épiques au niveau "+RAR_UNLOCK[3]+", Légendaires au niveau "+RAR_UNLOCK[4]+", Mythiques au niveau "+RAR_UNLOCK[5]+"."],
     ["⬆️","Les objets sortent au niveau 1 et vont dans l'Inventaire : touchez-en un pour le comparer et l'équiper (une flèche ▲ signale les meilleurs). Renforcez vos objets portés avec des scraps : +6 % par niveau."],
@@ -4863,8 +4868,8 @@ const GUIDES = {
     ["🎭","Votre classe a gagné un niveau : elle débloque un talent. Vous choisissez entre deux bonus, pour toujours."],
     ["👆","Touchez la ligne de votre classe, sous le combat, pour ouvrir les talents et faire votre choix. Chaque classe a les siens."]]},
   shop: {ic:"🛒", t:"La Boutique", s:"La Boutique", l:[
-    ["💎","La Boutique est rangée par onglets : Cristaux, Or, Lingots, Passe et Bonus. Les cristaux sont votre monnaie la plus précieuse."],
-    ["🪙","L'onglet Or regroupe tous les packs d'or, et l'onglet Lingots tous les packs de lingots pour forger."],
+    ["💎","La Boutique est rangée par onglets : Cristaux, Or, Orbes, Lingots, Passe et Bonus. Les cristaux sont votre monnaie la plus précieuse."],
+    ["🪙","Les onglets Or, Orbes et Lingots regroupent les packs de chaque monnaie, en cristaux ou en euros."],
     ["✨","L'onglet Bonus contient les avantages (boosts ×2, faveurs, places, classe), le marché du jour (clés, essais, scraps) et les apparences."],
     ["⚔️","Le Passe de combat : une saison de 30 jours avec 30 paliers de récompenses. Tout le monde a la piste gratuite."]]},
   rune: {ic:"✨", t:"Le Donjon des runes", s:"Le Donjon des runes", l:[
@@ -4879,16 +4884,15 @@ const GUIDES = {
     ["👑","Le Passe Royal (9,99 €) ajoute une 3e piste : cristaux et les 6 pièces Mythiques de l'ensemble exclusif du Souverain (une tous les 5 paliers), plus 10 paliers d'avance et l'Armure royale tout de suite."],
     ["📅","Une nouvelle saison commence tous les 30 jours : récupérez vos récompenses avant la fin, le passe repart de zéro."]]},
   defis: {ic:"⚔️", t:"Les Défis sont débloqués", s:"Les Défis", go:"defis", go_t:"Voir les Défis", l:[
-    ["🗼","La Tour des épreuves : chaque étage cache un gardien à battre en 30 secondes. Chaque étage conquis rapporte des cristaux et des scraps, avec un gros bonus tous les 5 étages."],
+    ["🗼","La Tour des épreuves : chaque étage cache un gardien à battre en 30 secondes. Chaque étage conquis rapporte des cristaux, des scraps, des orbes et des lingots, avec un bonus tous les 5 étages et un grand palier tous les 25."],
     ["🔑","Une défaite coûte une clé, une victoire ne coûte rien. Vous recevez 3 clés chaque jour."],
     ["🐲","Le Titan de la semaine : infligez-lui un maximum de dégâts en 30 secondes, 3 essais par jour. Plus vous frappez fort, plus vous débloquez de récompenses, remises à zéro chaque lundi."],
     ["📍","Les Défis ont leur propre onglet en bas de l'écran."]]},
   prest: {ic:"👻", t:"La Renaissance est débloquée", s:"La Renaissance", go:"prest", go_t:"Voir les Âmes", l:[
     ["🔥","À partir de l'étape "+PREST_MIN+" (puis 20 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro (or et scraps compris, les lingots sont gardés) avec des Âmes et un coffre de cristaux et d'orbes. Plus vous êtes allé loin, plus vous gagnez."],
-    ["⏩","Les Âmes ne comptent que le chemin parcouru pendant la partie : si vous repartez d'une étape avancée, il faut monter au moins 20 étapes plus haut pour renaître à nouveau."],
-    ["👻","Les Âmes sont une monnaie : dépensez-les à l'Autel des Âmes pour des améliorations permanentes : or, scraps, familiers, chances de forge, départ avancé à une étape plus haute…"],
-    ["🏅","Chaque Renaissance débloque un palier : 4e place de familier, forge automatique, 4e compétence, familier exclusif…"],
-    ["📦","Vous gardez familiers, cristaux, fief, classes et Âmes. Vous perdez l'or, la Forge, l'équipement et les scraps."],
+    ["👻","Les Âmes sont une monnaie : dépensez-les à l'Autel des Âmes pour des améliorations permanentes : attaque et PV, or, scraps, familiers, recharge des compétences, gains hors ligne…"],
+    ["🏅","Les Renaissances débloquent des paliers : 4e place de familier, 4e compétence, Donjon des runes, familier exclusif…"],
+    ["📦","Vous gardez familiers, compétences, cristaux, orbes, lingots, runes, fief, classes et Âmes, ainsi que l'équipement acheté (Souverain). Vous perdez l'or, la Forge, le reste de l'équipement et les scraps."],
     ["🎭","À chaque Renaissance, la classe jouée gagne un niveau, une nouvelle classe se débloque au hasard, et vous choisissez celle à jouer jusqu'à la prochaine."]]},
   city:  {ic:"🏰", t:"Votre fief est fondé", s:"Le Fief", go:"city", go_t:"Voir mon fief", l:[
     ["⛏️","La mine, la scierie et la carrière produisent de l'or, du bois et de la pierre, même jeu fermé. La production attend dans les bâtiments : touchez les bulles pour la récolter (jusqu'à 8 h de stock)."],
@@ -4898,9 +4902,13 @@ const GUIDES = {
   boss:  {ic:"👑", t:"Premier boss !", s:"Les boss", l:[
     ["👑","Un boss garde la fin de chaque zone, toutes les 10 étapes. Il est bien plus résistant que les monstres normaux."],
     ["⏳","Vous avez 30 secondes pour le battre (barre jaune). Sinon il vous repousse et vous retournez à l'étape d'avant pour gagner de l'or."],
-    ["🔥","Chaque boss a un pouvoir, affiché à côté de son nom : Enragé (plus fort à la fin), Carapace (brisée par une compétence) ou Régénération."],
+    ["🔥","Chaque boss a un pouvoir, affiché à côté de son nom : Enragé (plus fort à la fin), Carapace (brisée par une compétence) ou Régénération. D'autres apparaissent plus loin."],
     ["⚔️","Un combat de boss dure une dizaine de secondes : un coup ne peut pas lui retirer plus de 7 % de sa vie (18 % pour une compétence), et ses coups ne peuvent pas vous retirer plus de 20 % de la vôtre."],
     ["⚒️","Bloqué ? Améliorez-vous à la Forge, utilisez vos compétences, puis touchez « farm » pour relancer le défi."]]},
+  boss2: {ic:"💠", t:"Des boss plus rusés", s:"Pouvoirs de boss", l:[
+    ["⚔️","Après l'étape 100, les boss gagnent deux nouveaux pouvoirs, en plus d'Enragé, Carapace et Régénération."],
+    ["⚠️","Coup dévastateur : le boss prépare régulièrement un coup très puissant, annoncé à l'avance. L'esquive peut l'éviter, et une bonne défense l'amortit."],
+    ["💠","Bouclier runique : à mi-vie, il se couvre d'un bouclier. Brisez-le en 8 secondes (vos compétences aident beaucoup), sinon il se soigne."]]},
   event: {ic:"🐲", t:"Invasion de dragons !", s:"L'invasion de dragons", l:[
     ["🐲","Pendant le week-end, des dragonnets se mêlent aux monstres de toutes les zones."],
     ["✨","Chaque dragonnet vaincu donne des écailles, et chaque boss en donne 5."],
@@ -4915,6 +4923,7 @@ function guideWatch(){
   if(talentPending()) guideQueue("talents");
   if(view==="shop") guideQueue("shop");
   if(E && E.boss) guideQueue("boss");
+  if(E && E.boss && !MODE && (E.mech==="fracas" || E.mech==="bouclier")) guideQueue("boss2");
   if(eventActive() && unlocked("fams")) guideQueue("event");
   if(S.tuto.gq.length && !guideBusy()) guideShow(S.tuto.gq.shift(), true);
 }
@@ -5027,7 +5036,7 @@ function towerDiff(f){
 }
 function towerFloorHTML(f){
   const cur=S.chal.floor, done=f<cur, now=f===cur, lock=f>cur, pal=f%5===0, st=towerStage(f), bb=biomeOf(st).boss, rw=towerReward(f);
-  const rew = `+${rw.cr} 💎 · +${rw.ob} 🔮 · +${rw.ig} §lingot§${f%25===0?" · grand palier !":""}`;
+  const rew = `+${rw.cr} 💎 · +${rw.ob} 🔮 · +${rw.ig} §lingot§`;
   let right;
   if(done) right=`<span class="tdone">${spr("coche")}</span>`;
   else if(now){ const d=towerDiff(f); right = S.chal.keys>0 ? `<button class="btn gold sm" data-chal="tower" ${MODE?"disabled":""}>Combattre<small style="color:${d.c}">${d.t}</small></button>` : `<button class="btn sm" disabled>Plus de clé</button>`; }
@@ -5035,7 +5044,7 @@ function towerFloorHTML(f){
   return `<div class="tfloor ${done?"done":now?"now":"lock"} ${pal?"pal":""} ${f%25===0?"gpal":""}" data-tfloor="${f}">
     <div class="twin"></div><div class="twin r"></div>
     <span class="tnum">${f}</span><span class="tic">${lock?spr("question"):bb[1]}</span>
-    <div class="tmid"><b>${pal?"Palier · ":""}Étage ${f}</b><span>${rew}</span></div>${right}</div>`;
+    <div class="tmid"><b>${pal?"Palier ":"Étage "}${f}</b><span>${rew}</span></div>${right}</div>`;
 }
 function renderTower(keepScroll){
   const box=$("#defis"), old=$("#defis .towerbox"), c=S.chal, cur=c.floor;
@@ -5145,7 +5154,7 @@ function toast(html){ const t=$("#toast"); t.innerHTML=html; t.classList.add("on
 const TUTO = [
   {id:"tap",    view:"combat", target:"#enemy", text:"Touchez le monstre pour frapper ! Votre chevalier attaque aussi tout seul, mais vos coups l'aident.", need:"tap", count:3, reward:5},
   {id:"forge",  when:()=>S.gold>=10, inView:{forge:"#tab-forge .buy"}, nav:"forge", text:"Vous avez de l'or ! À la Forge, achetez une amélioration : votre chevalier frappera plus fort et tiendra plus longtemps.", need:"forge", reward:5},
-  {id:"craft",  when:()=>unlocked("loot"), inView:{loot:"#forge1"}, nav:"loot", text:"Forgez votre premier objet avec vos scraps : s'il est meilleur que le vôtre, il est équipé tout seul.", need:"craft", reward:10},
+  {id:"craft",  when:()=>unlocked("loot"), inView:{loot:"#forge1"}, nav:"loot", text:"Forgez votre premier objet avec vos lingots : s'il est meilleur que le vôtre, il est équipé tout seul.", need:"craft", reward:10},
   {id:"skill",  when:()=>unlocked("skills"), view:"combat", target:"#skills .skbtn", text:"Touchez une compétence pour l'utiliser, surtout contre les boss. Le cercle bleu montre sa recharge.", need:"skill", reward:10},
   {id:"summon", when:()=>unlocked("fams"), inView:{fams:"#pull1"}, nav:"fams", text:"Invoquez votre premier familier : il rejoint votre équipe et combat à vos côtés.", need:"summon", reward:10},
 ];
@@ -5940,9 +5949,9 @@ const DEMO_SAVE = {"gold":19098.614429971927,"souls":0,"prestiges":0,"best":26,"
 /* Partie « tout au max » pour tester : Renaissance max, tout débloqué, meilleur équipement, tout au niveau max */
 function loadMax(){
   const pseudo=S.pseudo, pseudoSkip=S.pseudoSkip, opts=S.opts;
-  const ST=300;
+  const ST=500;
   S = newState(); S.pseudo=pseudo; S.pseudoSkip=pseudoSkip; S.opts=Object.assign(S.opts, opts||{});
-  S.prestiges = Math.max(50, ...PMILE.map(m=>m.p)); S.best=S.maxStage=S.stage=ST; S.runStart=ST; S.joined="2026-01-01";
+  S.prestiges = Math.max(50, ...PMILE.map(m=>m.p)); S.best=S.maxStage=S.stage=ST; S.runStart=1; S.joined="2026-01-01";
   S.gold=1e21; S.crystals=50000; S.orbs=20000; S.ingots=20000; S.scraps=1e21; S.souls=100000; S.treats=5000;
   for(const k in S.mats) S.mats[k]=1e6;
   for(const a of ALTAR) S.altar[a.id]=a.max;
@@ -5954,7 +5963,7 @@ function loadMax(){
   for(const c of CLASSES){ S.talents[c.id]={}; for(const L in TALENTS) S.talents[c.id][L]=0; }
   // familiers et compétences : tout, 5 étoiles
   S.pets={}; for(const p of PETS) S.pets[p.id]={stars:5, copies:0};
-  S.team=[...PETS].sort((a,b)=>b.r-a.r).slice(0,TEAM_MAX).map(p=>p.id);
+  S.team=[...PETS].filter(p=>!p.event).sort((a,b)=>b.r-a.r).slice(0,teamMax()).map(p=>p.id);
   S.skl={owned:{}, eq:[], pulls:100000, pity:0, firstLeg:true}; for(const k of SKILLS) S.skl.owned[k.id]={stars:5, copies:0};
   S.skl.eq=[...SKILLS].sort((a,b)=>b.r-a.r).slice(0,sklMax()).map(k=>k.id);
   // équipement : ensemble du Souverain au niveau max, runes niveau max
@@ -6082,7 +6091,7 @@ async function pseudoSubmit(first){
     // hors ligne : on garde le nom, il sera enregistré plus tard
   }
   S.pseudo=n; pseudoOpen=false; LB.lastSig=""; dirty.opts=true; save();
-  toast(first?`Bienvenue, ${n} !`:`Vous vous appelez désormais ${n}.`);
+  if(!first) toast(`Vous vous appelez désormais ${n}.`);
   if(first) talk([{t:`Enchanté, <b>${esc(n)}</b> ! Allons-y, les monstres n'attendront pas.`, mood:"happy"}], {title:"Bienvenue"});
 }
 /* --- accès réseau --- */
