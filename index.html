@@ -956,6 +956,15 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 
 @media (max-width:380px){header{gap:4px;padding-left:6px;padding-right:6px}.res{gap:4px}.pill,header .pill{font-size:13px;padding:3px 6px 3px 4px;gap:3px;min-width:0}.pill .pi .sp,.pill .sp{width:15px;height:15px}.pill.g{min-width:0;flex:1 0 auto}.pill.c,.pill.s{flex:0 1 auto}.iconbtn{width:34px;height:34px}.nw{display:none}.nw2{display:inline}.tfloor .tic{display:none}}
 body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
+/* Petits écrans : chaque liste garde au moins une rangée visible, et l'onglet défile si besoin */
+.pager{min-height:84px}
+.card.grow:has(>.pager){min-height:150px}
+.card.grow:has(.selbar){min-height:210px}
+.view>[id^=tab-]{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}.view>[id^=tab-]::-webkit-scrollbar{display:none}
+.card .chips{flex:none}
+.setsA .setline{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
+@media (max-width:340px){.seg4c button{font-size:11px;letter-spacing:-.2px}.seg4c button .sp{display:none}.talmore{display:none}.seg button{font-size:12.5px}}
+@media (max-width:340px){header .pill{font-size:12px;padding:2px 5px 2px 3px;gap:2px}header .pill .sp{width:13px;height:13px}.pill.g{flex:1 1 auto;min-width:0;overflow:hidden}.pill.c,.pill.s{flex:none}.iconbtn{width:31px;height:31px}}
 </style>
 </head>
 <body>
@@ -971,7 +980,7 @@ body:has(#talk.on.coach.top) #toast{top:auto;bottom:calc(var(--sb) + 84px)}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1300";
+var BUILD_ID = "20261124-1333";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2639,7 +2648,7 @@ function renderLoot(){
   if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
   const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
   $("#tab-loot").innerHTML = band
-    + `<div class="card teamcard"><div class="chead"><h2>Équipé<small id="eqScr">🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
+    + `<div class="card teamcard" ${invSel?'hidden':''}><div class="chead"><h2>Équipé<small id="eqScr">🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
         <div class="teamrow eqrow" id="eqRowA" style="grid-template-columns:repeat(6,1fr)">${worn}</div><div id="setsBox" class="setsA">${setsHTML()}</div></div>
       <div class="card grow"><div class="chead"><h2>Inventaire<small>${S.inv.length}/${invMax()}</small></h2>
           <div class="cbtns">${nf?`<button class="btn violet sm" id="fuseOpen">✨ Fusions <b class="fnb">${nf}</b></button>`:""}${(S.invX||0)<INV_BUY_MAX && !invSel?`<button class="btn sm" id="invBuy" title="Agrandir l'inventaire">+10 📦</button>`:""}<button class="btn sm ${invSel?"gold":""}" id="invSelBtn" title="Sélectionner pour démonter ou vendre">${invSel?"Terminé":"☑️ Trier"}</button></div></div>
@@ -2666,7 +2675,9 @@ function pgCollapse(pager){
 }
 function pgBuild(pager){
   const src=pager.querySelector(":scope>.pgsrc"); if(!src){ pager.classList.add("pgok"); return; }
-  const H=pager.clientHeight, W=pager.clientWidth; if(H<20 || W<20) return;   // vue cachée : on recommence plus tard
+  let H=pager.clientHeight; const W=pager.clientWidth; if(H<20 || W<20) return;   // vue cachée : on recommence plus tard
+  { const srcE=pager.querySelector(":scope>.pgsrc"); if(srcE && srcE.children.length){ const need=Math.max(...[...srcE.children].map(e=>e.offsetHeight))+24;   // petit écran : au moins un élément entier par page, l'onglet défile
+      if(need>H){ pager.style.minHeight=need+"px"; H=pager.clientHeight; } } }
   pager.classList.add("pgok");
   if(src.scrollHeight <= H+1) return;                                       // tout tient : rien à faire
   const key=pager.dataset.pg||"x", items=[...src.children];
@@ -5644,7 +5655,7 @@ function setBonus(){
 }
 function setsHTML(){
   const c=setCounts(); const act=Object.keys(SETS).filter(k=>c[k]);
-  if(!act.length) return `<button class="setline" data-setsinfo="1">Ensembles : aucun porté · 2, 4 ou 6 pièces du même = bonus</button>`;
+  if(!act.length) return `<button class="setline" data-setsinfo="1">Ensembles : aucun porté · 2, 4 ou 6 pièces = bonus</button>`;
   return `<button class="setline" data-setsinfo="1">${act.map(k=>`<span class="${c[k]>=2?"on":""}">${SETS[k].ic} ${SETS[k].n} ${c[k]}/6${c[k]>=6?" ✓✓✓":c[k]>=4?" ✓✓":c[k]>=2?" ✓":""}</span>`).join("")}</button>`;
 }
 function setsDetail(){
