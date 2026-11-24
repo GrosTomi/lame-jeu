@@ -1043,7 +1043,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1612";
+var BUILD_ID = "20261124-1618";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -5132,7 +5132,7 @@ function chalReset(){
   if(c.dtries===undefined) c.dtries=dungTries();
   if(c.wk!==w){ c.wk=w; c.wbest=0; c.wclaim={}; }
 }
-const towerStage = f => 4 + f*3;
+const towerStage = f => 36 + f*3;   // étage 1 ≈ étape 39 : un vrai combat dès le déblocage des Défis (étape 45)
 const wRef = () => { const st=Math.max(10, Math.ceil(S.best/10)*10); return enemyFor(st).hp; };
 function modeEnemy(){
   if(MODE.kind==="dungeon"){
