@@ -966,7 +966,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1204";
+var BUILD_ID = "20261124-1215";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2908,8 +2908,8 @@ function renderOpts(){
     <div class="small" style="margin-bottom:8px">Ou copiez ce code de sauvegarde complet pour garder une copie.</div>
     <textarea id="saveTxt" placeholder="Collez ici un code de sauvegarde"></textarea>
     <div class="btnrow" style="margin-top:8px"><button class="btn sm" id="expBtn">Copier</button><button class="btn sm" id="impBtn">Importer</button><button class="btn sm red" id="resetBtn">Effacer</button></div></div>
-    ${DEV_TOOLS?`<div class="card"><h2>🧪 Outils de test</h2><div class="small" style="margin-bottom:8px">Remplace votre partie par une partie avancée (étape 26, fief débloqué) pour tester rapidement.</div>
-    <button class="btn blue wide sm" id="demoBtn">Charger une partie avancée</button>
+    ${DEV_TOOLS?`<div class="card"><h2>🧪 Outils de test</h2><div class="small" style="margin-bottom:8px">Remplace votre partie par une partie de test : Renaissance max, étape 300, tout débloqué, meilleur équipement, tout au niveau max.</div>
+    <button class="btn blue wide sm" id="demoBtn">Charger une partie avancée (tout au max)</button>
     <button class="btn wide sm" id="evForce" style="margin-top:8px">${eventForce?"Arrêter":"Forcer"} l'invasion de dragons</button>
     <button class="btn wide sm" id="tutoReset" style="margin-top:8px">Rejouer le tutoriel</button></div>`:""}
     <div class="small" style="text-align:center">${fmt(S.stats.kills)} ennemis vaincus · ${S.stats.bosses} boss · record étape ${S.best}<br>Version ${typeof BUILD_ID!=="undefined"?BUILD_ID:"?"}</div>`;
@@ -3446,7 +3446,7 @@ document.addEventListener("click", e=>{
     case "btnPass": shopTab="bp"; showView("shop"); break;
     case "tutoReset": S.tuto.step=0; S.tuto.cnt=0; S.tuto.gs={}; S.tuto.gq=[]; S.tuto.intro=false; showView("combat"); break;
     case "guidesBtn": guidesList(); break;
-    case "demoBtn": modal("Charger la partie de test ?", "Votre partie actuelle sera remplacée. Copiez d'abord votre code de sauvegarde si vous voulez la garder.", [{t:"Annuler"},{t:"Charger",cls:"gold",f:loadDemo}]); break;
+    case "demoBtn": modal("Charger la partie de test ?", "Votre partie actuelle sera remplacée. Copiez d'abord votre code de sauvegarde si vous voulez la garder.", [{t:"Annuler"},{t:"Charger",cls:"gold",f:loadMax}]); break;
     case "replayBtn": if(S.city && S.city.report) playRaid(S.city.report); break;
     case "pull1": summon(1); break;
     case "pull10": summon(10); break;
@@ -5936,6 +5936,51 @@ document.addEventListener("visibilitychange", ()=>{ if(document.hidden) schedule
 /* ================= OUTILS DE TEST ================= */
 /* Partie générée en simulation : étape 26, fief débloqué depuis 6 étapes, équipement fabriqué et fusionné, 9 familiers. */
 const DEMO_SAVE = {"gold":19098.614429971927,"souls":0,"prestiges":0,"best":26,"stage":26,"kills":8,"maxStage":26,"auto":false,"hp":null,"forge":{"atk":32,"hp":32,"def":31,"spd":23},"pets":{"faucon":{"stars":2,"copies":1},"renard":{"stars":1,"copies":0},"rat":{"stars":2,"copies":0},"corbeau":{"stars":2,"copies":0},"chat":{"stars":2,"copies":0},"basilic":{"stars":1,"copies":0},"lion":{"stars":1,"copies":0},"loup":{"stars":1,"copies":0},"sanglier":{"stars":1,"copies":0}},"team":["lion","basilic","faucon"],"crystals":9,"pity":4,"pulls":14,"cls":"guerrier","classes":{"guerrier":1},"city":{"lv":{"mine":6,"scierie":6,"carriere":6,"maison":6,"caserne":4,"tour":3,"mur":4},"res":{"or":189.3980357749985,"bois":157.55372318749934,"pierre":38.541119949998844},"hp":1136.8,"soldiers":48.666666666666664,"raid":1,"prog":6,"pending":false,"lastRaid":0,"report":null,"wins":0},"cityStash":0,"mail":{"read":{},"claimed":{}},"daily":{"day":0,"last":"","total":0},"equip":{"arme":{"id":"mwni2l44","slot":"arme","ri":3,"ilvl":26,"name":"Marteau de guerre du Roi déchu","atk":317.7084673532868,"or":18},"casque":{"id":"mwni2l7w","slot":"casque","ri":4,"ilvl":26,"name":"Barbute du Templier","hp":2512.5414760548488,"def":75.37624428164547,"vol":4},"armure":{"id":"mwni2l1k","slot":"armure","ri":3,"ilvl":26,"name":"Cuirasse du Loup","def":185.84278971141904,"hp":743.3711588456762,"vol":3},"bottes":{"id":"mwni2l80","slot":"bottes","ri":2,"ilvl":26,"name":"Bottes de marche des Braises","def":58.02269812832798,"hp":483.522484402733,"vol":2},"bouclier":{"id":"mwni2l3y","slot":"bouclier","ri":2,"ilvl":26,"name":"Targe des Braises","def":100.15310571215136,"hp":300.4593171364539,"crit":3},"talisman":{"id":"mwni2l5j","slot":"talisman","ri":3,"ilvl":26,"name":"Talisman des Braises","atk":134.28166434810564,"crit":4.086763961956807,"or":18}},"inv":[{"id":"mwni2l1m","slot":"arme","ri":4,"ilvl":26,"name":"Marteau de guerre de la Tempête","atk":521.0502367789751,"crit":6},{"id":"mwni2l2h","slot":"casque","ri":4,"ilvl":1,"name":"Bassinet du Givre","hp":139.1132492735067,"def":4.1733974782052,"vol":4},{"id":"mwni2l39","slot":"talisman","ri":3,"ilvl":26,"name":"Amulette de la Couronne","atk":139.8830570027002,"crit":4.6796858962339325,"vol":3},{"id":"mwni2l41","slot":"casque","ri":4,"ilvl":1,"name":"Heaume de la Couronne","hp":153.46500567499933,"def":4.60395017024998,"crit":6},{"id":"mwni2l4y","slot":"bouclier","ri":4,"ilvl":26,"name":"Targe du Roi déchu","def":209.10570798546146,"hp":627.3171239563844,"crit":6},{"id":"mwni2l5n","slot":"arme","ri":4,"ilvl":26,"name":"Masse des Braises","atk":447.13276733224023,"crit":6},{"id":"mwni2l6n","slot":"bouclier","ri":2,"ilvl":1,"name":"Targe des Anciens","def":5.783239027937508,"hp":17.349717083812525,"crit":3},{"id":"mwni2l6t","slot":"arme","ri":3,"ilvl":1,"name":"Fléau du Templier","atk":14.465545600279409,"vol":3},{"id":"mwni2l7j","slot":"bouclier","ri":1,"ilvl":1,"name":"Écu de la Tempête","def":3.155837754222844,"hp":9.467513262668533},{"id":"mwni2l7n","slot":"casque","ri":4,"ilvl":1,"name":"Bassinet des Ombres","hp":152.49345514678262,"def":4.574803654403478,"vol":4},{"id":"mwni2l7t","slot":"casque","ri":2,"ilvl":1,"name":"Casque à nasal de la Couronne","hp":53.228055376508514,"def":1.5968416612952554,"or":12},{"id":"mwni2kxw","slot":"casque","ri":3,"ilvl":26,"name":"Heaume de la Tempête","hp":1482.7589267286173,"def":44.48276780185852,"vol":3},{"id":"mwni2l7z","slot":"bottes","ri":2,"ilvl":1,"name":"Grèves des Anciens","def":3.225778118660281,"hp":26.88148432216901,"vol":2},{"id":"mwni2l85","slot":"talisman","ri":3,"ilvl":26,"name":"Amulette des Anciens","atk":135.1605529140901,"crit":4.022544492928493,"or":18},{"id":"mwni2l86","slot":"arme","ri":3,"ilvl":1,"name":"Masse de la Tempête","atk":16.731664009720575,"vol":3},{"id":"mwni2l8b","slot":"bottes","ri":4,"ilvl":26,"name":"Solerets de la Tempête","def":127.08425199372081,"hp":1059.0354332810068,"vol":4},{"id":"mwni2l8c","slot":"bottes","ri":1,"ilvl":1,"name":"Solerets des Braises","def":2.150268421661705,"hp":17.918903513847543},{"id":"mwni2l8d","slot":"bouclier","ri":1,"ilvl":1,"name":"Targe du Soldat","def":3.6153523243081587,"hp":10.846056972924476},{"id":"mwni2l8i","slot":"talisman","ri":1,"ilvl":1,"name":"Talisman du Templier","atk":3.2302995822557956,"crit":1.611759534282819},{"id":"mwni2l8j","slot":"armure","ri":1,"ilvl":1,"name":"Cotte de mailles des Ombres","def":4.497440944376745,"hp":17.98976377750698},{"id":"mwni2l8n","slot":"armure","ri":2,"ilvl":1,"name":"Cuirasse des Anciens","def":7.605694730814267,"hp":30.422778923257066,"or":12},{"id":"mwni2l8p","slot":"arme","ri":2,"ilvl":1,"name":"Lance du Dragon","atk":9.95330454509384,"crit":3},{"id":"mwni2l8q","slot":"armure","ri":4,"ilvl":26,"name":"Harnois de l'Aube","def":350.493789471607,"hp":1401.975157886428,"vol":4},{"id":"mwni2l8r","slot":"bottes","ri":1,"ilvl":1,"name":"Solerets du Roi déchu","def":2.038339057270148,"hp":16.986158810584566}],"scraps":117408,"mats":{"metal":3,"acier":19,"cuir":1,"bois":3,"gemme":0},"opts":{"autoEquip":false,"qty":1,"vibe":true,"speed":1,"showRaids":false},"stats":{"kills":4493,"bosses":2},"last":0};
+/* Partie « tout au max » pour tester : Renaissance max, tout débloqué, meilleur équipement, tout au niveau max */
+function loadMax(){
+  const pseudo=S.pseudo, pseudoSkip=S.pseudoSkip, opts=S.opts;
+  const ST=300;
+  S = newState(); S.pseudo=pseudo; S.pseudoSkip=pseudoSkip; S.opts=Object.assign(S.opts, opts||{});
+  S.prestiges = Math.max(50, ...PMILE.map(m=>m.p)); S.best=S.maxStage=S.stage=ST; S.runStart=ST; S.joined="2026-01-01";
+  S.gold=1e21; S.crystals=50000; S.orbs=20000; S.ingots=20000; S.scraps=1e21; S.souls=100000; S.treats=5000;
+  for(const k in S.mats) S.mats[k]=1e6;
+  for(const a of ALTAR) S.altar[a.id]=a.max;
+  for(const f of FORGE) S.forge[f.id]=f.max||0;
+  S.stats=Object.assign(S.stats,{kills:500000,bosses:20000,craft:100000,tap:100000});
+  S.pulls=100000; S.firstLeg=true;
+  // classes et talents
+  S.classes={}; for(const c of CLASSES) S.classes[c.id]=12; S.cls="guerrier"; S.talents={};
+  for(const c of CLASSES){ S.talents[c.id]={}; for(const L in TALENTS) S.talents[c.id][L]=0; }
+  // familiers et compétences : tout, 5 étoiles
+  S.pets={}; for(const p of PETS) S.pets[p.id]={stars:5, copies:0};
+  S.team=[...PETS].sort((a,b)=>b.r-a.r).slice(0,TEAM_MAX).map(p=>p.id);
+  S.skl={owned:{}, eq:[], pulls:100000, pity:0, firstLeg:true}; for(const k of SKILLS) S.skl.owned[k.id]={stars:5, copies:0};
+  S.skl.eq=[...SKILLS].sort((a,b)=>b.r-a.r).slice(0,sklMax()).map(k=>k.id);
+  // équipement : ensemble du Souverain au niveau max, runes niveau max
+  const RK=Object.keys(RUNES);
+  for(const k of SLOTKEYS){ const it=sovItem(k, false, ST); it.ench=[{r:"ombre",l:RUNE_MAX},{r:k==="talisman"?"foudre":"givre",l:RUNE_MAX}]; S.equip[k]=it; }
+  S.inv=[]; for(const k of SLOTKEYS) for(const set of ["loup","berserk"]){ const it=makeItem(ST,5,k,set); S.inv.push(it); }
+  S.runes={}; for(const r of RK) S.runes[r]=500;
+  // défis, passe, boutique
+  S.chal=Object.assign(S.chal||{}, {floor:200, keys:3, dmax:DUNG_DIFF.length-1, wtries:3, dtries:dungTries(), wbest:0, wclaim:{}});
+  S.bp.season=bpSeason(); S.bp.tier="r"; S.bp.xp=bpCum(BP_TIERS);
+  S.iap.speed=true;
+  S.skins.owned.champion=1; S.skins.owned.royal=1;
+  // fief : tout au max
+  createCity(); const c=S.city;
+  for(const b of BLD) c.lv[b.id]=40; c.roy={}; for(const b of ROY) c.roy[b.id]=ROY_MAX;
+  c.res={or:1e9,bois:1e9,pierre:1e9}; c.soldiers=cityPop(); c.raid=60; c.wins=60; c.hp=cityMaxHP();
+  // tuto terminé, tout débloqué
+  S.tuto.step=TUTO.length; S.tuto.cnt=0; S.tuto.intro=true; S.tuto.gq=[]; for(const k in GUIDES) S.tuto.gs[k]=true; for(const k in UNLOCK) S.tuto.seen[k]=true;
+  // force de la Forge d'or calée pour battre un boss de l'étape en ~5 s et encaisser ses coups
+  calc(); const e=enemyFor(Math.ceil(ST/10)*10);
+  let g=0; while(g++<4000 && e.max/(C.atk/C.interval) > 5){ S.forge.atk+=10; calc(); }
+  g=0; while(g++<4000 && C.hp < e.atk*60){ S.forge.hp+=10; calc(); }
+  g=0; while(g++<4000 && C.def < e.atk){ S.forge.def+=10; calc(); }
+  S.hp=C.hp; E=null; spawn(); S.last=Date.now();
+  Object.keys(dirty).forEach(k=>dirty[k]=true); save(); showView("combat");
+  toast("🧪 Partie « tout au max » chargée");
+}
 function loadDemo(){
   const o = JSON.parse(JSON.stringify(DEMO_SAVE));
   o.last = Date.now(); o.opts = Object.assign({}, o.opts, {showRaids:true, autoEquip:false});
