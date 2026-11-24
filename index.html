@@ -1025,6 +1025,11 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 @keyframes tcdPop{0%{transform:scale(2.4);opacity:0}35%{transform:scale(.92);opacity:1}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 @media (max-height:700px){#tcd span{font-size:72px}}
 #tcd span.go{font-size:58px;color:#fff;text-shadow:0 4px 0 #b84a00,0 0 26px #ff922bcc}
+[data-res]{cursor:pointer}.reslink{text-decoration:underline dotted;text-underline-offset:3px}
+.reshelp{text-align:left}.rhtop{display:flex;align-items:center;gap:12px;margin-bottom:8px}.rhic{font-size:40px;line-height:1}.rhic .sp{width:44px;height:44px}
+.rhtop b{display:block;font-family:var(--disp);font-weight:400;font-size:24px;line-height:1.1}.rhtop small{font-size:12.5px;font-weight:800;color:var(--mut)}#mBody .rhic .sp{width:46px!important;height:46px!important}.rhtop{background:#fff8e6;border-radius:12px;padding:8px 12px}
+.rhuse{background:#fff3d6;border-radius:10px;padding:7px 10px;font-weight:700;font-size:14px}
+.rhh{font-family:var(--disp);font-size:16px;margin:10px 0 4px}.reshelp ul{margin:0;padding-left:20px;font-size:14px;font-weight:600;line-height:1.45}.reshelp li{margin:2px 0}.reshelp .sp{width:15px;height:15px;vertical-align:-3px}
 </style>
 </head>
 <body>
@@ -1040,7 +1045,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1425";
+var BUILD_ID = "20261124-1433";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1057,9 +1062,9 @@ var BUILD_ID = "20261124-1425";
 <div id="app">
 <header>
   <div class="res">
-    <div class="pill g"><span class="pi">🪙</span><span id="gold">0</span></div>
-    <button class="pill c" id="btnShop" aria-label="Boutique"><span class="pi">💎</span><span id="crys">0</span></button>
-    <button class="pill s" data-view="prest"><span class="pi">👻</span><span id="souls">0</span></button>
+    <div class="pill g" data-res="gold" role="button"><span class="pi">🪙</span><span id="gold">0</span></div>
+    <button class="pill c" id="btnShop" data-res="crys" aria-label="Cristaux"><span class="pi">💎</span><span id="crys">0</span></button>
+    <button class="pill s" data-res="souls"><span class="pi">👻</span><span id="souls">0</span></button>
   </div>
   <div class="hbtns">
   <button class="iconbtn gift" id="btnDaily" aria-label="Récompenses et courrier">🎁<span class="hl">Cadeaux</span><span class="dot" id="dot-daily">!</span></button>
@@ -1779,6 +1784,44 @@ const TALENTS = {
   9:[{t:"+20 % d'attaque",k:"atk",v:20},{t:"+30 % de PV",k:"hp",v:30}],
   10:[{t:"+8 % de critique",k:"crit",v:8},{t:"+15 % de vitesse",k:"spd",v:15}],
 };
+/* ---------- Toucher une ressource : à quoi elle sert, comment en gagner, et la Boutique ---------- */
+const RES_INFO = {
+  gold:   {ic:"🪙", n:"Or", have:()=>fmt(S.gold), use:"Améliorer votre chevalier à la Forge, et payer certains achats du marché du jour.",
+           get:["Chaque monstre vaincu, et bien plus sur les boss","Pendant votre absence (gains hors ligne)","Coffres, calendrier, quêtes et Passe","Boosts « Or ×2 », compétence Pluie d'or, Autel (Avarice) et ensemble du Marchand"], shop:"gold"},
+  crys:   {ic:"💎", n:"Cristaux", have:()=>fmt(S.crystals), use:"La monnaie de la Boutique : orbes, lingots, or, clés, boosts, places…",
+           get:["Chaque boss, et +1 à chaque nouveau record","Quêtes du jour et de la semaine, succès, calendrier","Tour des épreuves, Titan, assauts repoussés au Fief","Renaissance, et « Cristaux gratuits » (pub) dans la Boutique"], shop:"gems"},
+  souls:  {ic:"👻", n:"Âmes", have:()=>fmt(S.souls), use:"Améliorations permanentes à l'Autel des Âmes.",
+           get:[()=>`En renaissant, à partir de l'étape ${prestMin()}`,"Plus vous êtes allé loin pendant la partie, plus vous en gagnez","Palier de Renaissance 15 : +25 % d'âmes"], go:{t:"👻 Voir la Renaissance", f:()=>{ prestTab="reb"; showView("prest"); }}},
+  orbs:   {ic:"🔮", n:"Orbes d'invocation", have:()=>fmt(S.orbs), use:"Invoquer des familiers et des compétences.",
+           get:["Chaque boss : 1 orbe, 2 pour un nouveau record","Parfois sur les monstres normaux","Chaque étage de la Tour (plus sur les paliers)","Quêtes, calendrier, Titan, Renaissance, absence, Ménagerie du Fief, expéditions"], shop:"orb"},
+  ingots: {ic:"§lingot§", n:"Lingots", have:()=>fmt(S.ingots||0), use:"Forger des objets à l'Atelier (1 par objet, 9 le ×10, 85 le ×100).",
+           get:["Chaque boss : 5 lingots, 10 pour un nouveau record","Parfois sur les monstres normaux","Chaque étage de la Tour, quêtes, Passe","Fonderie du Fief, expéditions, assauts repoussés"], shop:"ing"},
+  keys:   {ic:"🔑", n:"Clés de la Tour", have:()=>String(S.chal.keys), use:"Une défaite à la Tour coûte une clé. Une victoire n'en coûte jamais.",
+           get:[()=>`${TOWER_KEYS} clés offertes chaque jour`,"1 clé de plus par jour en regardant une pub (onglet Tour)","Marché du jour de la Boutique : 30 💎 la clé (3 par jour)"], shop:"bonus"},
+  wtry:   {ic:"🐲", n:"Essais contre le Titan", have:()=>`${S.chal.wtries}/${W_TRIES}`, use:"Chaque combat contre le Titan de la semaine utilise un essai.",
+           get:[()=>`${W_TRIES} essais offerts chaque jour`,"Marché du jour de la Boutique : 40 💎 l'essai (2 par jour)"], shop:"bonus"},
+  dtry:   {ic:"✨", n:"Essais du Donjon", have:()=>`${S.chal.dtries||0}/${dungTries()}`, use:"Chaque combat contre le gardien des runes utilise un essai, victoire ou défaite.",
+           get:[()=>`${DUNG_TRIES_BASE} essais offerts chaque jour`,"+1 essai par jour avec le palier de Renaissance 3"], go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
+  scraps: {ic:"🔩", n:"Scraps", have:()=>fmt(S.scraps), use:"Renforcer l'équipement et payer les fusions.",
+           get:["Tous les monstres, bien plus sur les boss","Démonter les objets dont vous ne voulez plus","Tour, quêtes, coffres, absence","Marché du jour : Caisse de scraps et Ferraille au poids"], shop:"bonus"},
+  treats: {ic:"🍖", n:"Friandises", have:()=>fmt(S.treats), use:"Monter le niveau de vos familiers (+10 % de dégâts par niveau, jusqu'au niveau 50).",
+           get:["Chaque boss : 3 friandises","Parfois sur les monstres normaux","Chaque étage de la Tour : 2","Quêtes de la semaine, coffres de série, Passe, absence"], shop:"bp", shopT:"⚔️ Voir le Passe"},
+  runes:  {ic:"✨", n:"Runes", have:()=>Object.values(S.runes||{}).reduce((a,b)=>a+b,0)+" au total", use:"Enchanter vos objets Légendaires et Mythiques portés.",
+           get:["Donjon des runes : une rune différente chaque jour","Plus la difficulté est haute, plus il en donne (2 à 40)","Grande expédition du Fief : 3 runes"], go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
+  city:   {ic:"🏰", n:"Ressources du Fief", have:()=>S.city?`${fmt(S.city.res.or)} 💰 · ${fmt(S.city.res.bois)} 🌲 · ${fmt(S.city.res.pierre)} 🪨`:"0", use:"Améliorer les bâtiments du village et du royaume.",
+           get:["Mine, scierie et carrière, même jeu fermé (à récolter, jusqu'à 8 h de stock)","Patrouilles (expéditions)","Assauts de pillards repoussés","Marché du jour : Convoi pour le fief"], shop:"bonus"},
+};
+function resHelp(k){
+  const r=RES_INFO[k]; if(!r) return;
+  const li = r.get.map(g=>`<li>${typeof g==="function"?g():g}</li>`).join("");
+  const body = `<div class="reshelp"><div class="rhtop"><span class="rhic">${r.ic}</span><div><small>Vous en avez</small><b>${r.have()}</b></div></div>
+    <div class="rhuse">${r.use}</div><div class="rhh">Comment en gagner</div><ul>${li}</ul></div>`;
+  const acts=[{t:"Fermer"}];
+  if(r.shop) acts.push({t:r.shopT||"🛒 Boutique", cls:"gold", f:()=>{ shopTab=r.shop; showView("shop"); }});
+  else if(r.go) acts.push({t:r.go.t, cls:"gold", f:r.go.f});
+  Sfx.play("ui"); modal(ico(r.ic)+" "+r.n, ico(body), acts);
+}
+document.addEventListener("click", e=>{ const t=e.target.closest("[data-res]"); if(!t || t.closest("#modal")) return; e.stopPropagation(); e.preventDefault(); resHelp(t.dataset.res); }, true);
 function ingHelp(){
   talk([{t:"Les <b>Lingots</b> servent à forger des objets à l'Atelier : 1 lingot par objet, et moins cher en lot : 9 lingots le ×10, 85 lingots le ×100.", mood:"happy", ic:"§lingot§"},
         {t:"Chaque <b>boss</b> vaincu en donne 5, et 5 de plus pour un nouveau record. Les monstres en lâchent parfois un.", ic:"👑"},
@@ -2689,7 +2732,7 @@ function renderFams(){
   $("#tab-fams").innerHTML = sumBand({cid:"crys2", val:S.orbs, lvT:`Invocation niv. ${L.lv}`, lvR:L.need?`${L.cur} / ${L.need}`:"Max", pct,
       btns:`<button class="btn gold" id="pull1">×1<small>🔮 ${PULL_COST}</small></button><button class="btn gold" id="pull10">×10<small>🔮 ${PULL10_COST} · Rare</small></button><button class="btn violet" id="pull100">×100<small>🔮 ${PULL100_COST}</small></button>`,
       ft:`${sumNextTxt(L.lv, S.pity, false)} · <button class="linkbtn" id="rates">Taux</button> · <button class="linkbtn" id="btnShop2">Gagner des orbes</button>`})
-    + `<div class="card teamcard"><div class="chead"><h2>Équipe<small>${Math.round(C.famPct)} % de vos dégâts · 🍖 ${S.treats}</small></h2><button class="btn blue sm" id="autoTeam">✨ Les plus forts</button></div>
+    + `<div class="card teamcard"><div class="chead"><h2>Équipe<small>${Math.round(C.famPct)} % de vos dégâts · <span data-res="treats" role="button">🍖 ${S.treats}</span></small></h2><button class="btn blue sm" id="autoTeam">✨ Les plus forts</button></div>
         <div class="teamrow" style="grid-template-columns:repeat(${tm},1fr)">${slots}</div></div>
       <div class="card grow"><div class="chead"><h2>Collection<small>${owned}/${PETS.length}</small></h2><button class="linkbtn" id="collInfo">Bonus de collection</button></div>
         <div class="pager" data-pg="pets"><div class="pgsrc grid5">${list.map(petTile).join("")}</div></div></div>`;
@@ -2731,7 +2774,7 @@ function renderLoot(){
   if(invSel) for(const id of [...invSel]) if(!S.inv.some(it=>it.id===id)) invSel.delete(id);
   const nSel = invSel ? invSel.size : 0, selList = invSel ? S.inv.filter(it=>invSel.has(it.id)) : [];
   $("#tab-loot").innerHTML = band
-    + `<div class="card teamcard" ${invSel?'hidden':''}><div class="chead"><h2>Équipé<small id="eqScr">🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
+    + `<div class="card teamcard" ${invSel?'hidden':''}><div class="chead"><h2>Équipé<small id="eqScr" data-res="scraps" role="button">🔩 ${fmt(S.scraps)}</small></h2><div class="cbtns"><button class="btn green sm" id="eqUpAll" ${upAllInfo().n?"":"disabled"}>▲ Améliorer</button><button class="btn blue sm" id="eqBest">✨ Les meilleurs</button></div></div>
         <div class="teamrow eqrow" id="eqRowA" style="grid-template-columns:repeat(6,1fr)">${worn}</div><div id="setsBox" class="setsA">${setsHTML()}</div></div>
       <div class="card grow"><div class="chead"><h2>Inventaire<small>${S.inv.length}/${invMax()}</small></h2>
           <div class="cbtns">${nf?`<button class="btn violet sm" id="fuseOpen">✨ Fusions <b class="fnb">${nf}</b></button>`:""}${(S.invX||0)<INV_BUY_MAX && !invSel?`<button class="btn sm" id="invBuy" title="Agrandir l'inventaire">+10 📦</button>`:""}<button class="btn sm ${invSel?"gold":""}" id="invSelBtn" title="Sélectionner pour démonter ou vendre">${invSel?"Terminé":"☑️ Trier"}</button></div></div>
@@ -2891,7 +2934,7 @@ function openSheet(kind, id){
     title = p.n;
     body = `<div class="sheeticon">${p.ic}</div>${rarTag(p.r)}<div style="color:var(--or2);font-size:20px">${starTxt(o.stars)}</div>
       ${o.stars<5?`<div class="small">Copies ${o.copies} / ${need} pour ${o.stars+1}★</div><div class="prog"><i style="width:${o.copies/need*100}%"></i></div>`:`<div class="small">Étoiles max · un doublon rend 3 💎</div>`}
-      <div class="petlv"><b>Niveau ${o.lvl||1}${(o.lvl||1)>=PET_LVMAX?" (max)":""}</b><span>🍖 ${S.treats} friandises</span></div>
+      <div class="petlv"><b>Niveau ${o.lvl||1}${(o.lvl||1)>=PET_LVMAX?" (max)":""}</b><span data-res="treats" role="button">🍖 ${S.treats} friandises</span></div>
       <div class="slist"><div><span>⚔️ Dégâts</span><b>${Math.round(p.dps*starMult(o.stars)*petLvlMult(o))} % des vôtres</b></div><div><span>✨ Bonus</span><b>${PS_TXT[p.ps].replace("{v}",Math.round(petPassive(p,o.stars)*10)/10)}</b></div></div>`;
     const fc=feedCost(o.lvl||1), mxed=(o.lvl||1)>=PET_LVMAX;
     acts = [{t:`🍖 Nourrir<small>${mxed?"niveau max":fc+" friandises · +10 % dégâts"}</small>`, act:"feed", dis:mxed||S.treats<fc},
@@ -3413,7 +3456,7 @@ function pickClass(id){
 
 function sumBand(o){
   return `<div class="band sumcard">
-    <div class="bandtop"><div class="crys">${o.ic||"🔮"} <span id="${o.cid}">${nfK(o.val)}</span></div>
+    <div class="bandtop"><div class="crys" data-res="${o.cid==="ingB"?"ingots":"orbs"}" role="button">${o.ic||"🔮"} <span id="${o.cid}">${nfK(o.val)}</span></div>
       <div class="bandlv"><div class="bandlvt"><b>${o.lvT}</b><span>${o.lvR}</span></div><div class="sumlvbar"><i style="width:${o.pct.toFixed(1)}%"></i></div></div></div>
     <div class="btnrow b3">${o.btns}</div>
     <div class="bandft">${o.ft}</div></div>`;
@@ -3568,7 +3611,7 @@ document.addEventListener("click", e=>{
     case "btnSpeed": { const mx=speedMax(); if(mx<2){ openSheet("speed"); break; }
       if(mx===2 && (S.opts.speed||1)===2){ S.opts.speed=1; openSheet("speed"); break; }   // ×3 : proposer l'achat
       S.opts.speed = (S.opts.speed||1)%mx+1; dirty.enemy=true; vibe(10); break; }
-    case "btnShop": showView("shop"); break;
+    case "btnShop": resHelp("crys"); break;
     case "btnShop2": orbHelp(); break;
     case "ingHelp": ingHelp(); break;
     case "collInfo": modal("Bonus de collection", collChips("pet")+`<div class="small">La Wyverne s'obtient à la boutique de l'invasion de dragons. Le Spectre des Âmes est offert au palier de Renaissance 7, puis rejoint les invocations Mythiques.</div>`, [{t:"OK", cls:"gold"}]); break;
@@ -3853,12 +3896,12 @@ function renderCity(){
   const royN = ROY.filter(b=>royLv(b.id)<ROY_MAX && affordC(royCost(b))).length, expDone = c.exp && Date.now()>=c.exp.end;
   const seg = `<div class="seg seg4c"><button data-ctab="village" class="${cityTab==="village"?"on":""}">🏘️ Village${upN?` <span class="tdot">${upN}</span>`:""}</button><button data-ctab="royaume" class="${cityTab==="royaume"?"on":""}">👑 Royaume${royN?` <span class="tdot">${royN}</span>`:""}</button><button data-ctab="exp" class="${cityTab==="exp"?"on":""}">🏕️ Expé.${expDone||!c.exp?` <span class="tdot">${expDone?"✓":"!"}</span>`:""}</button><button data-ctab="gestion" class="${cityTab==="gestion"?"on":""}">🛡️ Défense${c.pending?` <span class="tdot">!</span>`:""}</button></div>`;
   if(cityTab==="village"){
-    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 <span class="nw">Tout r</span><span class="nw2">R</span>écolter</button></div>
+    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1" data-res="city" role="button"></div><button class="btn gold sm" id="collectAll">🧺 <span class="nw">Tout r</span><span class="nw2">R</span>écolter</button></div>
       <div class="villagewrap">${villageSVG()}<div class="vhint">👆 Touchez les bulles pour récolter, et un bâtiment pour l'améliorer</div></div>`;
     renderCityRes(); requestAnimationFrame(updBubbles); return;
   }
   if(cityTab==="royaume"){
-    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1"></div><button class="btn gold sm" id="collectAll">🧺 <span class="nw">Tout r</span><span class="nw2">R</span>écolter</button></div>
+    el.innerHTML = seg + `<div class="vtop"><div class="reschips" id="cityRes" data-compact="1" data-res="city" role="button"></div><button class="btn gold sm" id="collectAll">🧺 <span class="nw">Tout r</span><span class="nw2">R</span>écolter</button></div>
       <div class="villagewrap">${royalSVG()}<div class="vhint">👆 Touchez un bâtiment royal : ils rendent votre chevalier plus fort pour toujours</div></div>`;
     renderCityRes(); requestAnimationFrame(updBubbles); return;
   }
@@ -3903,7 +3946,7 @@ function renderCity(){
       <div class="small" style="margin-top:4px">Ils sont rebâtis après chaque assaut. Un assaut repoussé rapporte des cristaux, des lingots et des orbes.</div></div>
     <div class="card"><h2>👥 Habitants et armée</h2>
       <div class="cstats"><div><span>👥</span><b>${pop}</b><small>Population</small></div><div><span>🏹</span><b>${Math.floor(c.soldiers)}/${pop}</b><small>Soldats</small></div><div><span>⚔️</span><b>${fmt(mil)}</b><small>Puissance</small></div></div></div>
-    <div class="card"><h2>📦 Ressources</h2><div class="reschips" id="cityRes"></div><div class="small">Produites en continu, même jeu fermé, jusqu'à ${STOCK_H} h de stock : pensez à les récolter dans le Village.</div></div>
+    <div class="card"><h2>📦 Ressources</h2><div class="reschips" id="cityRes" data-res="city" role="button"></div><div class="small">Produites en continu, même jeu fermé, jusqu'à ${STOCK_H} h de stock : pensez à les récolter dans le Village.</div></div>
     <h2 class="mgrp" style="margin-top:4px">🏗️ Bâtiments</h2>${blds}
   </div></div>`;
   renderCityRes();
@@ -5206,7 +5249,7 @@ function renderTower(keepScroll){
   const low = Math.max(1, cur-40);
   let floors=""; for(let f=towerTop; f>=low; f--) floors += towerFloorHTML(f);
   const fromBottom = old ? old.scrollHeight - old.scrollTop : 0;
-  box.innerHTML = `<div class="card thead"><div class="thl"><b>🗼 Tour des épreuves</b><span>Étage atteint : <b>${cur-1}</b> · Clés : <b>${c.keys}</b> · une défaite coûte une clé</span></div>
+  box.innerHTML = `<div class="card thead"><div class="thl"><b>🗼 Tour des épreuves</b><span>Étage atteint : <b>${cur-1}</b> · <span data-res="keys" role="button" class="reslink">Clés : <b>${c.keys}</b></span> · une défaite coûte une clé</span></div>
       ${c.keys>0 ? `<button class="btn gold sm" data-tgo="1">Mon étage</button>` : c.adKey!==today() ? `<button class="btn blue sm" id="adKey">${S.iap.noads?"+1 clé":"📺 +1 clé"}</button>` : `<span class="small">Clés demain</span>`}</div>
     <div class="towerbox"><div class="tower">
       <div class="tsky" id="tSky"><div class="tcloud">☁️</div>La tour se perd dans les nuages…<br><button class="linkbtn" data-tmore="1">Voir plus haut</button></div>
@@ -5235,7 +5278,7 @@ function renderTitan(){
       <div class="titart">${spr("dragontri")}</div>
       <div class="titname">Le Titan à trois têtes</div>
       <div class="titsub">Boss de la semaine · se réveille chaque lundi</div>
-      <div class="titstats"><div><b>×${c.wbest.toFixed(1)}</b><span>votre record</span></div><div><b>${c.wtries}/${W_TRIES}</b><span>essais du jour</span></div></div>
+      <div class="titstats"><div><b>×${c.wbest.toFixed(1)}</b><span>votre record</span></div><div data-res="wtry" role="button"><b>${c.wtries}/${W_TRIES}</b><span>essais du jour</span></div></div>
       <div class="ttrack"><div class="ttfill" style="width:${pos(c.wbest)}%"></div>${marks}</div>
       <button class="btn titbtn wide" data-chal="wboss" ${c.wtries>0 && !MODE?"":"disabled"}>🔥 Affronter le Titan</button>
       <div class="titnote">30 secondes pour frapper le plus fort possible. Vos dégâts sont comptés en « boss de votre record ».</div>
@@ -5973,9 +6016,9 @@ function renderDungeon(){
     return `<button class="btn ${d.c} dbtn ${op?"":"locked"}" data-dung="${i}" ${t>0&&!MODE&&op?"":"disabled"}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${Math.max(5,base+d.off)} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
   const week = RUNE_DAY.map((x,i)=>({x,i})).slice(1).concat([{x:RUNE_DAY[0],i:0}]).map(({x,i})=>`<div class="dday ${x===r?"on":""}"><small>${JOURS[i].slice(0,3)}</small>${runeChip(x,(S.runes||{})[x]||0)}</div>`).join("");
   box.innerHTML = `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
-    <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small">Essais : <b>${t}</b>/${dungTries()}</span></div>
+    <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small reslink" data-res="dtry" role="button">Essais : <b>${t}</b>/${dungTries()}</span></div>
       <div class="dbtns">${diffs}</div><div class="small" style="margin-top:6px">Un essai est utilisé même en cas de défaite. Les essais reviennent chaque jour.</div></div>
-    <div class="card"><div class="chead"><h2>Vos runes</h2></div><div class="dweek">${week}</div>
+    <div class="card"><div class="chead"><h2>Vos runes</h2></div><div class="dweek" data-res="runes" role="button">${week}</div>
       <div class="small" style="margin-top:8px">Les runes enchantent vos objets <b style="color:${RAR[4].c}">Légendaires</b> (1 emplacement) et <b style="color:${RAR[5].c}">Mythiques</b> (2). Touchez un objet porté pour l'enchanter. Chaque niveau coûte autant de runes que son numéro (jusqu'au niveau ${RUNE_MAX}).</div></div>`;
 }
 /* ================= PARTICULES ================= */
