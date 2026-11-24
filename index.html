@@ -1032,6 +1032,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 .rhh{font-family:var(--disp);font-size:16px;margin:10px 0 4px}.reshelp ul{margin:0;padding-left:20px;font-size:14px;font-weight:600;line-height:1.45}.reshelp li{margin:2px 0}.reshelp .sp{width:15px;height:15px;vertical-align:-3px}
 .row.focusflash{animation:focusFlash 2.2s ease}@keyframes focusFlash{0%,40%{box-shadow:0 0 0 3px #ffd43b,0 0 18px #ffd43b;background:#fff3bf}100%{box-shadow:none}}
 .nokey{flex-direction:column;line-height:1.1}.nokey small{font-size:10px;opacity:.9}
+.rhtop.lack{background:#ffe3e3}.rhtop.lack b{color:#c92a2a}.rhtop small{display:block}
 </style>
 </head>
 <body>
@@ -1047,7 +1048,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1438";
+var BUILD_ID = "20261124-1445";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1824,16 +1825,20 @@ function goShopMkt(id){
     row.classList.remove("focusflash"); void row.offsetWidth; row.classList.add("focusflash"); };
   setTimeout(focus, 60);
 }
-function resHelp(k){
+function resHelp(k, lack, short){
   const r=RES_INFO[k]; if(!r) return;
+  const rn = lack && lack.rune && RUNES[lack.rune] ? "runes de "+RUNES[lack.rune].n : null;
   const li = r.get.map(g=>`<li>${typeof g==="function"?g():g}</li>`).join("");
-  const body = `<div class="reshelp"><div class="rhtop"><span class="rhic">${r.ic}</span><div><small>Vous en avez</small><b>${r.have()}</b></div></div>
+  const top = lack ? `<div class="rhtop lack"><span class="rhic">${r.ic}</span><div><small>Il vous manque</small><b>${fmt(Math.max(0,lack.need-lack.have))} ${rn||r.n.toLowerCase()}</b><small>Il en faut ${fmt(lack.need)}, vous en avez ${fmt(lack.have)}.</small></div></div>`
+    : short ? `<div class="rhtop lack"><span class="rhic">${r.ic}</span><div><small>Il ne vous en reste plus</small><b>${r.have()}</b></div></div>`
+    : `<div class="rhtop"><span class="rhic">${r.ic}</span><div><small>Vous en avez</small><b>${r.have()}</b></div></div>`;
+  const body = `<div class="reshelp">${top}
     <div class="rhuse">${r.use}</div><div class="rhh">Comment en gagner</div><ul>${li}</ul></div>`;
   const acts=[{t:"Fermer"}];
   if(r.mkt) acts.push({t:"🛒 Boutique", cls:"gold", f:()=>goShopMkt(r.mkt)});
   else if(r.shop) acts.push({t:r.shopT||"🛒 Boutique", cls:"gold", f:()=>{ shopTab=r.shop; showView("shop"); }});
-  else if(r.go) acts.push({t:r.go.t, cls:"gold", f:r.go.f});
-  Sfx.play("ui"); modal(ico(r.ic)+" "+r.n, ico(body), acts);
+  else if(r.go && !(view==="defis" && defTab==="rune" && (k==="dtry"||k==="runes"))) acts.push({t:r.go.t, cls:"gold", f:r.go.f});
+  Sfx.play("ui"); modal(ico(r.ic)+" "+((lack||short)?"Pas assez : ":"")+r.n, ico(body), acts);
 }
 document.addEventListener("click", e=>{ const t=e.target.closest("[data-res]"); if(!t || t.closest("#modal")) return; e.stopPropagation(); e.preventDefault(); resHelp(t.dataset.res); }, true);
 function ingHelp(){
@@ -2711,10 +2716,10 @@ function updateShop(){
     const a=$("#pull1"), b=$("#pull10"); if(a){ a.classList.toggle("lack",S.orbs<PULL_COST); b.classList.toggle("lack",S.orbs<PULL10_COST); const c=$("#pull100"); if(c) c.classList.toggle("lack",S.orbs<PULL100_COST); $("#crys2").textContent=nfK(S.orbs); } return; }
   document.querySelectorAll("#tab-forge .buy").forEach(b=>{
     const f=FORGE.find(x=>x.id===b.dataset.forge), maxed = f.max && S.forge[f.id]>=f.max, r=forgeBulk(f);
-    if(maxed){ b.disabled=true; b.querySelector(".q").textContent="MAX"; b.querySelector(".cost").textContent="—"; return; }
+    if(maxed){ delete b.dataset.need; b.classList.remove("lack"); b.disabled=true; b.querySelector(".q").textContent="MAX"; b.querySelector(".cost").textContent="—"; return; }
     b.querySelector(".q").textContent = "+"+r.n+" niv.";
     b.querySelector(".cost").textContent = fmt(r.total);
-    b.disabled = S.gold < r.total;
+    b.disabled = false; b.dataset.need = "go:"+r.total; b.classList.toggle("lack", S.gold < r.total);
   });
 }
 
@@ -2904,8 +2909,8 @@ function openSheet(kind, id){
     body = `<div class="sheeticon iarth">${itemArt(it)}</div>${rarTag(it.ri)}<div class="small">Niveau ${it.ilvl} / ${cap} · 🔩 ${fmt(S.scraps)}</div>${statList(it)}
       <div class="small" style="margin-top:6px">Chaque niveau coûte des scraps, jusqu'au niveau de votre zone.</div>${enchantHTML(it,"eq")}`;
     acts = maxed ? [{t:"Niveau max de la zone", dis:true}] : [
-      {t:`⬆️ +1 niveau<small>🔩 ${fmt(c1)}${m1?` · ${mic} ${m1}`:""}</small>`, act:"up1", dis:S.scraps<c1 || S.mats[mk]<m1},
-      {t:`⏫ +${mx.n} niveaux<small>🔩 ${fmt(mx.tot)}${mx.mt?` · ${mic} ${mx.mt}`:""}</small>`, act:"upmax", cls:"gold", dis:mx.n<1}];
+      {t:`⬆️ +1 niveau<small>🔩 ${fmt(c1)}${m1?` · ${mic} ${m1}`:""}</small>`, act:"up1", need:"sc:"+Math.ceil(c1)},
+      {t:`⏫ +${mx.n} niveaux<small>🔩 ${fmt(mx.tot)}${mx.mt?` · ${mic} ${mx.mt}`:""}</small>`, act:"upmax", cls:"gold", ...(mx.n<1 ? {need:"sc:"+Math.ceil(c1)} : {})}];
   } else if(kind==="inv"){
     const it=S.inv.find(x=>x.id===id); if(!it){ closeSheet(); return; }
     const cur=S.equip[it.slot];
@@ -2951,14 +2956,15 @@ function openSheet(kind, id){
       <div class="petlv"><b>Niveau ${o.lvl||1}${(o.lvl||1)>=PET_LVMAX?" (max)":""}</b><span data-res="treats" role="button">🍖 ${S.treats} friandises</span></div>
       <div class="slist"><div><span>⚔️ Dégâts</span><b>${Math.round(p.dps*starMult(o.stars)*petLvlMult(o))} % des vôtres</b></div><div><span>✨ Bonus</span><b>${PS_TXT[p.ps].replace("{v}",Math.round(petPassive(p,o.stars)*10)/10)}</b></div></div>`;
     const fc=feedCost(o.lvl||1), mxed=(o.lvl||1)>=PET_LVMAX;
-    acts = [{t:`🍖 Nourrir<small>${mxed?"niveau max":fc+" friandises · +10 % dégâts"}</small>`, act:"feed", dis:mxed||S.treats<fc},
-            {t:"🍖 Nourrir au max", act:"feedmax", dis:mxed||S.treats<fc},
+    acts = [{t:`🍖 Nourrir<small>${mxed?"niveau max":fc+" friandises · +10 % dégâts"}</small>`, act:"feed", ...(mxed?{dis:true}:{need:"tr:"+fc})},
+            {t:"🍖 Nourrir au max", act:"feedmax", ...(mxed?{dis:true}:{need:"tr:"+fc})},
             {t: inTeam?"Retirer de l'équipe":"Mettre dans l'équipe", act:"team", cls: inTeam?"":"gold"}];
   }
   acts.push({t:"Fermer", act:"close"});
   $("#mClose").style.display = "";
   $("#mTitle").innerHTML = title; $("#mBody").innerHTML = body;
-  $("#mActs").innerHTML = acts.map(a=>`<button class="btn ${a.cls||""}" data-act="${a.act||""}" ${a.dis?"disabled":""}>${a.t}</button>`).join("");
+  $("#mActs").innerHTML = acts.map(a=>`<button class="btn ${a.cls||""}" data-act="${a.act||""}" ${a.need?`data-need="${a.need}"`:""} ${a.lack?`data-lack="${a.lack}"`:""} ${a.dis?"disabled":""}>${a.t}</button>`).join("");
+  $("#mActs").querySelectorAll("[data-need]").forEach(needSync); $("#mActs").querySelectorAll("[data-lack]").forEach(b=>b.classList.add("lack"));
   $("#modal").classList.add("on");
 }
 function closeSheet(){ sheet=null; $("#modal").classList.remove("on"); }
@@ -3153,13 +3159,23 @@ function tickNum(id, v, f){
   const el=$("#"+id), txt=f(Math.round(t.shown)); if(el.textContent!==txt) el.textContent=txt;
   el.parentElement.classList.toggle("ticking", !!t.t0);
 }
-/* Les boutons qui coûtent une monnaie se dégrisent tout seuls dès qu'on a assez */
-const NEED_HAVE = {sc:()=>S.scraps, cr:()=>S.crystals, go:()=>S.gold, so:()=>S.souls, ig:()=>S.ingots||0, ob:()=>S.orbs};
+/* Les boutons qui coûtent une monnaie se dégrisent tout seuls dès qu'on a assez.
+   S'il en manque, le bouton reste touchable (grisé) et explique comment en obtenir, avec un lien vers la Boutique. */
+function needSync(b){ const [k,v]=b.dataset.need.split(":"), ok=needHave(k)>=+v; if(b.disabled) b.disabled=false; if(b.classList.contains("lack")===ok) b.classList.toggle("lack", !ok); }
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-need].lack, [data-lack].lack"); if(!b) return;
+  e.stopPropagation(); e.preventDefault();
+  if(b.dataset.lack){ resHelp(b.dataset.lack, null, true); return; }
+  const [k,v]=b.dataset.need.split(":"); resHelp(NEED_RES[k] || (k.startsWith("rn_")?"runes":k), {need:+v, have:needHave(k), rune:k.startsWith("rn_")?k.slice(3):null});
+}, true);
+const NEED_HAVE = {sc:()=>S.scraps, cr:()=>S.crystals, go:()=>S.gold, so:()=>S.souls, ig:()=>S.ingots||0, ob:()=>S.orbs, tr:()=>S.treats, ky:()=>S.chal.keys, wt:()=>S.chal.wtries, dt:()=>S.chal.dtries||0};
+const needHave = k => k.startsWith("rn_") ? ((S.runes||{})[k.slice(3)]||0) : NEED_HAVE[k] ? NEED_HAVE[k]() : 0;
+const NEED_RES = {sc:"scraps", cr:"crys", go:"gold", so:"souls", ig:"ingots", ob:"orbs", tr:"treats", ky:"keys", wt:"wtry", dt:"dtry"};
 let needT = 0;
 function updNeed(){
   const now=performance.now(); if(now-needT<250) return; needT=now;
   const root = $("#modal").classList.contains("on") ? document : $(".view:not([hidden])"); if(!root) return;
-  root.querySelectorAll("[data-need]").forEach(b=>{ const [k,v]=b.dataset.need.split(":"), ok=(NEED_HAVE[k]?NEED_HAVE[k]():0)>=+v; if(b.disabled===ok) b.disabled=!ok; });
+  root.querySelectorAll("[data-need]").forEach(needSync);
   root.querySelectorAll("[data-needc]").forEach(b=>{ const [k,v]=b.dataset.needc.split(":"), ok=(NEED_HAVE[k]?NEED_HAVE[k]():0)>=+v; b.classList.toggle("no", !ok); });
 }
 function frameUI(){
@@ -3925,7 +3941,7 @@ function renderCity(){
       const st = (b.id==="fonderie"||b.id==="menagerie") && L ? `<div class="roystock"><span>${b.id==="fonderie"?"§lingot§":"🔮"} ${Math.floor(c.stock[b.id]||0)} / ${Math.floor(stockCap(b.id))}</span><button class="btn green sm" data-collect="${b.id}" ${(c.stock[b.id]||0)>=1?"":"disabled"}>Récolter</button></div>` : "";
       return `<div class="royrow"><div class="royic">${b.ic}</div><div class="mid"><div class="t">${b.n}</div><div class="lv">${L?"Niveau "+L+(mx?" (max)":""):"À construire"}</div>
         <div class="d">${L?`<b>${b.txt(L)}</b>${mx?"":` → ${b.txt(L+1)}`}`:b.d}</div>${st}</div>
-        ${mx?`<span class="badge bup">Max</span>`:`<button class="btn ${ok?"gold":""} sm royup" data-roy="${b.id}" ${ok?"":"disabled"}>${L?"Améliorer":"Construire"}<small>${costTxt(cst)}</small></button>`}</div>`; }).join("");
+        ${mx?`<span class="badge bup">Max</span>`:`<button class="btn ${ok?"gold":"lack"} sm royup" data-roy="${b.id}" ${ok?"":'data-lack="city"'}>${L?"Améliorer":"Construire"}<small>${costTxt(cst)}</small></button>`}</div>`; }).join("");
     el.innerHTML = seg + `<div class="card" style="flex:none"><div class="small">Les bâtiments royaux rendent votre chevalier plus fort pour toujours (ils restent à la Renaissance). Payez-les avec les ressources de votre village.</div><div class="reschips" id="cityRes" data-compact="1" style="margin-top:6px"></div></div>
       <div class="card grow"><div class="pager" data-pg="roy"><div class="pgsrc list">${rows}</div></div></div>`;
     renderCityRes(); return;
@@ -4049,7 +4065,7 @@ function roySheet(id){
   return {title:b.n, body:`<div class="sheeticon royic big">${b.ic}</div><div class="small">${b.d}</div>
     <div class="slist"><div><span>Niveau</span><b>${L}${mx?" (max)":` → ${L+1}`}</b></div><div><span>Actuel</span><b>${L?b.txt(L):"—"}</b></div>${mx?"":`<div><span>Après</span><b class="up">${b.txt(L+1)}</b></div>`}</div>${st}
     ${mx?"":`<div class="small" style="margin-top:10px">Coût : ${costTxt(cst)}</div><div class="small">Vous avez : ${costTxt(c.res)}</div>`}`,
-    acts:[...(st?[{t:"🧺 Récolter", act:"rcol", dis:(c.stock[id]||0)<1}]:[]), ...(mx?[]:[{t:L?"⬆️ Améliorer":"🔨 Construire", act:"roy", cls:"gold", dis:!ok}])]};
+    acts:[...(st?[{t:"🧺 Récolter", act:"rcol", dis:(c.stock[id]||0)<1}]:[]), ...(mx?[]:[{t:L?"⬆️ Améliorer":"🔨 Construire", act:"roy", cls:"gold", ...(ok?{}:{lack:"city"})}])]};
 }
 function updBubbles(){
   if(!S.city || !S.city.stock) return;
@@ -4073,7 +4089,7 @@ function updateCity(){
     cityT=now; renderCityRes(); updBubbles();
     const eb=$("#expBar"); if(eb && S.city.exp){ const cur=EXPS.find(e=>e.id===S.city.exp.id), left=Math.max(0,S.city.exp.end-Date.now()); eb.style.width=Math.min(100,(1-left/(cur.h*3600e3))*100)+"%"; $("#expLeft").textContent = left?"Retour dans "+fmtLeft(left):"De retour avec le butin !"; if(!left && !$("#expClaim")) dirty.city=true; }
     document.querySelectorAll(".bld[data-shroy]").forEach(g=>{ const d=royDef(g.dataset.shroy); g.classList.toggle("can", royLv(d.id)<ROY_MAX && affordC(royCost(d))); });
-    document.querySelectorAll("[data-roy]").forEach(b=>{ const d=royDef(b.dataset.roy); b.disabled = royLv(d.id)>=ROY_MAX || !affordC(royCost(d)); b.classList.toggle("gold", !b.disabled); });
+    document.querySelectorAll("[data-roy]").forEach(b=>{ const d=royDef(b.dataset.roy), mx=royLv(d.id)>=ROY_MAX, ok=!mx && affordC(royCost(d)); b.disabled=mx; b.classList.toggle("gold", ok); b.classList.toggle("lack", !mx && !ok); if(!mx && !ok) b.dataset.lack="city"; else delete b.dataset.lack; });
     document.querySelectorAll(".bld[data-shbld]").forEach(g=>{ g.classList.toggle("can", affordC(bldCost(bldDef(g.dataset.shbld)))); });
     const hb=$(".cityhp .bar"); if(hb){ hb.querySelector("i").style.width=(S.city.hp/cityMaxHP()*100)+"%"; hb.querySelector("b").textContent=`❤️ ${fmt(S.city.hp)} / ${fmt(cityMaxHP())}`; }
   }
@@ -4083,7 +4099,7 @@ function bldSheet(id){
   return {title:b.n, body:`<div class="sheeticon">${b.ic}</div><div class="small">${b.d}</div>
     <div class="slist"><div><span>Niveau</span><b>${L} → ${L+1}</b></div><div><span>Actuel</span><b>${L?bldEffect(id,L):"—"}</b></div><div><span>Après</span><b class="up">${bldEffect(id,L+1)}</b></div></div>
     <div class="small" style="margin-top:10px">Coût : ${costTxt(c)}</div><div class="small">Vous avez : ${costTxt(S.city.res)}</div>`,
-    acts:[{t:L?"⬆️ Améliorer":"🔨 Construire", act:"bld", cls:"gold", dis:!ok}]};
+    acts:[{t:L?"⬆️ Améliorer":"🔨 Construire", act:"bld", cls:"gold", ...(ok?{}:{lack:"city"})}]};
 }
 
 /* ================= MESSAGES & RÉCOMPENSES QUOTIDIENNES ================= */
@@ -5295,7 +5311,7 @@ function renderTitan(){
       <div class="titsub">Boss de la semaine · se réveille chaque lundi</div>
       <div class="titstats"><div><b>×${c.wbest.toFixed(1)}</b><span>votre record</span></div><div data-res="wtry" role="button"><b>${c.wtries}/${W_TRIES}</b><span>essais du jour</span></div></div>
       <div class="ttrack"><div class="ttfill" style="width:${pos(c.wbest)}%"></div>${marks}</div>
-      <button class="btn titbtn wide" data-chal="wboss" ${c.wtries>0 && !MODE?"":"disabled"}>🔥 Affronter le Titan</button>
+      <button class="btn titbtn wide ${c.wtries>0?"":"lack"}" data-chal="wboss" ${c.wtries>0?"":'data-lack="wtry"'} ${!MODE?"":"disabled"}>🔥 Affronter le Titan</button>
       <div class="titnote">30 secondes pour frapper le plus fort possible. Vos dégâts sont comptés en « boss de votre record ».</div>
     </div>
     <div class="card grow"><h2 style="font-size:17px;margin-bottom:6px">Récompenses de la semaine</h2><div class="pager" data-pg="titan"><div class="pgsrc list">${tiers}</div></div></div>`;
@@ -6002,7 +6018,7 @@ function enchantHTML(it, kind){
   for(let i=0;i<n;i++){ const e=it.ench[i];
     if(e && RUNES[e.r]){ const R=RUNES[e.r], have=(S.runes||{})[e.r]||0, cost=e.l+1, mx=e.l>=RUNE_MAX;
       h += `<div class="enchrow"><span class="rune big" style="--rc:${R.c}">${spr(R.ic)}</span><div class="mid"><b>${R.n} niv. ${e.l}</b><small>${runeTxt(e.r,e.l)}${mx?"":` → ${runeTxt(e.r,e.l+1)}`}</small></div>
-        ${mx?`<span class="badge bup">Max</span>`:`<button class="btn sm violet" data-act="enchup:${i}" ${have>=cost?"":"disabled"}>+1<small>${cost} rune${cost>1?"s":""} (${have})</small></button>`}</div>`;
+        ${mx?`<span class="badge bup">Max</span>`:`<button class="btn sm violet" data-act="enchup:${i}" data-need="rn_${e.r}:${cost}">+1<small>${cost} rune${cost>1?"s":""} (${have})</small></button>`}</div>`;
     } else {
       const own=Object.keys(RUNES).filter(r=>((S.runes||{})[r]||0)>=1);
       h += `<div class="enchrow empty"><span class="rune big empty">?</span><div class="mid"><b>Emplacement libre</b><small>${own.length?"Choisissez une rune (coûte 1 rune) :":"Aucune rune : allez au Donjon des runes."}</small>
@@ -6028,7 +6044,7 @@ function renderDungeon(){
   guideQueue("rune");
   const box=$("#defis"), r=runeToday(), R=RUNES[r], t=S.chal.dtries||0, base=Math.max(10, S.best);
   const diffs = DUNG_DIFF.map((d,i)=>{ const op=dungOpen(i);
-    return `<button class="btn ${d.c} dbtn ${op?"":"locked"}" data-dung="${i}" ${t>0&&!MODE&&op?"":"disabled"}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${Math.max(5,base+d.off)} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
+    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" data-dung="${i}" ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${op&&!MODE?"":"disabled"}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${Math.max(5,base+d.off)} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
   const week = RUNE_DAY.map((x,i)=>({x,i})).slice(1).concat([{x:RUNE_DAY[0],i:0}]).map(({x,i})=>`<div class="dday ${x===r?"on":""}"><small>${JOURS[i].slice(0,3)}</small>${runeChip(x,(S.runes||{})[x]||0)}</div>`).join("");
   box.innerHTML = `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
     <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small reslink" data-res="dtry" role="button">Essais : <b>${t}</b>/${dungTries()}</span></div>
