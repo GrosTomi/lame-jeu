@@ -1055,6 +1055,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 .rsub{font-size:11.5px;font-weight:700;color:#5c4a2a}.rsub.off{color:#aaa;font-style:italic}
 .rpick{display:flex!important;flex-direction:row!important;align-items:center;gap:6px;padding:3px 8px 3px 3px!important;border:2px solid var(--qc)!important;font-size:11px;text-align:left}.rpick .rune2{width:30px;height:30px}.rpick .rune2 .sp{width:16px;height:16px}
 .enchpick{flex-direction:column;align-items:stretch}
+.villagewrap .vsvg{overflow:visible}
 </style>
 </head>
 <body>
@@ -1070,7 +1071,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0919";
+var BUILD_ID = "20261125-0924";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -4094,14 +4095,14 @@ function royalSVG(){
   return `<svg class="vsvg" viewBox="0 0 360 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quartier royal">
   <defs><linearGradient id="rsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf8a"/><stop offset="1" stop-color="#ffe9c4"/></linearGradient>
   <pattern id="rpave" width="20" height="12" patternUnits="userSpaceOnUse"><rect width="20" height="12" fill="#d8cbb1"/><path d="M0 0 H20 M0 6 H20 M10 0 V6 M0 6 V12 M20 6 V12" stroke="#bfae8e" stroke-width="1"/></pattern></defs>
-  <rect width="360" height="130" fill="url(#rsky)"/>
+  <rect x="-500" width="1360" height="130" fill="url(#rsky)"/>
   <g opacity=".95"><rect x="120" y="44" width="120" height="86" fill="#e9dcc2" stroke="#8a7350" stroke-width="2"/>
   ${[0,1,2,3,4,5,6,7].map(i=>`<rect x="${120+i*15.5}" y="36" width="9" height="9" fill="#e9dcc2" stroke="#8a7350" stroke-width="1.5"/>`).join("")}
   <rect x="100" y="20" width="30" height="110" fill="#e1d2b4" stroke="#8a7350" stroke-width="2"/><path d="M96 20 L115 -4 L134 20Z" fill="#3557d6" stroke="#1e2f6b" stroke-width="2"/>
   <rect x="230" y="20" width="30" height="110" fill="#e1d2b4" stroke="#8a7350" stroke-width="2"/><path d="M226 20 L245 -4 L264 20Z" fill="#3557d6" stroke="#1e2f6b" stroke-width="2"/>
   <path d="M160 130 v-34 a20 20 0 0 1 40 0 v34z" fill="#5a3a22"/><rect x="170" y="56" width="20" height="16" fill="#f2c94c" stroke="#8a7350"/><use href="#sp-couronne" x="173" y="57" width="14" height="14"/>
   <path class="flag" d="M115 -4 l16 5 -16 6z" fill="#e0313f"/><path class="flag" d="M245 -4 l16 5 -16 6z" fill="#e0313f"/></g>
-  <rect y="128" width="360" height="312" fill="#8fdc6a"/>
+  <rect x="-500" y="128" width="1360" height="412" fill="#8fdc6a"/>
   <path d="M150 128 H210 L230 440 H130Z" fill="url(#rpave)"/>
   <circle cx="180" cy="262" r="30" fill="url(#rpave)" stroke="#bfae8e" stroke-width="2"/><circle cx="180" cy="262" r="20" fill="#5ec8f2" stroke="#8a7350" stroke-width="3"/><circle cx="180" cy="262" r="5" fill="#a8e6ff"/><path d="M180 246 v-10" stroke="#a8e6ff" stroke-width="3" class="flow"/>
   ${tree(20,160)}${tree(340,160)}${tree(28,262,.8)}${tree(334,262,.8)}${tree(176,404,.7)}${tree(16,380,.8)}${tree(346,380,.8)}
@@ -4408,14 +4409,14 @@ function villageSVG(){
   return `<svg class="vsvg" viewBox="0 0 360 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Votre village">
   <defs><linearGradient id="vsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8ff"/><stop offset="1" stop-color="#d7f0ff"/></linearGradient>
   <linearGradient id="vgrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdc6a"/><stop offset="1" stop-color="#5cb948"/></linearGradient></defs>
-  <rect width="360" height="170" fill="url(#vsky)"/>
+  <rect x="-500" width="1360" height="170" fill="url(#vsky)"/>
   <circle cx="312" cy="38" r="18" fill="#ffe066"/><circle cx="312" cy="38" r="26" fill="#ffe06644"/>
   <g class="cloud"><ellipse cx="70" cy="40" rx="24" ry="9" fill="#fff"/><ellipse cx="88" cy="34" rx="16" ry="10" fill="#fff"/></g>
   <g class="cloud c2"><ellipse cx="220" cy="28" rx="20" ry="7" fill="#fff"/><ellipse cx="234" cy="23" rx="12" ry="8" fill="#fff"/></g>
   <path d="M-10 175 L60 70 L130 175 Z" fill="#8aa0c8"/><path d="M60 70 L46 92 L56 88 L62 96 L72 90 Z" fill="#fff"/>
   <path d="M200 175 L282 58 L370 175 Z" fill="#7d93bd"/><path d="M282 58 L266 82 L278 77 L284 86 L296 80 Z" fill="#fff"/>
   <path d="M110 175 L180 100 L250 175 Z" fill="#9db0d4"/>
-  <rect y="160" width="360" height="280" fill="url(#vgrass)"/>
+  <rect x="-500" y="160" width="1360" height="380" fill="url(#vgrass)"/>
   <ellipse cx="250" cy="250" rx="40" ry="10" fill="#a3e47e" opacity=".6"/><ellipse cx="110" cy="390" rx="46" ry="10" fill="#a3e47e" opacity=".6"/>
   <path d="M122 160 C110 205, 132 240, 112 284 S 72 362, 56 440" fill="none" stroke="#5ec8f2" stroke-width="16" stroke-linecap="round"/>
   <path d="M122 160 C110 205, 132 240, 112 284 S 72 362, 56 440" fill="none" stroke="#a8e6ff" stroke-width="4" stroke-dasharray="6 14" class="flow"/>
@@ -6102,7 +6103,7 @@ function runeMigrate(){
   S.runes={}; S.rinvL={};
 }
 /* Donjons de ressources : 5 donjons × 5 difficultés à étape fixe */
-const RD_DIFF = [{n:"Normal", st:60, c:"blue"}, {n:"Difficile", st:150, c:"gold"}, {n:"Héroïque", st:250, c:"red"}, {n:"Légendaire", st:400, c:"violet"}, {n:"Cauchemar", st:600, c:"dark"}];
+const RD_DIFF = [{n:"Normal", st:60, c:"blue"}, {n:"Difficile", st:130, c:"gold"}, {n:"Héroïque", st:200, c:"red"}, {n:"Légendaire", st:300, c:"violet"}, {n:"Cauchemar", st:500, c:"dark"}];
 const RDUNG = [
   {id:"gold",   n:"Caverne d'or",        ic:"piece",      c:"#f2c94c", what:"de l'or",               amt:(i)=>Math.ceil(goldFor(RD_DIFF[i].st)*[150,250,400,600,900][i]), give:v=>{ S.gold+=v; S.stats.goldEarned=(S.stats.goldEarned||0)+v; }, txt:v=>`${fmt(v)} or`},
   {id:"scraps", n:"Forge abandonnée",    ic:"boulon",     c:"#adb5bd", what:"des scraps",            amt:(i)=>Math.ceil(scrapFor(RD_DIFF[i].st)*[150,250,400,600,900][i]), give:v=>{ S.scraps+=v; }, txt:v=>`${fmt(v)} scraps`},
