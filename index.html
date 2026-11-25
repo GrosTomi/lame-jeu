@@ -911,7 +911,7 @@ nav{background:linear-gradient(180deg,#1f3b8f,#172f78)!important;border-top:4px 
 .eqrow .tile{height:58px}.eqrow .tile.itile .ti{width:64%}
 @media (max-height:740px){.eqrow .tile{height:48px}}
 .selbar .btn{padding:6px 4px;font-size:13px}
-@media (max-height:620px){#tab-loot .teamcard{display:none}}
+/* (la carte Équipé reste visible sur les petits écrans : l'onglet défile si besoin) */
 .row .d:empty{display:none}
 
 .seg5 button{display:flex;flex-direction:column;align-items:center;line-height:1.05;padding:5px 2px;font-size:16px;position:relative}
@@ -1048,7 +1048,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0813";
+var BUILD_ID = "20261125-0820";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
