@@ -1048,7 +1048,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0707";
+var BUILD_ID = "20261125-0813";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -5057,7 +5057,7 @@ const GUIDES = {
     ["⚔️","Le Passe de combat : une saison de 30 jours avec 30 paliers de récompenses. Tout le monde a la piste gratuite."]]},
   rune: {ic:"✨", t:"Le Donjon des runes", s:"Le Donjon des runes", l:[
     ["✨","Chaque jour, le Donjon garde une rune différente : Feu le lundi, Givre le mardi, Foudre le mercredi, Vie le jeudi, Ombre le vendredi, Sang le samedi, Or le dimanche."],
-    ["⚔️","Vous avez 3 essais par jour contre son gardien (4 avec le palier de Renaissance 3), en 6 difficultés, de Normal à Cauchemar. Légendaire, Mythique et Cauchemar se débloquent en battant la difficulté précédente. Plus c'est dur, plus il donne de runes."],
+    ["⚔️","Vous avez 3 essais par jour contre son gardien (4 avec le palier de Renaissance 3), en 6 difficultés à niveau fixe, de Normal (gardien d'étape 80) à Cauchemar (étape 600). Légendaire, Mythique et Cauchemar se débloquent en battant la difficulté précédente. Plus c'est dur, plus il donne de runes."],
     ["💎","Les runes enchantent vos objets Légendaires (1 emplacement) et Mythiques (2) : touchez l'objet porté, puis choisissez une rune."],
     ["⬆️","Chaque niveau d'enchantement coûte autant de runes que son numéro, jusqu'au niveau 10. Les runes sont gardées à la Renaissance."]]},
   pass: {ic:"⚔️", t:"Le Passe de combat", s:"Le Passe de combat", l:[
@@ -5143,7 +5143,7 @@ const towerStage = f => 36 + f*3;   // étage 1 ≈ étape 39 : un vrai combat d
 const wRef = () => { const st=Math.max(10, Math.ceil(S.best/10)*10); return enemyFor(st).hp; };
 function modeEnemy(){
   if(MODE.kind==="dungeon"){
-    const d=DUNG_DIFF[MODE.diff], st=Math.max(5, Math.max(10,S.best)+d.off), e=enemyFor(st), bb=biomeOf(st).boss, R=RUNES[MODE.rune];
+    const d=DUNG_DIFF[MODE.diff], st=d.st, e=enemyFor(st), bb=biomeOf(st).boss, R=RUNES[MODE.rune];
     if(!e.boss){ e.hp*=BOSS_HPM; e.atk*=BOSS_ATKM; }
     e.max=e.hp; e.boss=true; e.timer=30; e.n=`Gardien de la rune de ${R.n}`; e.ic=bb[1]; e.ev=false; return e;
   }
@@ -5992,8 +5992,9 @@ const RUNE_DAY = ["or","feu","givre","foudre","vie","ombre","sang"];   // dimanc
 const JOURS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const RUNE_MAX = 10, DUNG_TRIES_BASE = 3;
 const dungTries = () => DUNG_TRIES_BASE + (hasP(3)?1:0);
-const DUNG_DIFF = [{n:"Normal", off:-30, r:2, c:"blue"}, {n:"Difficile", off:-15, r:4, c:"gold"}, {n:"Héroïque", off:0, r:8, c:"red"},
-  {n:"Légendaire", off:15, r:14, c:"orange"}, {n:"Mythique", off:35, r:24, c:"violet"}, {n:"Cauchemar", off:70, r:40, c:"dark"}];
+/* Gardiens à niveau FIXE (ils ne suivent plus votre record) : Cauchemar ≈ étape 600, un objectif de toute fin de partie */
+const DUNG_DIFF = [{n:"Normal", st:80, r:2, c:"blue"}, {n:"Difficile", st:150, r:4, c:"gold"}, {n:"Héroïque", st:250, r:8, c:"red"},
+  {n:"Légendaire", st:350, r:14, c:"orange"}, {n:"Mythique", st:450, r:24, c:"violet"}, {n:"Cauchemar", st:600, r:40, c:"dark"}];
 const dungOpen = i => i <= 2 || i <= ((S.chal && S.chal.dmax) ?? -1) + 1;   // Légendaire, Mythique, Cauchemar : battre la difficulté d'avant
 const runeToday = () => RUNE_DAY[new Date().getDay()];
 const runeSlots = it => it && it.ri>=5 ? 2 : it && it.ri>=4 ? 1 : 0;
@@ -6036,9 +6037,9 @@ function dungStart(d){
 }
 function renderDungeon(){
   guideQueue("rune");
-  const box=$("#defis"), r=runeToday(), R=RUNES[r], t=S.chal.dtries||0, base=Math.max(10, S.best);
+  const box=$("#defis"), r=runeToday(), R=RUNES[r], t=S.chal.dtries||0;
   const diffs = DUNG_DIFF.map((d,i)=>{ const op=dungOpen(i);
-    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" data-dung="${i}" ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${op&&!MODE?"":"disabled"}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${Math.max(5,base+d.off)} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
+    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" data-dung="${i}" ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${op&&!MODE?"":"disabled"}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${d.st} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
   const week = RUNE_DAY.map((x,i)=>({x,i})).slice(1).concat([{x:RUNE_DAY[0],i:0}]).map(({x,i})=>`<div class="dday ${x===r?"on":""}"><small>${JOURS[i].slice(0,3)}</small>${runeChip(x,(S.runes||{})[x]||0)}</div>`).join("");
   box.innerHTML = `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
     <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small reslink" data-res="dtry" role="button">Essais : <b>${t}</b>/${dungTries()}</span></div>
