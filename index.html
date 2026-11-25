@@ -1070,7 +1070,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0904";
+var BUILD_ID = "20261125-0912";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1742,6 +1742,7 @@ const grp3 = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
 function fmtP(n){
   if(!isFinite(n)) return "∞"; n=Math.max(0, n);
   if(n<1e5) return grp3(Math.ceil(n));
+  return fmt(n);   // au-delà : même affichage que l'en-tête (« 110 Md », « 2,32 Td »…)
   const e=Math.floor(Math.log10(n)/3)-1; if(e<1) return grp3(Math.ceil(n));
   const m=Math.ceil(n/Math.pow(1000,e));
   let suf; if(e<SUF.length) suf=SUF[e]; else { const k=e-SUF.length, A="abcdefghijklmnopqrstuvwxyz"; suf = k<676 ? A[Math.floor(k/26)]+A[k%26] : "e"+(e*3); }
@@ -2361,7 +2362,7 @@ function die(){
   E = null; dirty.enemy = true;
 }
 function bossFail(){
-  if(MODE){ modeEnd(MODE.kind==="wboss"); return; }
+  if(MODE){ modeEnd(false); return; }
   log(`⏳ Trop lent ! <b>${E.n}</b> vous repousse. Renforcez-vous puis redéfiez-le.`, "bad");
   S.auto = false; S.stage--; S.kills = KPS; spawn();
 }
@@ -2461,7 +2462,7 @@ const MECH = {
 };
 const MECH_ORDER = ["rage","carapace","regen","fracas","bouclier"];
 function dmgE(d){   // les dégâts passent d'abord par le bouclier runique
-  if(MODE && MODE.kind==="wboss"){ MODE.dealt=(MODE.dealt||0)+d; return; }
+  if(MODE && MODE.kind==="wboss") MODE.dealt=(MODE.dealt||0)+d;
   if(E.shield>0){ const a=Math.min(E.shield,d); E.shield-=a; d-=a;
     if(E.shield<=0){ E.shield=0; E.shT=0; floatTxt("BOUCLIER BRISÉ !","crit"); shake(); Sfx.play("crit"); } }
   E.hp -= d;
@@ -3044,7 +3045,7 @@ function updateDots(){
   $("#dot-fams").classList.toggle("on", !GROUP.includes(view) && (fOk || pOk || (unlocked("loot") && fg>0)));
   const sd=(k,on)=>document.querySelectorAll(`.subnav [data-sub="${k}"] .dot`).forEach(d=>d.classList.toggle("on", !!on));
   if(GROUP.includes(view)){ sd("pets", pOk && view!=="fams"); sd("forge", fOk && view!=="forge"); sd("loot", unlocked("loot") && fg>0 && view!=="loot"); }
-  const c=S.chal; $("#dot-defis").classList.toggle("on", unlocked("defis") && view!=="defis" && !!c && (c.keys>0 || c.wtries>0 || W_TIERS.some((t,i)=>c.wbest>=t.r && !c.wclaim[i])));
+  const c=S.chal; $("#dot-defis").classList.toggle("on", unlocked("defis") && view!=="defis" && !!c && (c.keys>0 || c.wtries>0));
   { const sd=$("#dot-shop"); if(sd){ adDayReset(); sd.classList.toggle("on", view!=="shop" && (S.ads.gems<AD_LIMITS.gems || bpClaimable()>0)); } }
   $("#dot-prest").classList.toggle("on", view!=="prest" && (soulGain()>0 || ALTAR.some(x=>al(x.id)<x.max && S.souls>=altarCost(x,al(x.id)))));
   const rc=rewardsCount()+mailUnread(), dd=$("#dot-daily"); dd.classList.toggle("on", rc>0); dd.textContent = rc>0 ? rc : "";
@@ -3235,7 +3236,7 @@ function frameUI(){
   if(view==="combat"){
     $("#ehpFill").style.width = ep+"%";
     { const en=$("#enemy"); if(en){ const ch=!!(E && E.warn>0), sh=!!(E && E.shield>0); if(en.classList.contains("charge")!==ch) en.classList.toggle("charge", ch); if(en.classList.contains("shieldup")!==sh) en.classList.toggle("shieldup", sh); } }
-    $("#ehpTxt").textContent = E ? (MODE && MODE.kind==="wboss" ? "Dégâts : "+fmt(MODE.dealt||0) : fmt(Math.max(0,E.hp))) : "";
+    $("#ehpTxt").textContent = E ? fmt(Math.max(0,E.hp)) : "";
     if(E && E.boss) $("#timerFill").style.width = (E.timer/30*100)+"%";
     if(E && MODE && MODE.kind==="tower"){ const sec=Math.max(0,Math.ceil(E.timer)), el=$("#twSec"); if(el.textContent!==String(sec)){ el.textContent=sec; $("#twHud").classList.toggle("low", sec<=10); } }
     $("#hhpFill").style.width = hpP+"%";
@@ -4772,7 +4773,7 @@ function premiumHTML(){
 const MARKET = [
   {id:"key",    ic:"🔑", n:"Clé de la tour",          d:()=>"Une tentative de plus à la Tour des épreuves", cur:"cr", cost:()=>30, max:3, ok:()=>unlocked("defis"), give:()=>{ S.chal.keys++; }},
   {id:"dkey",   ic:"🔑", n:"Clé de donjon",           d:()=>"Un combat de plus dans les donjons (runes ou ressources)", cur:"cr", cost:()=>25, max:5, ok:()=>hasP(3), give:()=>{ S.chal.dtries=(S.chal.dtries||0)+1; }},
-  {id:"wtry",   ic:"🐲", n:"Essai contre le Titan",   d:()=>"Un essai de plus contre le Titan de la semaine", cur:"cr", cost:()=>40, max:2, ok:()=>unlocked("defis"), give:()=>{ S.chal.wtries++; }},
+  {id:"wtry",   ic:"🐲", n:"Essai contre le Titan",   d:()=>"Un essai de plus contre le Titan", cur:"cr", cost:()=>40, max:2, ok:()=>unlocked("defis"), give:()=>{ S.chal.wtries++; }},
   {id:"scrapc", ic:"🔩", n:"Caisse de scraps",        d:()=>`+${fmt(itemCost()*25)} scraps pour renforcer et fusionner`, cur:"cr", cost:()=>20, max:5, give:()=>{ S.scraps+=itemCost()*25; }},
   {id:"boost",  ic:"⚡", n:"Vitesse ×2 / ×3 · 30 min", d:()=>"Débloque les vitesses rapides pendant 30 minutes", cur:"cr", cost:()=>25, max:4, ok:()=>!S.iap.speed, give:()=>{ S.ads.boostUntil=Math.max(Date.now(),S.ads.boostUntil||0)+30*60e3; dirty.enemy=true; }},
   {id:"scrapg", ic:"🔩", n:"Ferraille au poids",      d:()=>`+${fmt(itemCost()*8)} scraps`, cur:"or", cost:()=>goldPack(40), max:10, give:()=>{ S.scraps+=itemCost()*8; }},
@@ -5108,7 +5109,7 @@ const GUIDES = {
   defis: {ic:"⚔️", t:"Les Défis sont débloqués", s:"Les Défis", go:"defis", go_t:"Voir les Défis", l:[
     ["🗼","La Tour des épreuves : chaque étage cache un gardien à battre en 30 secondes. Chaque étage conquis rapporte des cristaux, des scraps, des orbes et des lingots, avec un bonus tous les 5 étages et un grand palier tous les 25."],
     ["🔑","Une défaite coûte une clé, une victoire ne coûte rien. Vous recevez 3 clés chaque jour."],
-    ["🐲","Le Titan de la semaine : infligez-lui un maximum de dégâts en 30 secondes, 3 essais par jour. Plus vous frappez fort, plus vous débloquez de récompenses, remises à zéro chaque lundi."],
+    ["🐲","Le Titan : terrassez-le en 30 secondes, 3 essais par jour. Chaque victoire rapporte cristaux et orbes, et le fait monter d'un niveau (+10 étapes)."],
     ["📍","Les Défis ont leur propre onglet en bas de l'écran."]]},
   prest: {ic:"👻", t:"La Renaissance est débloquée", s:"La Renaissance", go:"prest", go_t:"Voir les Âmes", l:[
     ["🔥","À partir de l'étape "+PREST_MIN+" (puis 50 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro (or et scraps compris, les lingots sont gardés) avec des Âmes et un coffre de cristaux et d'orbes. Plus vous êtes allé loin, plus vous gagnez."],
@@ -5170,6 +5171,10 @@ function guidesList(){
 /* ---------- Défis : tour des épreuves et boss de la semaine (combats réels dans l'arène) ---------- */
 let MODE = null;
 const TOWER_KEYS = 3, W_TRIES = 3;
+/* Titan : un niveau qui monte à chaque victoire (permanent). Niveau 1 ≈ boss d'étape 40 (battable vers 30 min de jeu), +10 étapes par niveau. */
+const titanLv = () => (S.chal && S.chal.tlv) || 1;
+const titanStage = L => 30 + 10*L;
+const titanReward = L => ({cr: 15 + 5*L, ob: 1 + Math.floor(L/2)});
 const W_TIERS = [{r:1,cr:10,ob:1},{r:3,cr:20,ob:2},{r:8,cr:30,ob:3},{r:20,cr:50,ob:5},{r:50,cr:75,ob:10},{r:150,cr:125,ob:15},{r:500,cr:200,ob:25},{r:1500,cr:300,ob:35},{r:5000,cr:450,ob:50},{r:15000,cr:650,ob:70},{r:50000,cr:1000,ob:100}];   // dégâts en « boss de votre record »
 function weekId(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return d.getFullYear()+"-S"+(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)); }
 function chalReset(){
@@ -5197,8 +5202,8 @@ function modeEnemy(){
     if(!e.boss){ e.hp*=6; e.atk*=1.5; }
     e.max=e.hp; e.boss=true; e.timer=30; e.n="Gardien de la Tour"; e.ic=bb[1]; e.ev=false; return e;
   }
-  const st=Math.max(10, Math.ceil(S.best/10)*10), e=enemyFor(st);
-  MODE.ref=e.hp; e.hp=e.max=e.hp*1e15; e.atk*=1.1; e.boss=true; e.timer=30; e.n="Titan de la semaine"; e.ic="§dragontri§"; e.ev=false; return e;
+  const L=titanLv(), st=titanStage(L), e=enemyFor(st);
+  e.hp=e.max=e.hp*3; e.boss=true; e.timer=30; e.n=`Titan · niveau ${L}`; e.ic="§dragontri§"; e.ev=false; return e;
 }
 /* Tour : écran de chargement, puis combat, puis écran de fin (victoire ou défaite) */
 function towerLaunch(){   // pas d'écran de chargement : le combat s'ouvre directement sur le 3, 2, 1
@@ -5290,11 +5295,15 @@ function modeEnd(win, quit){
     }
     towerEndShow(win, m, e, quit);
   } else {
-    const dmg = m.dealt||0, ratio = m.ref ? dmg/m.ref : 0;
-    const best = Math.max(S.chal.wbest, ratio), rec = ratio>S.chal.wbest; S.chal.wbest = best;
-    log(`🐲 Titan de la semaine : ${fmt(dmg)} dégâts (×${ratio<1000?ratio.toFixed(1):fmt(ratio)}).`, "boss");
-    const ready = W_TIERS.filter((t,i)=>best>=t.r && !S.chal.wclaim[i]).length;
-    modal("Fin du combat", `<div class="sheeticon">🐲</div>Vous avez infligé <b>${fmt(dmg)}</b> dégâts, soit <b>×${ratio<1000?ratio.toFixed(1):fmt(ratio)}</b> les PV du boss de votre record.${rec?`<br><b style="color:var(--grn)">Nouveau record de la semaine !</b>`:""}${ready?`<br><br>${ready} récompense${ready>1?"s":""} à récupérer dans le panneau des défis.`:""}`, [{t:"🐲 Retour au Titan", cls:"gold", f:()=>{ defTab="titan"; showView("defis"); renderDefis(true); }}]);
+    const L=titanLv(), back=()=>{ defTab="titan"; showView("defis"); renderDefis(true); };
+    if(win){ const rw=titanReward(L); S.chal.tlv=L+1; S.chal.wbest=Math.max(S.chal.wbest||0, L); S.crystals+=rw.cr; S.orbs+=rw.ob; track("titan");
+      log(`🐲 Titan niveau ${L} vaincu ! +${rw.cr} 💎 · +${rw.ob} 🔮`, "boss");
+      modal("Titan vaincu !", `<div class="sheeticon">🐲</div>Vous avez terrassé le <b>Titan de niveau ${L}</b> !<br><b style="color:var(--grn)">+${rw.cr} 💎 · +${rw.ob} 🔮</b><br><br>Il revient au <b>niveau ${L+1}</b>, plus fort (boss d'étape ${titanStage(L+1)}).`, [{t:"🐲 Retour au Titan", cls:"gold", f:back}]);
+    } else {
+      const pct = e && e.max ? Math.round(Math.min(100, Math.max(0, 1-e.hp/e.max)*100)) : 0;
+      log(`🐲 Le Titan niveau ${L} a survécu (${pct} % de sa vie retirée).`, "bad");
+      modal(quit?"Combat abandonné":"Le Titan a survécu", `<div class="sheeticon">🐲</div>Vous lui avez retiré <b>${pct} %</b> de sa vie (${fmt(m.dealt||0)} dégâts).<br><br>Il vous reste <b>${S.chal.wtries}</b> essai${S.chal.wtries>1?"s":""} aujourd'hui. Renforcez-vous et réessayez !`, [{t:"🐲 Retour au Titan", cls:"gold", f:back}]);
+    }
   }
   spawn(); dirty.enemy=true; save();
 }
@@ -5351,29 +5360,24 @@ function towerScrollToCur(smooth){ const el=document.querySelector(`[data-tfloor
   const top = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - box.clientHeight/2 + el.offsetHeight/2;
   box.scrollTo({top, behavior: smooth?"smooth":"auto"}); }
 function renderTitan(){
-  const c=S.chal, box=$("#defis");
-  const TOP = W_TIERS[W_TIERS.length-1].r*1.3, pos = v => Math.min(100, Math.max(0, Math.log10(Math.max(v,0.1)/0.5)/Math.log10(TOP/0.5)*100));   // échelle logarithmique jusqu'au dernier palier
-  const marks = W_TIERS.map((t,i)=>{ const got=c.wclaim[i], ok=c.wbest>=t.r;
-    return `<div class="tmark ${got?"got":ok?"ok":""}" style="left:${pos(t.r)}%"><i></i><b>${t.r>=1000?(t.r/1000+"K").replace(".",","):"×"+t.r}</b></div>`; }).join("");
-  const tiers = W_TIERS.map((t,i)=>{ const got=c.wclaim[i], ok=c.wbest>=t.r;
-    return `<div class="trw ${got?"got":ok?"ok":""}"><span class="trm">×${t.r>=1000?fmt(t.r):t.r}</span><span class="trr">+${t.cr} 💎 · +${t.ob} 🔮</span>${got?`<span class="trs">${spr("coche")}</span>`:ok?`<button class="btn gold sm" data-wclaim="${i}">Récupérer</button>`:`<span class="trs lock">${spr("cadenas")}</span>`}</div>`; }).join("");
+  const c=S.chal, box=$("#defis"), L=titanLv(), rw=titanReward(L);
+  const next = [0,1,2,3,4,5,6,7].map(k=>{ const l=L+k, r=titanReward(l); return `<div class="trw ${k===0?"ok":""}"><span class="trm">Niv. ${l}</span><span class="trr">étape ${titanStage(l)} · +${r.cr} 💎 · +${r.ob} 🔮</span></div>`; }).join("");
   box.innerHTML = `<div class="titanhero">
       <div class="tembers"></div>
       <div class="titart">${spr("dragontri")}</div>
       <div class="titname">Le Titan à trois têtes</div>
-      <div class="titsub">Boss de la semaine · se réveille chaque lundi</div>
-      <div class="titstats"><div><b>×${c.wbest.toFixed(1)}</b><span>votre record</span></div><div data-res="wtry" role="button"><b>${c.wtries}/${W_TRIES}</b><span>essais du jour</span></div></div>
-      <div class="ttrack"><div class="ttfill" style="width:${pos(c.wbest)}%"></div>${marks}</div>
-      <button class="btn titbtn wide ${c.wtries>0?"":"lack"}" data-chal="wboss" ${c.wtries>0?"":'data-lack="wtry"'} ${!MODE?"":"disabled"}>🔥 Affronter le Titan</button>
-      <div class="titnote">30 secondes pour frapper le plus fort possible. Vos dégâts sont comptés en « boss de votre record ».</div>
+      <div class="titsub">Chaque victoire le fait monter d'un niveau</div>
+      <div class="titstats"><div><b>Niv. ${L}</b><span>boss d'étape ${titanStage(L)}</span></div><div data-res="wtry" role="button"><b>${c.wtries}/${W_TRIES}</b><span>essais du jour</span></div></div>
+      <button class="btn titbtn wide ${c.wtries>0?"":"lack"}" data-chal="wboss" ${c.wtries>0?"":'data-lack="wtry"'} ${!MODE?"":"disabled"}>🔥 Affronter le Titan<small>Victoire : +${rw.cr} 💎 · +${rw.ob} 🔮</small></button>
+      <div class="titnote">Terrassez-le en 30 secondes. Il a 3 fois la vie d'un boss de son étape. ${L>1?`Vous l'avez déjà vaincu ${L-1} fois.`:""}</div>
     </div>
-    <div class="card grow"><h2 style="font-size:17px;margin-bottom:6px">Récompenses de la semaine</h2><div class="pager" data-pg="titan"><div class="pgsrc list">${tiers}</div></div></div>`;
+    <div class="card grow"><h2 style="font-size:17px;margin-bottom:6px">Prochains niveaux</h2><div class="pager" data-pg="titan"><div class="pgsrc list">${next}</div></div></div>`;
 }
 let defisSig="";
 function renderDefis(force){
   const box=$("#defis"); if(!box) return;
   if(!unlocked("defis")){ box.innerHTML=""; $("#defSeg").innerHTML=""; return; }
-  const c=S.chal, sig=[defTab,c.floor,c.keys,c.wtries,c.wbest.toFixed(2),JSON.stringify(c.wclaim),c.adKey===today(),!!MODE,c.dtries,runeList().length+":"+runeList().reduce((a,x)=>a+x.l+x.q,0),S.dust||0,S.grim||0,dungSub,JSON.stringify(c.rmax||{}),runeToday()].join("|");
+  const c=S.chal, sig=[defTab,c.floor,c.keys,c.wtries,titanLv(),c.adKey===today(),!!MODE,c.dtries,runeList().length+":"+runeList().reduce((a,x)=>a+x.l+x.q,0),S.dust||0,S.grim||0,dungSub,JSON.stringify(c.rmax||{}),runeToday()].join("|");
   if(sig===defisSig && !force) return;
   const first = !defisSig.startsWith(defTab+"|") ;
   defisSig=sig;
@@ -5874,7 +5878,7 @@ const ACH = [
   {id:"reb",   n:"Phénix",          d:"Renaître {g} fois",                    v:()=>S.prestiges, t:[[1,30],[5,60],[10,100],[25,200],[50,300],[100,500]], old:["r1","r2","r3","r4"]},
   {id:"def",   n:"Défenseur",       d:"Repousser {g} assauts du fief",        v:()=>S.city?S.city.wins:0, t:[[5,30],[20,60],[100,120],[500,250],[2000,400]], old:["d1","d2"]},
   {id:"tower", n:"Grimpeur",        d:"Conquérir l'étage {g} de la Tour",     v:()=>S.chal?S.chal.floor-1:0, t:[[10,40],[50,120],[100,200],[250,350],[500,500]], old:["tw1","tw2"]},
-  {id:"titan", n:"Tueur de titans",  d:"Infliger ×{g} au Titan de la semaine", v:()=>S.chal?S.chal.wbest||0:0, t:[[50,80],[500,150],[5000,300],[50000,500]], old:["ti1"]},
+  {id:"titan", n:"Tueur de titans",  d:"Vaincre le Titan {g} fois", v:()=>titanLv()-1, t:[[5,80],[15,150],[30,300],[50,500]], old:["ti1"]},
   {id:"gold",  n:"Trésor royal",    d:"Posséder {g} d'or",                    v:()=>S.gold, t:[[1e9,60],[1e15,100],[1e21,200],[1e30,350],[1e45,500]], old:["gold1"]},
   {id:"streak",n:"Fidèle",          d:"Se connecter {g} jours d'affilée",     v:()=>S.streak?S.streak.n||0:0, t:[[3,20],[7,40],[21,150]], old:[null,"str7"]},
   {id:"taps",  n:"Main de fer",     d:"Frapper {g} fois vous-même",           v:()=>S.stats.tap||0, t:[[100,15],[1000,40],[10000,80],[50000,150],[250000,300],[1e6,500]]},
@@ -6375,7 +6379,7 @@ function loadMax(){
   S.inv=[]; for(const k of SLOTKEYS) for(const set of ["loup","berserk"]){ const it=makeItem(ST,5,k,set); S.inv.push(it); }
   S.runes={}; S.runeV2=true; S.rinv=[]; for(const r of RK) for(let q=0;q<5;q++) S.rinv.push(makeRune(r, q, 1+q*2)); S.dust=5000; S.grim=1000; for(const k in S.skl.owned) S.skl.owned[k].lv=SKL_LMAX;
   // défis, passe, boutique
-  S.chal=Object.assign(S.chal||{}, {floor:200, keys:3, dmax:DUNG_DIFF.length-1, wtries:3, dtries:dungTries(), wbest:0, wclaim:{}});
+  S.chal=Object.assign(S.chal||{}, {floor:200, keys:3, dmax:DUNG_DIFF.length-1, wtries:3, dtries:dungTries(), wbest:0, wclaim:{}, tlv:100});
   S.bp.season=bpSeason(); S.bp.tier="r"; S.bp.xp=bpCum(BP_TIERS);
   S.iap.speed=true;
   S.skins.owned.champion=1; S.skins.owned.royal=1;
@@ -6438,7 +6442,7 @@ const SB_URL = "https://jvpeyliecpwjfztqmcdc.supabase.co", SB_KEY = "sb_publisha
 const LB_ON = () => !!(SB_URL && SB_KEY) && typeof fetch === "function";
 const LB_AUTH = "lame-lb-auth";
 const LB = {ver:0, data:{}, at:{}, me:{}, err:"", busy:false, lastPush:0, lastSig:""};
-const RK = [{k:"week", n:"Semaine", u:v=>fmt(v)+" boss"}, {k:"power", n:"Puissance", u:v=>"⚡ "+fmt(v)}, {k:"best", n:"Étape", u:v=>"étape "+fmt(v)}, {k:"tower", n:"Tour", u:v=>"étage "+fmt(v)}, {k:"titan", n:"Titan", u:v=>"×"+(v>=1000?fmt(v):(+v).toFixed(1))}, {k:"rebirths", n:"Renais.", u:v=>fmt(v)+" ⟳"}];
+const RK = [{k:"week", n:"Semaine", u:v=>fmt(v)+" boss"}, {k:"power", n:"Puissance", u:v=>"⚡ "+fmt(v)}, {k:"best", n:"Étape", u:v=>"étape "+fmt(v)}, {k:"tower", n:"Tour", u:v=>"étage "+fmt(v)}, {k:"titan", n:"Titan", u:v=>"niv. "+fmt((+v||0)+1)}, {k:"rebirths", n:"Renais.", u:v=>fmt(v)+" ⟳"}];
 let rkTab = "week", pseudoOpen = false, lbNoPower = false, lbNoTitle = false;
 /* Semaine : boss vaincus depuis lundi */
 function weekIdOf(dt){ const d=new Date(dt); d.setHours(0,0,0,0); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4); return d.getFullYear()+"-S"+(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)); }
@@ -6563,7 +6567,7 @@ async function recDo(){
 }
 function lbRow(name){
   const c=S.chal||{};
-  const r={name, power:Math.floor(powerTotal()), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
+  const r={name, power:Math.floor(powerTotal()), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:titanLv()-1, titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
   if(lbNoPower) delete r.power;
   r.week = weekScore();
   return r;
@@ -6638,7 +6642,7 @@ function renderRank(){
   const box=$("#tab-rank"), R=RK.find(r=>r.k===rkTab)||RK[0]; if(!box) return;
   const sub=`<div class="seg rksub">${RK.map(r=>`<button data-rk="${r.k}" class="${r.k===R.k?"on":""}">${r.n}</button>`).join("")}</div>`;
   const myV=R.k==="power"?Math.floor(powerTotal()):R.k==="week"?weekScore():lbRow(S.pseudo||"")[R.k];
-  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="week"?"boss vaincus depuis lundi":R.k==="titan"?"cette semaine":R.k==="power"?"cumulée sur toutes vos parties":"tous les joueurs"}</span></div>${sub}
+  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="week"?"boss vaincus depuis lundi":R.k==="titan"?"victoires sur le Titan":R.k==="power"?"cumulée sur toutes vos parties":"tous les joueurs"}</span></div>${sub}
     <div class="rkme"><span class="rkn">${LB.me[R.k]?"#"+LB.me[R.k]:"–"}</span><span class="rkname">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"} <small class="small">(vous)</small></span><span class="rkv">${myV>0?R.u(myV):"–"}</span></div>${S.pseudo?"":`<button class="btn gold sm wide" id="pseudoBtn" style="margin-top:6px">Choisir un nom pour apparaître au classement</button>`}</div>`;
   let body;
   if(!LB_ON()) body=`<div class="small" style="text-align:center;padding:24px 8px">🏆<br><b>Le classement en ligne arrive bientôt.</b><br>Votre nom est déjà réservé sur cet appareil : vos records y apparaîtront dès son ouverture.</div>`;
