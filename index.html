@@ -1028,6 +1028,11 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 .row.focusflash{animation:focusFlash 2.2s ease}@keyframes focusFlash{0%,40%{box-shadow:0 0 0 3px #ffd43b,0 0 18px #ffd43b;background:#fff3bf}100%{box-shadow:none}}
 .nokey{flex-direction:column;line-height:1.1}.nokey small{font-size:10px;opacity:.9}
 .rhtop.lack{background:#ffe3e3}.rhtop.lack b{color:#c92a2a}.rhtop small{display:block}
+header .res,.hbtns{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
+.hbtns .iconbtn{width:100%}
+@media (max-width:360px){header .pill{font-size:13px;padding:3px 4px}}
+.band{border-color:#9db8ff!important}
 </style>
 </head>
 <body>
@@ -1043,7 +1048,7 @@ body.tw #btnQuit{background:linear-gradient(#ff8787,#e03131);color:#fff;border-c
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261124-1947";
+var BUILD_ID = "20261125-0702";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1594,12 +1599,12 @@ const FORGE = [
   {id:"hp",    n:"Vigueur",      ic:"❤️", d:"+1 % de PV max",                 base:1,   g:1.0327},
   {id:"def",   n:"Endurance",    ic:"🧱", d:"+1 % de défense",                base:1.2, g:1.0327},
   {id:"spd",   n:"Agilité",      ic:"⚡", d:"+1 % de vitesse d'attaque",      base:10,  g:1.085, max:200},
-  {id:"crit",  n:"Précision",    ic:"💥", d:"+0,1 % de chance de critique",   base:200, g:1.09,  max:150},
-  {id:"critd", n:"Brutalité",    ic:"§boum§", d:"+1 % de dégâts critiques",   base:150, g:1.06,  max:300},
-  {id:"vol",   n:"Soif de sang", ic:"🩸", d:"+0,05 % de vol de vie",          base:250, g:1.09,  max:200},
-  {id:"regen", n:"Vitalité",     ic:"💚", d:"+0,01 % de PV par seconde",      base:150, g:1.08,  max:200},
-  {id:"dodge", n:"Esquive",      ic:"§nuage§", d:"+0,1 % d'esquive",          base:300, g:1.09,  max:150},
-  {id:"dbl",   n:"Enchaînement", ic:"§epees§", d:"+0,1 % de double coup",      base:300, g:1.09,  max:150},
+  {id:"crit",  n:"Précision",    ic:"💥", d:"+0,1 % de chance de critique",   base:200, g:1.2415, max:150},
+  {id:"critd", n:"Brutalité",    ic:"§boum§", d:"+1 % de dégâts critiques",   base:150, g:1.1149, max:300},
+  {id:"vol",   n:"Soif de sang", ic:"🩸", d:"+0,05 % de vol de vie",          base:250, g:1.1745, max:200},
+  {id:"regen", n:"Vitalité",     ic:"💚", d:"+0,01 % de PV par seconde",      base:150, g:1.1776, max:200},
+  {id:"dodge", n:"Esquive",      ic:"§nuage§", d:"+0,1 % d'esquive",          base:300, g:1.2382, max:150},
+  {id:"dbl",   n:"Enchaînement", ic:"§epees§", d:"+0,1 % de double coup",      base:300, g:1.2382, max:150},
 ];
 
 const CLASSES = [
@@ -1650,7 +1655,7 @@ function ratesFrom(keys, lv){
   return a.map((v,i)=> rarOpen(lv,i) ? Math.round((v+(b[i]-v)*t)*10000)/10000 : 0);
 }
 const forgeRates = lv => ratesFrom(FORGE_RATE_KEYS, lv);
-const sumNeed = lv => 5 + 2*(lv-1);   // 50 niveaux, même effort total qu'avant pour le max (~2 600 invocations)
+const sumNeed = lv => Math.round(10*Math.pow(1.12, lv-1));   // +12 % par niveau : le niveau 50 demande ~21 000 invocations
 const pityMax = skl => (skl ? S.skl.firstLeg : S.firstLeg) ? PITY : 10;   // la première Légendaire arrive vite          // invocations pour passer du niveau lv au suivant
 function sumLevel(pulls){
   let lv=1, left = pulls ?? (S.pulls||0);
@@ -1752,7 +1757,7 @@ function newState(keep){
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}, tier:{}, tiersV2:true}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["pseudo","pseudoSkip","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["pseudo","pseudoSkip","pmax","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -1809,7 +1814,7 @@ const RES_INFO = {
   runes:  {ic:"✨", n:"Runes", have:()=>Object.values(S.runes||{}).reduce((a,b)=>a+b,0)+" au total", use:"Enchanter vos objets Légendaires et Mythiques portés.",
            get:["Donjon des runes : une rune différente chaque jour","Plus la difficulté est haute, plus il en donne (2 à 40)","Grande expédition du Fief : 3 runes"], go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
   city:   {ic:"🏰", n:"Ressources du Fief", have:()=>S.city?`${fmt(S.city.res.or)} 💰 · ${fmt(S.city.res.bois)} 🌲 · ${fmt(S.city.res.pierre)} 🪨`:"0", use:"Améliorer les bâtiments du village et du royaume.",
-           get:["Mine, scierie et carrière, même jeu fermé (à récolter, jusqu'à 8 h de stock)","Patrouilles (expéditions)","Assauts de pillards repoussés","Marché du jour : Convoi pour le fief"], shop:"bonus"},
+           get:["Mine, scierie et carrière, même jeu fermé (à récolter, jusqu'à ${STOCK_H} h de stock)","Patrouilles (expéditions)","Assauts de pillards repoussés","Marché du jour : Convoi pour le fief"], shop:"bonus"},
 };
 /* Ouvre la Boutique (onglet Bonus) directement sur un article du marché du jour, mis en évidence */
 function goShopMkt(id){
@@ -2042,7 +2047,7 @@ function canAfford(scr, mat, mn){ return S.scraps>=scr && (!mat || S.mats[mat]>=
 /* Renforcement : uniquement des scraps */
 const upMat = lv => 0;   // les matériaux ont été retirés du jeu
 /* Forge d'équipement : un objet au hasard parmi les 6, rareté selon le niveau de forge (même tableau que les invocations) */
-const FORGE_NEED = lv => 5 + 2*(lv-1);   // 50 niveaux, même effort total qu'avant pour le max (~2 600 objets)
+const FORGE_NEED = lv => Math.round(10*Math.pow(1.12, lv-1));   // +12 % par niveau : le niveau 50 demande ~21 000 objets forgés
 function forgeLevel(n){
   let lv=1, left = n ?? (S.stats.craft||0);
   while(lv<SUM_MAX && left>=FORGE_NEED(lv)){ left-=FORGE_NEED(lv); lv++; }
@@ -3036,7 +3041,7 @@ function renderPrest(){
     body = `<div class="card soulcard"><div class="big">👻 ${free}</div><div class="small">Âme${free>1?"s":""} à dépenser à l'Autel</div>
         <div class="soulnote">Gagnez des Âmes en renaissant. Une Âme dépensée disparaît.</div></div>
       <div class="card" style="text-align:center"><h2>Renaître</h2>
-        <div class="small" style="margin-bottom:10px">${S.maxStage<prestMin()?`Atteignez l'étape ${prestMin()} pour renaître (record de cette partie : ${S.maxStage}). Chaque Renaissance demande 20 étapes de plus que la précédente.`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b> et <b>${ch.orbs} 🔮</b> (l'or et les scraps repartent de zéro, les lingots sont gardés)${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
+        <div class="small" style="margin-bottom:10px">${S.maxStage<prestMin()?`Atteignez l'étape ${prestMin()} pour renaître (record de cette partie : ${S.maxStage}). Chaque Renaissance demande 50 étapes de plus que la précédente.`:`Vous repartez ${st>=10?`de l'étape ${st+1}`:"de l'étape 1"} avec <b style="color:var(--violet)">+${g} âmes</b>, un coffre de <b>${ch.crystals} 💎</b> et <b>${ch.orbs} 🔮</b> (l'or et les scraps repartent de zéro, les lingots sont gardés)${nextM && nextM.p===S.prestiges+1?`, et vous débloquez : <b>${nextM.t}</b>`:""}.`}</div>
         ${S.maxStage>=prestMin() && g<=0?`<div class="small" style="margin:-4px 0 8px;color:var(--red)">Vous êtes reparti de l'étape ${S.runStart}. Montez plus haut que votre point de départ pour gagner des âmes.</div>`:""}
         <button class="btn violet wide" id="btnPrest" ${g>0 && runClimb()>=20?"":"disabled"}>🔥 Renaître (+${g} âmes)</button></div>
       ${nextM?`<div class="card"><div class="chead"><h2>Prochain palier</h2><span class="small">Renaissances : <b>${S.prestiges}</b></span></div><div class="mrow"><span class="mp">${nextM.p}</span><span class="mi">${nextM.ic}</span><span class="mt">${nextM.t}</span></div></div>`:""}`;
@@ -3209,6 +3214,7 @@ function frameUI(){
     if(E && MODE && MODE.kind==="tower"){ const sec=Math.max(0,Math.ceil(E.timer)), el=$("#twSec"); if(el.textContent!==String(sec)){ el.textContent=sec; $("#twHud").classList.toggle("low", sec<=10); } }
     $("#hhpFill").style.width = hpP+"%";
     $("#hhpTxt").textContent = fmt(hp)+" / "+fmt(C.hp);
+    { const hp=heroPower(); if(hp>(S.pmax||0)) S.pmax=hp; }
     $("#heroLine").innerHTML = "⚡ "+fmt(heroPower()); const hn=$("#heroName"), ttl=S.lbTitle && S.lbTitle.wk===weekId() ? S.lbTitle.t.split(" ")[0] : "", nm=(S.pseudo||"Vous")+"|"+ttl; if(hn.dataset.v!==nm){ hn.dataset.v=nm; hn.innerHTML=esc(S.pseudo||"Vous")+(ttl?" "+ico(ttl):""); }
   } else {
     $("#miniE").style.width = ep+"%";
@@ -3684,7 +3690,7 @@ document.addEventListener("contextmenu", e=>e.preventDefault());
 
 /* ================= FIEF (construction de ville) ================= */
 const CITY_UNLOCK = 60, RAID_EVERY = 20, RAID_COOLDOWN = 120;   // assaut toutes les 20 nouvelles étapes, 2 min minimum entre deux
-const STOCK_H = 8;   // la production s'accumule jusqu'à 8 h dans les bâtiments, à récolter en les touchant
+const STOCK_H = 3;   // la production s'accumule jusqu'à 3 h dans les bâtiments, à récolter en les touchant
 const CRES = {or:{n:"Or du fief", ic:"💰"}, bois:{n:"Bois", ic:"🌲"}, pierre:{n:"Pierre", ic:"🪨"}};
 const BLD = [
   {id:"mine",     n:"Mine d'or",       ic:"⛏️", cost:[10,30,20], d:"Produit de l'or du fief."},
@@ -4993,7 +4999,7 @@ function track(ev, n=1){
 
 /* ---------- Déblocage progressif des onglets ---------- */
 const PREST_MIN = 100;
-const prestMin = () => PREST_MIN + 20*Math.min(S.prestiges||0, 20);   // 100, puis +20 étapes à chaque Renaissance (jusqu'à 500)
+const prestMin = () => PREST_MIN + 50*Math.min(S.prestiges||0, 20);   // 100, puis +50 étapes à chaque Renaissance (jusqu'à 1 100)
 const UNLOCK = {hero:3, loot:10, skills:20, fams:30, defis:45, city:CITY_UNLOCK, prest:PREST_MIN};   // un nouveau système toutes les 2 à 10 minutes environ
 const UNLOCK_TXT = {hero:"la fiche de votre Héros", fams:"les Familiers", loot:"l'Atelier", skills:"les compétences", defis:"les Défis", prest:"la Renaissance", city:"votre Fief"};
 const unlocked = k => !(k in UNLOCK) || S.best>=UNLOCK[k] || S.prestiges>0 || (k==="fams" && S.pets && Object.keys(S.pets).length>0) || !!(S.tuto && S.tuto.seen && S.tuto.seen[k]) || (k==="city" && !!S.city);   // déjà débloqué une fois = reste ouvert   // qui a déjà des familiers les garde
@@ -5066,7 +5072,7 @@ const GUIDES = {
     ["🐲","Le Titan de la semaine : infligez-lui un maximum de dégâts en 30 secondes, 3 essais par jour. Plus vous frappez fort, plus vous débloquez de récompenses, remises à zéro chaque lundi."],
     ["📍","Les Défis ont leur propre onglet en bas de l'écran."]]},
   prest: {ic:"👻", t:"La Renaissance est débloquée", s:"La Renaissance", go:"prest", go_t:"Voir les Âmes", l:[
-    ["🔥","À partir de l'étape "+PREST_MIN+" (puis 20 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro (or et scraps compris, les lingots sont gardés) avec des Âmes et un coffre de cristaux et d'orbes. Plus vous êtes allé loin, plus vous gagnez."],
+    ["🔥","À partir de l'étape "+PREST_MIN+" (puis 50 étapes de plus à chaque Renaissance), vous pouvez renaître : vous repartez à zéro (or et scraps compris, les lingots sont gardés) avec des Âmes et un coffre de cristaux et d'orbes. Plus vous êtes allé loin, plus vous gagnez."],
     ["👻","Les Âmes sont une monnaie : dépensez-les à l'Autel des Âmes pour des améliorations permanentes : attaque et PV, or, scraps, familiers, recharge des compétences, gains hors ligne…"],
     ["🏅","Les Renaissances débloquent des paliers : 4e place de familier, 4e compétence, Donjon des runes, familier exclusif…"],
     ["📦","Vous gardez familiers, compétences, cristaux, orbes, lingots, runes, fief, classes et Âmes, ainsi que l'équipement acheté (Souverain). Vous perdez l'or, la Forge, le reste de l'équipement et les scraps."],
@@ -6399,7 +6405,8 @@ async function recDo(){
 }
 function lbRow(name){
   const c=S.chal||{};
-  const r={name, power:Math.floor(heroPower()), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
+  S.pmax = Math.max(S.pmax||0, heroPower());
+  const r={name, power:Math.floor(S.pmax), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
   if(lbNoPower) delete r.power;
   r.week = weekScore();
   return r;
@@ -6473,7 +6480,7 @@ function lbDeleteAsk(){
 function renderRank(){
   const box=$("#tab-rank"), R=RK.find(r=>r.k===rkTab)||RK[0]; if(!box) return;
   const sub=`<div class="seg rksub">${RK.map(r=>`<button data-rk="${r.k}" class="${r.k===R.k?"on":""}">${r.n}</button>`).join("")}</div>`;
-  const myV=R.k==="power"?Math.floor(heroPower()):R.k==="week"?weekScore():lbRow(S.pseudo||"")[R.k];
+  const myV=R.k==="power"?Math.floor(Math.max(S.pmax||0, heroPower())):R.k==="week"?weekScore():lbRow(S.pseudo||"")[R.k];
   const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="week"?"boss vaincus depuis lundi":R.k==="titan"?"cette semaine":R.k==="power"?"attaque, vie et défense":"tous les joueurs"}</span></div>${sub}
     <div class="rkme"><span class="rkn">${LB.me[R.k]?"#"+LB.me[R.k]:"–"}</span><span class="rkname">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"} <small class="small">(vous)</small></span><span class="rkv">${myV>0?R.u(myV):"–"}</span></div>${S.pseudo?"":`<button class="btn gold sm wide" id="pseudoBtn" style="margin-top:6px">Choisir un nom pour apparaître au classement</button>`}</div>`;
   let body;
