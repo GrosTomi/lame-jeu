@@ -1043,6 +1043,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 .matrow{display:flex;gap:10px;flex-wrap:wrap;font-weight:800}.matrow span{background:#fff3d6;border-radius:10px;padding:5px 10px}.matrow .sp{width:16px;height:16px;vertical-align:-3px}
 .enchbtns{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}.enchbtns .btn{flex:1;min-width:0;flex-direction:column;line-height:1.15}.enchbtns small{font-size:10px}
 .skllv{margin-top:8px;background:#e7f1ff;border:2px solid #a5c8ff;border-radius:12px;padding:6px 10px}.skllv b{font-family:var(--disp);font-weight:400;font-size:15px;display:block}.skllv small{font-size:12px;font-weight:700}.skllv .sp{width:14px;height:14px;vertical-align:-2px}
+.rdbtn.locked,.dbtn.locked{filter:grayscale(.9) brightness(1.05);opacity:.7}
 </style>
 </head>
 <body>
@@ -1058,7 +1059,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0835";
+var BUILD_ID = "20261125-0843";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -3549,6 +3550,10 @@ document.addEventListener("click", e=>{
   if(t.dataset.altar){ altarBuy(t.dataset.altar); renderPrest(); return; }
   if(t.id==="altarReset"){ S.souls += altarSpent(); S.altar={}; calc(); dirty.stats=true; renderPrest(); save(); return; }
   if(t.dataset.dsub){ dungSub=t.dataset.dsub; renderDefis(true); return; }
+  if(t.dataset.rdlock){ const [id,i]=t.dataset.rdlock.split(":"), D=RDUNG.find(x=>x.id===id), d=RD_DIFF[+i], prev=RD_DIFF[+i-1];
+    Sfx.play("ui"); modal(`🔒 ${D.n} · ${d.n}`, `<div class="small" style="text-align:left">Pour débloquer cette difficulté, battez d'abord <b>${D.n} en ${prev.n}</b> (gardien d'étape ${prev.st}).<br><br>Ensuite : gardien d'étape <b>${d.st}</b>, qui rapporte <b>${D.txt(D.amt(+i))}</b>.</div>`, [{t:"Compris", cls:"gold"}]); return; }
+  if(t.dataset.dlock){ const i=+t.dataset.dlock, d=DUNG_DIFF[i], prev=DUNG_DIFF[i-1];
+    Sfx.play("ui"); modal(`🔒 Donjon des runes · ${d.n}`, `<div class="small" style="text-align:left">Pour débloquer cette difficulté, battez d'abord le gardien en <b>${prev.n}</b> (étape ${prev.st}), quelle que soit la rune du jour.<br><br>Ensuite : gardien d'étape <b>${d.st}</b>, qui rapporte <b>${d.r} runes</b>.</div>`, [{t:"Compris", cls:"gold"}]); return; }
   if(t.dataset.rdung){ const [id,d]=t.dataset.rdung.split(":"); rdStart(id,+d); return; }
   if(t.dataset.chal){ if(t.dataset.chal==="tower") towerLaunch(); else if(t.dataset.chal==="wboss") titanLaunch(); else chalStart(t.dataset.chal); return; }
   if(t.id==="teMenu"){ towerEndClose(false); return; }
@@ -6126,7 +6131,7 @@ function renderResDung(box, sub){
     <div class="small" style="margin-bottom:6px">Choisissez ce que vous voulez récolter, puis la difficulté. Normal et Difficile sont ouverts ; les suivantes se débloquent en battant celle d'avant.</div>
     ${RDUNG.map(D=>`<div class="rdrow"><div class="rdh"><span class="rdic" style="--rc:${D.c}">${spr(D.ic)}</span><div><b>${D.n}</b><small>Rapporte ${D.what}</small></div></div>
       <div class="rdbtns">${RD_DIFF.map((d,i)=>{ const op=rdOpen(D.id,i), lk=op&&t<=0&&!MODE;
-        return `<button class="btn ${d.c} rdbtn ${op?"":"locked"} ${lk?"lack":""}" data-rdung="${D.id}:${i}" ${lk?'data-lack="dtry"':""} ${op&&!MODE?"":"disabled"} title="${d.n} · étape ${d.st}"><b>${op?d.n:spr("cadenas")}</b><small>${op?`ét. ${d.st}`:""}</small><small>${op?D.txt(D.amt(i)).replace(/ (Poussière runique|Grimoires?|friandises|scraps|or)$/,""):""}</small></button>`; }).join("")}</div></div>`).join("")}
+        return `<button class="btn ${d.c} rdbtn ${op?"":"locked"} ${lk?"lack":""}" ${op?`data-rdung="${D.id}:${i}"`:`data-rdlock="${D.id}:${i}"`} ${lk?'data-lack="dtry"':""} ${MODE?"disabled":""} title="${d.n} · étape ${d.st}"><b>${op?d.n:spr("cadenas")}</b><small>${op?`ét. ${d.st}`:""}</small><small>${op?D.txt(D.amt(i)).replace(/ (Poussière runique|Grimoires?|friandises|scraps|or)$/,""):""}</small></button>`; }).join("")}</div></div>`).join("")}
   </div>`;
 }
 function renderRuneInv(box, sub){
@@ -6143,7 +6148,7 @@ function renderRuneInv(box, sub){
 function renderRuneDung(box, sub){
   const r=runeToday(), R=RUNES[r], t=S.chal.dtries||0;
   const diffs = DUNG_DIFF.map((d,i)=>{ const op=dungOpen(i);
-    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" data-dung="${i}" ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${op&&!MODE?"":"disabled"}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${d.st} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
+    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" ${op?`data-dung="${i}"`:`data-dlock="${i}"`} ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${MODE?"disabled":""}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${d.st} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
   const week = RUNE_DAY.map((x,i)=>({x,i})).slice(1).concat([{x:RUNE_DAY[0],i:0}]).map(({x,i})=>`<div class="dday ${x===r?"on":""}"><small>${JOURS[i].slice(0,3)}</small>${runeChip(x,runeCount(x))}</div>`).join("");
   box.innerHTML = sub + `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
     <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small reslink" data-res="dtry" role="button">${spr("cle")} Clés : <b>${t}</b>/${dungTries()}</span></div>
