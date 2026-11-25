@@ -1048,7 +1048,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0702";
+var BUILD_ID = "20261125-0707";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1757,7 +1757,7 @@ function newState(keep){
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}, tier:{}, tiersV2:true}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["pseudo","pseudoSkip","pmax","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["pseudo","pseudoSkip","pwSum","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -3214,7 +3214,7 @@ function frameUI(){
     if(E && MODE && MODE.kind==="tower"){ const sec=Math.max(0,Math.ceil(E.timer)), el=$("#twSec"); if(el.textContent!==String(sec)){ el.textContent=sec; $("#twHud").classList.toggle("low", sec<=10); } }
     $("#hhpFill").style.width = hpP+"%";
     $("#hhpTxt").textContent = fmt(hp)+" / "+fmt(C.hp);
-    { const hp=heroPower(); if(hp>(S.pmax||0)) S.pmax=hp; }
+    { const hp=heroPower(); if(hp>(S.pmax||0)) S.pmax=hp; }   // pmax = puissance max de la partie en cours
     $("#heroLine").innerHTML = "⚡ "+fmt(heroPower()); const hn=$("#heroName"), ttl=S.lbTitle && S.lbTitle.wk===weekId() ? S.lbTitle.t.split(" ")[0] : "", nm=(S.pseudo||"Vous")+"|"+ttl; if(hn.dataset.v!==nm){ hn.dataset.v=nm; hn.innerHTML=esc(S.pseudo||"Vous")+(ttl?" "+ico(ttl):""); }
   } else {
     $("#miniE").style.width = ep+"%";
@@ -3455,7 +3455,7 @@ function rebirth(){
   if(unlocked) S.classes[unlocked.id] = 1;
   const chest = chestOf(S.maxStage), oldBest = S.best;
   if(runClimb()<20) return;
-  const keep = Object.assign({}, S, {souls:S.souls+g, prestiges:S.prestiges+1});
+  const keep = Object.assign({}, S, {souls:S.souls+g, prestiges:S.prestiges+1, pwSum:powerTotal()});   // la puissance max de cette partie s'ajoute au cumul du classement
   const paid = [...SLOTKEYS.map(k=>S.equip[k]), ...S.inv].filter(it=>it && (it.sov || it.set==="souverain"));   // objets payés : gardés
   S = newState(keep);
   for(const old of paid){ const it=Object.assign(sovItem(old.slot, false, 1), {id:old.id, ench:old.ench});   // revient au niveau 1
@@ -6196,7 +6196,7 @@ const DEMO_SAVE = {"gold":19098.614429971927,"souls":0,"prestiges":0,"best":26,"
 /* Partie « tout au max » pour tester : Renaissance max, tout débloqué, meilleur équipement, tout au niveau max */
 function loadMax(){
   const pseudo=S.pseudo, pseudoSkip=S.pseudoSkip, opts=S.opts;
-  const ST=500;
+  const ST=PREST_MIN+50*20;   // étape requise pour renaître avec 20+ renaissances
   S = newState(); S.pseudo=pseudo; S.pseudoSkip=pseudoSkip; S.opts=Object.assign(S.opts, opts||{});
   S.prestiges = Math.max(50, ...PMILE.map(m=>m.p)); S.best=S.maxStage=S.stage=ST; S.runStart=1; S.joined="2026-01-01";
   S.gold=1e21; S.crystals=50000; S.orbs=20000; S.ingots=20000; S.scraps=1e21; S.souls=100000; S.treats=5000;
@@ -6268,6 +6268,8 @@ function save(){
    Copie de la partie dans l'espace privé du joueur. Ailleurs (site web, appli Android),
    claude n'existe pas et seule la sauvegarde de l'appareil est utilisée. */
 /* Puissance : un seul nombre qui résume le chevalier (dégâts par seconde, vie et défense) */
+/* Classement Puissance : somme des puissances max de chaque partie (une par Renaissance) + la partie en cours */
+function powerTotal(){ S.pmax = Math.max(S.pmax||0, heroPower()); return (S.pwSum||0) + S.pmax; }
 function heroPower(){
   if(typeof C==="undefined" || !C) return 0;
   const dps = (C.atk||0)/(C.interval||1)*(1+(C.crit||0)/100*((C.critd||100)/100))*(1+((C.dbl||0)+2*(C.tpl||0))/100) + (C.famDps||0);
@@ -6405,8 +6407,7 @@ async function recDo(){
 }
 function lbRow(name){
   const c=S.chal||{};
-  S.pmax = Math.max(S.pmax||0, heroPower());
-  const r={name, power:Math.floor(S.pmax), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
+  const r={name, power:Math.floor(powerTotal()), best:Math.floor(S.best||0), tower:Math.max(0,(c.floor||1)-1), titan:+(c.wbest||0).toFixed(2), titan_wk:String(c.wk||""), rebirths:S.prestiges||0, updated_at:new Date().toISOString()};
   if(lbNoPower) delete r.power;
   r.week = weekScore();
   return r;
@@ -6480,8 +6481,8 @@ function lbDeleteAsk(){
 function renderRank(){
   const box=$("#tab-rank"), R=RK.find(r=>r.k===rkTab)||RK[0]; if(!box) return;
   const sub=`<div class="seg rksub">${RK.map(r=>`<button data-rk="${r.k}" class="${r.k===R.k?"on":""}">${r.n}</button>`).join("")}</div>`;
-  const myV=R.k==="power"?Math.floor(Math.max(S.pmax||0, heroPower())):R.k==="week"?weekScore():lbRow(S.pseudo||"")[R.k];
-  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="week"?"boss vaincus depuis lundi":R.k==="titan"?"cette semaine":R.k==="power"?"attaque, vie et défense":"tous les joueurs"}</span></div>${sub}
+  const myV=R.k==="power"?Math.floor(powerTotal()):R.k==="week"?weekScore():lbRow(S.pseudo||"")[R.k];
+  const head=`<div class="card" style="flex:none"><div class="chead"><h2>Classement</h2><span class="small">${R.k==="week"?"boss vaincus depuis lundi":R.k==="titan"?"cette semaine":R.k==="power"?"cumulée sur toutes vos parties":"tous les joueurs"}</span></div>${sub}
     <div class="rkme"><span class="rkn">${LB.me[R.k]?"#"+LB.me[R.k]:"–"}</span><span class="rkname">${S.pseudo?esc(S.pseudo):"<i>Sans nom</i>"} <small class="small">(vous)</small></span><span class="rkv">${myV>0?R.u(myV):"–"}</span></div>${S.pseudo?"":`<button class="btn gold sm wide" id="pseudoBtn" style="margin-top:6px">Choisir un nom pour apparaître au classement</button>`}</div>`;
   let body;
   if(!LB_ON()) body=`<div class="small" style="text-align:center;padding:24px 8px">🏆<br><b>Le classement en ligne arrive bientôt.</b><br>Votre nom est déjà réservé sur cet appareil : vos records y apparaîtront dès son ouverture.</div>`;
