@@ -1050,6 +1050,11 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 .enchbtns{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}.enchbtns .btn{flex:1;min-width:0;flex-direction:column;line-height:1.15}.enchbtns small{font-size:10px}
 .skllv{margin-top:8px;background:#e7f1ff;border:2px solid #a5c8ff;border-radius:12px;padding:6px 10px}.skllv b{font-family:var(--disp);font-weight:400;font-size:15px;display:block}.skllv small{font-size:12px;font-weight:700}.skllv .sp{width:14px;height:14px;vertical-align:-2px}
 .rdbtn.locked,.dbtn.locked{filter:grayscale(.9) brightness(1.05);opacity:.7}
+.rune2{position:relative;flex:none;width:38px;height:38px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--rc) 22%,#fff);border:3px solid var(--qc);box-shadow:0 2px 0 #0002}.rune2 .sp{width:22px;height:22px}
+.rune2 b{position:absolute;right:-6px;bottom:-6px;background:var(--qc);color:#fff;font-family:var(--disp);font-weight:400;font-size:11px;border-radius:7px;padding:0 4px;border:2px solid #fff}
+.rsub{font-size:11.5px;font-weight:700;color:#5c4a2a}.rsub.off{color:#aaa;font-style:italic}
+.rpick{display:flex!important;flex-direction:row!important;align-items:center;gap:6px;padding:3px 8px 3px 3px!important;border:2px solid var(--qc)!important;font-size:11px;text-align:left}.rpick .rune2{width:30px;height:30px}.rpick .rune2 .sp{width:16px;height:16px}
+.enchpick{flex-direction:column;align-items:stretch}
 </style>
 </head>
 <body>
@@ -1065,7 +1070,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0852";
+var BUILD_ID = "20261125-0904";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1774,7 +1779,7 @@ function newState(keep){
     tuto:{step:0, cnt:0, seen:{}, gs:{}, gq:[], intro:false}, orbs:0, treats:0, boosts:{gold:0, scraps:0}, extraSlot:0, skins:{owned:{classique:1}, hero:"classique", aura:false}, streak:{n:0, last:""}, wq:{wk:"", list:[], bonus:false}, bp:{season:-1, xp:0, tier:"", cl:{f:{},c:{},r:{}}, day:"", bossXP:0}, talents:{}, altar:{}, market:{day:"", n:{}}, firstLeg:false, chal:{floor:1, keys:3, day:"", wk:"", wbest:0, wclaim:{}, wtries:3, adKey:""}, skl:{owned:{}, eq:[], pulls:0, pity:0}, quests:{day:"", list:[], bonus:false}, ach:{claimed:{}, tier:{}, tiersV2:true}, event:{tokens:0, bought:{}},
     stats:{kills:0,bosses:0}, last:Date.now()
   };
-  if(keep){ for(const k of ["pseudo","pseudoSkip","pwSum","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","rinvL","dust","grim","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
+  if(keep){ for(const k of ["pseudo","pseudoSkip","pwSum","recCode","recHash","wkb","wkClaimed","lbTitle","souls","prestiges","best","opts","stats","pets","team","crystals","pity","pulls","favPet","favSkl","invX","runes","rinvL","rinv","runeV2","dust","grim","ingots","cls","classes","city","cityStash","mail","daily","iap","ads","tuto","quests","ach","event","skl","altar","firstLeg","chal","soulsV2","matsGone","orbs","joined","treats","boosts","extraSlot","skins","streak","wq","bp","talents"]) s[k]=keep[k]; }
   s.equip.arme = {id:uid(), slot:"arme", ri:0, ilvl:1, name:"Épée rouillée", atk:3};
   return s;
 }
@@ -1823,7 +1828,7 @@ const RES_INFO = {
   wtry:   {ic:"🐲", n:"Essais contre le Titan", have:()=>`${S.chal.wtries}/${W_TRIES}`, use:"Chaque combat contre le Titan de la semaine utilise un essai.",
            get:[()=>`${W_TRIES} essais offerts chaque jour`,"Marché du jour de la Boutique : 40 💎 l'essai (2 par jour)"], mkt:"wtry"},
   dtry:   {ic:"🔑", n:"Clés de donjon", have:()=>`${S.chal.dtries||0}/${dungTries()}`, use:"Chaque combat de donjon (runes ou ressources) utilise une clé, victoire ou défaite.",
-           get:[()=>`${DUNG_TRIES_BASE} clés offertes chaque jour, communes à tous les donjons`], go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
+           get:[()=>`${DUNG_TRIES_BASE} clés offertes chaque jour, communes à tous les donjons`,"Marché du jour de la Boutique : 25 💎 la clé (5 par jour)"], mkt:"dkey", go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
   scraps: {ic:"🔩", n:"Scraps", have:()=>fmt(S.scraps), use:"Renforcer l'équipement et payer les fusions.",
            get:["Tous les monstres, bien plus sur les boss","Démonter les objets dont vous ne voulez plus","Tour, quêtes, coffres, absence","Marché du jour : Caisse de scraps et Ferraille au poids"], shop:"bonus"},
   treats: {ic:"🍖", n:"Friandises", have:()=>fmt(S.treats), use:"Monter le niveau de vos familiers (+10 % de dégâts par niveau, jusqu'au niveau 50).",
@@ -1832,7 +1837,7 @@ const RES_INFO = {
            get:["Donjon de ressources « Puits runique » (onglet Défis → Donjon → Ressources)","5 à 38 par victoire selon la difficulté"], go:{t:"⛏️ Aller aux donjons", f:()=>{ defTab="rune"; dungSub="res"; showView("defis"); }}},
   grim:   {ic:"§parchemin§", n:"Grimoires", have:()=>fmt(S.grim||0), use:"Monter le niveau de vos compétences (1 → 10, +10 % d'effet par niveau), en plus des étoiles.",
            get:["Donjon de ressources « Bibliothèque oubliée » (onglet Défis → Donjon → Ressources)","2 à 12 par victoire selon la difficulté"], go:{t:"⛏️ Aller aux donjons", f:()=>{ defTab="rune"; dungSub="res"; showView("defis"); }}},
-  runes:  {ic:"✨", n:"Runes", have:()=>runeStacks().reduce((a,x)=>a+x.n,0)+" en réserve", use:"Enchanter vos objets Légendaires et Mythiques portés.",
+  runes:  {ic:"✨", n:"Runes", have:()=>runeList().length+" en réserve", use:"Enchanter vos objets Légendaires et Mythiques portés.",
            get:["Donjon des runes : une rune différente chaque jour","Plus la difficulté est haute, plus il en donne (2 à 40)","Grande expédition du Fief : 3 runes"], go:{t:"✨ Aller au Donjon", f:()=>{ defTab="rune"; showView("defis"); }}},
   city:   {ic:"🏰", n:"Ressources du Fief", have:()=>S.city?`${fmt(S.city.res.or)} 💰 · ${fmt(S.city.res.bois)} 🌲 · ${fmt(S.city.res.pierre)} 🪨`:"0", use:"Améliorer les bâtiments du village et du royaume.",
            get:["Mine, scierie et carrière, même jeu fermé (à récolter, jusqu'à ${STOCK_H} h de stock)","Patrouilles (expéditions)","Assauts de pillards repoussés","Marché du jour : Convoi pour le fief"], shop:"bonus"},
@@ -3477,7 +3482,7 @@ function rebirth(){
   const chest = chestOf(S.maxStage), oldBest = S.best;
   if(runClimb()<20) return;
   const paid = [...SLOTKEYS.map(k=>S.equip[k]), ...S.inv].filter(it=>it && (it.sov || it.set==="souverain"));   // objets payés : gardés
-  for(const it of [...SLOTKEYS.map(k=>S.equip[k]), ...S.inv]) if(it && !paid.includes(it) && it.ench){ it.ench.forEach(e=>{ if(e && RUNES[e.r]) giveRune(e.r, e.l); }); it.ench=[]; }   // les runes des objets perdus reviennent dans l'inventaire
+  for(const it of [...SLOTKEYS.map(k=>S.equip[k]), ...S.inv]) if(it && !paid.includes(it)) freeRunes(it);   // les runes des objets perdus reviennent dans l'inventaire
   const keep = Object.assign({}, S, {souls:S.souls+g, prestiges:S.prestiges+1, pwSum:powerTotal()});   // la puissance max de cette partie s'ajoute au cumul du classement
   S = newState(keep);
   for(const old of paid){ const it=Object.assign(sovItem(old.slot, false, 1), {id:old.id, ench:old.ench});   // revient au niveau 1
@@ -3555,11 +3560,14 @@ document.addEventListener("click", e=>{
   if(t.dataset.guide){ guideShow(t.dataset.guide, false); return; }
   if(t.dataset.altar){ altarBuy(t.dataset.altar); renderPrest(); return; }
   if(t.id==="altarReset"){ S.souls += altarSpent(); S.altar={}; calc(); dirty.stats=true; renderPrest(); save(); return; }
+  if(t.dataset.rdism){ const L=runeList(), j=L.findIndex(x=>x.id===t.dataset.rdism); if(j>=0){ const ru=L.splice(j,1)[0], v=runeDustValue(ru); S.dust=(S.dust||0)+v; Sfx.play("craft"); toast(`♻️ ${runeName(ru)} démontée : +${v} ${spr("etincelles")}`); save(); renderDefis(true); } return; }
+  if(t.id==="runeDismCom"){ const L=runeList(), com=L.filter(x=>x.q===0); if(!com.length) return; const v=com.reduce((a,x)=>a+runeDustValue(x),0);
+    modal("Démonter les Communes ?", `${com.length} rune${com.length>1?"s":""} Commune${com.length>1?"s":""} pour <b>${v} Poussière runique</b>.`, [{t:"Annuler"},{t:"Démonter", cls:"gold", f:()=>{ S.rinv=L.filter(x=>x.q!==0); S.dust=(S.dust||0)+v; Sfx.play("craft"); save(); renderDefis(true); }}]); return; }
   if(t.dataset.dsub){ dungSub=t.dataset.dsub; renderDefis(true); return; }
   if(t.dataset.rdlock){ const [id,i]=t.dataset.rdlock.split(":"), D=RDUNG.find(x=>x.id===id), d=RD_DIFF[+i], prev=RD_DIFF[+i-1];
     Sfx.play("ui"); modal(`🔒 ${D.n} · ${d.n}`, `<div class="small" style="text-align:left">Pour débloquer cette difficulté, battez d'abord <b>${D.n} en ${prev.n}</b> (gardien d'étape ${prev.st}).<br><br>Ensuite : gardien d'étape <b>${d.st}</b>, qui rapporte <b>${D.txt(D.amt(+i))}</b>.</div>`, [{t:"Compris", cls:"gold"}]); return; }
   if(t.dataset.dlock){ const i=+t.dataset.dlock, d=DUNG_DIFF[i], prev=DUNG_DIFF[i-1];
-    Sfx.play("ui"); modal(`🔒 Donjon des runes · ${d.n}`, `<div class="small" style="text-align:left">Pour débloquer cette difficulté, battez d'abord le gardien en <b>${prev.n}</b> (étape ${prev.st}), quelle que soit la rune du jour.<br><br>Ensuite : gardien d'étape <b>${d.st}</b>, qui rapporte <b>${d.r} runes</b>.</div>`, [{t:"Compris", cls:"gold"}]); return; }
+    Sfx.play("ui"); modal(`🔒 Donjon des runes · ${d.n}`, `<div class="small" style="text-align:left">Pour débloquer cette difficulté, battez d'abord le gardien en <b>${prev.n}</b> (étape ${prev.st}), quelle que soit la rune du jour.<br><br>Ensuite : gardien d'étape <b>${d.st}</b>, qui rapporte <b>${RUNE_DROP[i].n} rune${RUNE_DROP[i].n>1?"s":""}</b>${RUNE_DROP[i].w[4]?` (${RUNE_DROP[i].w[4]} % de Mythique)`:""}.</div>`, [{t:"Compris", cls:"gold"}]); return; }
   if(t.dataset.rdung){ const [id,d]=t.dataset.rdung.split(":"); rdStart(id,+d); return; }
   if(t.dataset.chal){ if(t.dataset.chal==="tower") towerLaunch(); else if(t.dataset.chal==="wboss") titanLaunch(); else chalStart(t.dataset.chal); return; }
   if(t.id==="teMenu"){ towerEndClose(false); return; }
@@ -3778,7 +3786,7 @@ function expClaim(){
   const c=S.city, x=c.exp; if(!x || Date.now()<x.end) return;
   const e=EXPS.find(y=>y.id===x.id), l=expLoot(e, x.sol);
   S.ingots=(S.ingots||0)+(l.ingots||0); S.orbs+=(l.orbs||0); c.res.or+=(l.or||0); c.res.bois+=(l.bois||0); c.res.pierre+=(l.pierre||0);
-  if(l.runes){ S.runes=S.runes||{}; const ks=Object.keys(RUNES); for(let i=0;i<l.runes;i++){ const k=pick(ks); S.runes[k]=(S.runes[k]||0)+1; } }
+  if(l.runes){ const ks=Object.keys(RUNES); for(let i=0;i<l.runes;i++) if(runeList().length<RUNE_INV_MAX) runeList().push(makeRune(pick(ks), rollRuneQ([50,35,13,2,0]))); }
   const cards=[];
   if(l.item){ const ri = Math.random()<0.15 ? 4 : 3, it=makeItem(Math.max(1,craftLvl()), ri); placeItem(it); dirty.loot=true; cards.push({ic:SLOTS[it.slot].ic, n:it.name, ri, tag:"Butin d'expédition"}); }
   c.soldiers=Math.min(cityPop(), c.soldiers+x.sol); c.exp=null; track("expedition");
@@ -4763,6 +4771,7 @@ function premiumHTML(){
 }
 const MARKET = [
   {id:"key",    ic:"🔑", n:"Clé de la tour",          d:()=>"Une tentative de plus à la Tour des épreuves", cur:"cr", cost:()=>30, max:3, ok:()=>unlocked("defis"), give:()=>{ S.chal.keys++; }},
+  {id:"dkey",   ic:"🔑", n:"Clé de donjon",           d:()=>"Un combat de plus dans les donjons (runes ou ressources)", cur:"cr", cost:()=>25, max:5, ok:()=>hasP(3), give:()=>{ S.chal.dtries=(S.chal.dtries||0)+1; }},
   {id:"wtry",   ic:"🐲", n:"Essai contre le Titan",   d:()=>"Un essai de plus contre le Titan de la semaine", cur:"cr", cost:()=>40, max:2, ok:()=>unlocked("defis"), give:()=>{ S.chal.wtries++; }},
   {id:"scrapc", ic:"🔩", n:"Caisse de scraps",        d:()=>`+${fmt(itemCost()*25)} scraps pour renforcer et fusionner`, cur:"cr", cost:()=>20, max:5, give:()=>{ S.scraps+=itemCost()*25; }},
   {id:"boost",  ic:"⚡", n:"Vitesse ×2 / ×3 · 30 min", d:()=>"Débloque les vitesses rapides pendant 30 minutes", cur:"cr", cost:()=>25, max:4, ok:()=>!S.iap.speed, give:()=>{ S.ads.boostUntil=Math.max(Date.now(),S.ads.boostUntil||0)+30*60e3; dirty.enemy=true; }},
@@ -5211,7 +5220,7 @@ function towerCountdown(m){   // 3, 2, 1, Combat ! : on voit le gardien avant qu
     if(n>0){ show(String(n)); n--; setTimeout(tick, 750); return; }
     show("Combat !"); setTimeout(()=>{ cd.classList.remove("on"); if(MODE===m) m.hold=false; }, 650);
   };
-  setTimeout(tick, 350);
+  tick();
 }
 function towerEndShow(win, m, e, quit){
   const f=m.floor, rw=towerReward(f), el=$("#tend");
@@ -5237,7 +5246,7 @@ function chalStart(kind){
   if(MODE || deadT>0 || !unlocked("defis")) return;
   if(kind==="tower" && S.chal.keys<=0) return;
   if(kind==="wboss"){ if(S.chal.wtries<=0) return; S.chal.wtries--; }
-  MODE={kind, floor:S.chal.floor};
+  MODE={kind, floor:S.chal.floor, hold:true};   // figé jusqu'à la fin du 3, 2, 1
   S.hp=C.hp; for(const k in skCd) skCd[k]=0;
   showView("combat"); spawn(); dirty.enemy=true; Sfx.play("boss"); save();
 }
@@ -5258,10 +5267,12 @@ function modeEnd(win, quit){
   }
   if(m.kind==="dungeon"){
     const d=DUNG_DIFF[m.diff], R=RUNES[m.rune];
-    if(win){ S.runes=S.runes||{}; S.runes[m.rune]=(S.runes[m.rune]||0)+d.r; track("dungeon"); S.chal.dmax=Math.max(S.chal.dmax ?? -1, m.diff);
-      log(`✨ Donjon des runes (${d.n}) : +${d.r} runes de ${R.n} !`, "boss");
+    if(win){ const drop=RUNE_DROP[m.diff], got=[]; for(let k=0;k<drop.n;k++){ const ru=makeRune(m.rune, rollRuneQ(drop.w)); got.push(ru); }
+      const L=runeList(), dust=[]; got.forEach(ru=>{ if(L.length<RUNE_INV_MAX) L.push(ru); else { const v=runeDustValue(ru); S.dust=(S.dust||0)+v; dust.push(v); } });
+      track("dungeon"); S.chal.dmax=Math.max(S.chal.dmax ?? -1, m.diff);
+      log(`✨ Donjon des runes (${d.n}) : ${got.map(runeName).join(", ")} !`, "boss");
       lastPull=0; revealCb=()=>{ defTab="rune"; dungSub="inv"; showView("defis"); renderDefis(true); };
-      showReveal([{ic:`§${R.ic}§`, n:`${d.r} runes de ${R.n} (niv. 1)`, ri:d.r>=8?5:d.r>=4?4:3, rn:"Donjon des runes", tag:`Chaque rune : ${runeTxt(m.rune,1)} au niveau 1, ${runeTxt(m.rune,RUNE_MAX)} au niveau ${RUNE_MAX}. Vous en avez ${runeCount(m.rune)}.`}]);
+      showReveal(got.map(ru=>({ic:`§${R.ic}§`, n:runeName(ru), ri:RR[ru.q].ri, rn:"Donjon des runes", tag:`${statTxt(ru.r, runeMain(ru))}<br><small>+${Math.round(runeGrow(ru.q)*100)} % de la base par niveau · sous-stats à +4 et +8</small>${dust.length?"<br><small>Inventaire plein : démontée en Poussière</small>":""}`})));
     } else {
       log(quit?`✨ Donjon abandonné (une clé utilisée).`:`✨ Le gardien de la rune de ${R.n} vous a repoussé.`, "bad");
       modal(quit?"Donjon abandonné":"Repoussé !", `Il vous reste <b>${S.chal.dtries||0}</b> clé${(S.chal.dtries||0)>1?"s":""} de donjon aujourd'hui. Essayez une difficulté plus basse ou renforcez-vous.`, [{t:"OK", cls:"gold", f:()=>{ defTab="rune"; showView("defis"); renderDefis(true); }}]);
@@ -5362,7 +5373,7 @@ let defisSig="";
 function renderDefis(force){
   const box=$("#defis"); if(!box) return;
   if(!unlocked("defis")){ box.innerHTML=""; $("#defSeg").innerHTML=""; return; }
-  const c=S.chal, sig=[defTab,c.floor,c.keys,c.wtries,c.wbest.toFixed(2),JSON.stringify(c.wclaim),c.adKey===today(),!!MODE,c.dtries,JSON.stringify(S.runes||{}),JSON.stringify(S.rinvL||{}),S.dust||0,S.grim||0,dungSub,JSON.stringify(c.rmax||{}),runeToday()].join("|");
+  const c=S.chal, sig=[defTab,c.floor,c.keys,c.wtries,c.wbest.toFixed(2),JSON.stringify(c.wclaim),c.adKey===today(),!!MODE,c.dtries,runeList().length+":"+runeList().reduce((a,x)=>a+x.l+x.q,0),S.dust||0,S.grim||0,dungSub,JSON.stringify(c.rmax||{}),runeToday()].join("|");
   if(sig===defisSig && !force) return;
   const first = !defisSig.startsWith(defTab+"|") ;
   defisSig=sig;
@@ -6034,30 +6045,55 @@ const Sfx = (()=>{
 /* Chaque jour, le Donjon des runes donne un élément différent. Les runes enchantent les Légendaires (1 emplacement)
    et les Mythiques (2 emplacements) ; chaque niveau d'enchantement coûte autant de runes que son niveau. */
 const RUNES = {
-  feu:    {n:"Feu",    ic:"flamme",   c:"#ff6b3d", st:"atk",  per:3,   d:"+{v} % d'attaque"},
-  givre:  {n:"Givre",  ic:"nuage",    c:"#74c0fc", st:"dodge", per:0.5, d:"+{v} % d'esquive"},
-  foudre: {n:"Foudre", ic:"eclair",   c:"#ffd43b", st:"dbl",   per:0.5, d:"+{v} % de double coup"},
-  vie:    {n:"Vie",    ic:"coeurvert",c:"#40c057", st:"hp",   per:3,   d:"+{v} % de PV"},
-  ombre:  {n:"Ombre",  ic:"dague",    c:"#9b6dff", st:"critd", per:5,  d:"+{v} % de dégâts critiques"},
-  sang:   {n:"Sang",   ic:"goutte",   c:"#e03131", st:"vol",  per:0.4, d:"+{v} % de vol de vie"},
-  or:     {n:"Or",     ic:"piece",    c:"#f2c94c", st:"gold", per:4,   d:"+{v} % d'or"},
+  feu:    {n:"Feu",    ic:"flamme",   c:"#ff6b3d", st:"atk",  per:3,   mx:10,  d:"+{v} % d'attaque"},
+  givre:  {n:"Givre",  ic:"nuage",    c:"#74c0fc", st:"dodge", per:0.5, mx:1.5, d:"+{v} % d'esquive"},
+  foudre: {n:"Foudre", ic:"eclair",   c:"#ffd43b", st:"dbl",   per:0.5, mx:1,   d:"+{v} % de double coup"},
+  vie:    {n:"Vie",    ic:"coeurvert",c:"#40c057", st:"hp",   per:3,   mx:10,  d:"+{v} % de PV"},
+  ombre:  {n:"Ombre",  ic:"dague",    c:"#9b6dff", st:"critd", per:5,  mx:16,  d:"+{v} % de dégâts critiques"},
+  sang:   {n:"Sang",   ic:"goutte",   c:"#e03131", st:"vol",  per:0.4, mx:1.2, d:"+{v} % de vol de vie"},
+  or:     {n:"Or",     ic:"piece",    c:"#f2c94c", st:"gold", per:4,   mx:13,  d:"+{v} % d'or"},
 };
 const RUNE_DAY = ["or","feu","givre","foudre","vie","ombre","sang"];   // dimanche → samedi
 const JOURS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const RUNE_MAX = 10, DUNG_TRIES_BASE = 10;
 const dungTries = () => DUNG_TRIES_BASE;   // 10 clés de donjon par jour, communes au Donjon des runes et aux donjons de ressources
-/* Inventaire de runes : les runes niveau 1 sont comptées dans S.runes[type] ; une rune retirée d'un objet garde son niveau (S.rinvL["type:niv"]). */
+/* ===== Runes v2 : chaque rune est unique =====
+   Rareté (Commune → Mythique) ; stat principale tirée au hasard dans la fourchette de sa rareté (1/5 du maximum par rareté) ;
+   chaque niveau ajoute 10 % (+3 % par rareté) de la valeur de base ; une sous-stat se débloque à +4 et à +8 ; reforge des sous-stats. */
+const RR = [{n:"Commune", ri:0}, {n:"Rare", ri:2}, {n:"Épique", ri:3}, {n:"Légendaire", ri:4}, {n:"Mythique", ri:5}];   // ri = couleur dans RAR
+const rrC = q => RAR[RR[q].ri].c;
 const DUST_UP = [0, 5, 10, 18, 30, 45, 65, 90, 120, 160];   // Poussière runique pour passer du niveau n au niveau n+1 (fixe)
 const runeChance = l => { const t=l+1; return t<=3 ? 100 : Math.max(30, 100-10*(t-3)); };   // +4 : 90 %, +5 : 80 %… +10 : 30 %
-const runeRemoveCost = e => Math.ceil(craftScrap(Math.max(10, S.maxStage||1))*0.4*e.l);
-function runeStacks(){ const o=[]; for(const r in RUNES){ const n=(S.runes||{})[r]||0; if(n>0) o.push({r, l:1, n}); }
-  for(const k in (S.rinvL||{})){ const n=S.rinvL[k]; if(n>0){ const [r,l]=k.split(":"); if(RUNES[r]) o.push({r, l:+l, n}); } }
-  return o.sort((a,b)=> b.l-a.l || Object.keys(RUNES).indexOf(a.r)-Object.keys(RUNES).indexOf(b.r)); }
-const runeCount = r => runeStacks().filter(x=>x.r===r).reduce((a,x)=>a+x.n,0);
-function takeRune(r,l){ if(l<=1){ if(((S.runes||{})[r]||0)<1) return false; S.runes[r]--; return true; }
-  const k=r+":"+l; if(!S.rinvL || !(S.rinvL[k]>0)) return false; if(--S.rinvL[k]<=0) delete S.rinvL[k]; return true; }
-function freeRunes(it){ if(it && it.ench){ it.ench.forEach(e=>{ if(e && RUNES[e.r]) giveRune(e.r, e.l); }); it.ench=[]; } }   // un objet détruit rend ses runes
-function giveRune(r,l,n=1){ if(l<=1){ S.runes=S.runes||{}; S.runes[r]=(S.runes[r]||0)+n; } else { S.rinvL=S.rinvL||{}; S.rinvL[r+":"+l]=(S.rinvL[r+":"+l]||0)+n; } }
+const REFORGE_COST = 20, RUNE_INV_MAX = 150;
+const runeGrow = q => 0.10 + 0.03*q;
+const runeMain = ru => ru.b * (1 + runeGrow(ru.q)*(ru.l-1));
+const rfmt = v => (Math.round(v*100)/100).toLocaleString("fr-FR", {maximumFractionDigits: v>=10?1:2});
+const statTxt = (r, v) => RUNES[r].d.replace("{v}", rfmt(v));
+const runeRemoveCost = ru => Math.ceil(craftScrap(Math.max(10, S.maxStage||1))*0.4*ru.l);
+const runeDustValue = ru => [1,2,4,7,12][ru.q] + 2*(ru.l-1);
+function rollBand(r, q, mult=1){ const mx=RUNES[r].mx*mult, lo=Math.max(0.04, q*0.2), hi=(q+1)*0.2; return mx*(lo + Math.random()*(hi-lo)); }
+function rollSub(ru){ const used=new Set([ru.r, ...(ru.subs||[]).map(x=>x.r)]); const pool=Object.keys(RUNES).filter(k=>!used.has(k)); const r=pick(pool); return {r, v:rollBand(r, ru.q, 0.5)}; }
+function makeRune(r, q, l=1){ const ru={id:"ru"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36), r, q, b:rollBand(r,q), l:1, subs:[]}; while(ru.l<l) runeLevelUp(ru); return ru; }
+function runeLevelUp(ru){ ru.l++; if(ru.l===4 || ru.l===8) ru.subs.push(rollSub(ru)); }
+function runeName(ru){ return `${RUNES[ru.r].n} ${RR[ru.q].n.toLowerCase()}`; }
+function runeChip2(ru, extra=""){ const R=RUNES[ru.r]; return `<span class="rune2" style="--rc:${R.c};--qc:${rrC(ru.q)}">${spr(R.ic)}<b>+${ru.l}</b></span>${extra}`; }
+function runeLines(ru){ return `<b style="color:${rrC(ru.q)}">${statTxt(ru.r, runeMain(ru))}</b>` + (ru.subs||[]).map(x=>`<br><span class="rsub">• ${statTxt(x.r, x.v)}</span>`).join("") + (ru.l<4?`<br><span class="rsub off">Sous-stat à +4</span>`:ru.l<8?`<br><span class="rsub off">2e sous-stat à +8</span>`:""); }
+const runeList = () => (S.rinv=S.rinv||[]);
+const runeCount = r => runeList().filter(x=>x.r===r).length;
+function runeScore(ru){ return ru.q*100 + ru.l*10 + ru.b/RUNES[ru.r].mx; }
+function freeRunes(it){ if(it && it.ench){ it.ench.forEach(e=>{ if(e && e.id) runeList().push(e); }); it.ench=[]; } }   // un objet détruit rend ses runes
+/* Butin du Donjon des runes : nombre et rareté selon la difficulté */
+const RUNE_DROP = [ {n:1, w:[70,25,5,0,0]}, {n:1, w:[45,35,17,3,0]}, {n:2, w:[25,35,30,9,1]}, {n:2, w:[10,30,38,18,4]}, {n:3, w:[0,20,40,32,8]}, {n:3, w:[0,10,35,40,15]} ];
+function rollRuneQ(w){ let x=Math.random()*100, a=0; for(let i=0;i<5;i++){ a+=w[i]; if(x<a) return i; } return 0; }
+/* Ancien système (runes identiques empilées) → runes v2 */
+function runeMigrate(){
+  if(S.runeV2) return; S.runeV2=true; S.rinv=S.rinv||[];
+  for(const k of SLOTKEYS){ const it=S.equip[k]; if(it && it.ench) it.ench=it.ench.map(e=> e && !e.id && RUNES[e.r] ? makeRune(e.r, 2, e.l) : e); }
+  for(const it of (S.inv||[])) if(it.ench) it.ench=it.ench.map(e=> e && !e.id && RUNES[e.r] ? makeRune(e.r, 2, e.l) : e);
+  for(const r in (S.runes||{})){ const n=Math.min(15, Math.ceil((S.runes[r]||0)/4)); for(let i=0;i<n;i++) S.rinv.push(makeRune(r, 1)); }
+  for(const k in (S.rinvL||{})){ const [r,l]=k.split(":"); if(RUNES[r]) for(let i=0;i<S.rinvL[k];i++) S.rinv.push(makeRune(r, 2, +l)); }
+  S.runes={}; S.rinvL={};
+}
 /* Donjons de ressources : 5 donjons × 5 difficultés à étape fixe */
 const RD_DIFF = [{n:"Normal", st:60, c:"blue"}, {n:"Difficile", st:150, c:"gold"}, {n:"Héroïque", st:250, c:"red"}, {n:"Légendaire", st:400, c:"violet"}, {n:"Cauchemar", st:600, c:"dark"}];
 const RDUNG = [
@@ -6081,7 +6117,7 @@ const runeVal = (r, l) => Math.round(RUNES[r].per*l*10)/10;
 const runeTxt = (r, l) => RUNES[r].d.replace("{v}", String(runeVal(r,l)).replace(".",","));
 function runeBonus(){
   const b={}; for(const k of SLOTKEYS){ const it=S.equip[k]; if(!it || !it.ench) continue;
-    it.ench.forEach(e=>{ if(e && RUNES[e.r]){ const st=RUNES[e.r].st; b[st]=(b[st]||0)+runeVal(e.r, e.l); } }); }
+    it.ench.forEach(e=>{ if(e && e.id && RUNES[e.r]){ const st=RUNES[e.r].st; b[st]=(b[st]||0)+runeMain(e); (e.subs||[]).forEach(x=>{ const s2=RUNES[x.r].st; b[s2]=(b[s2]||0)+x.v; }); } }); }
   return b;
 }
 function runeChip(r, n){ const R=RUNES[r]; return `<span class="rune" style="--rc:${R.c}" title="Rune de ${R.n}">${spr(R.ic)}<b>${n}</b></span>`; }
@@ -6090,38 +6126,40 @@ function enchantHTML(it, kind){
   it.ench = it.ench || [];
   let h = `<div class="enchbox"><div class="enchh">✨ Enchantements <small>${n} emplacement${n>1?"s":""} · ${spr("etincelles")} ${S.dust||0} Poussière runique</small></div>`;
   for(let i=0;i<n;i++){ const e=it.ench[i];
-    if(e && RUNES[e.r]){ const R=RUNES[e.r], mx=e.l>=RUNE_MAX, cost=DUST_UP[e.l]||0, ch=runeChance(e.l), rm=runeRemoveCost(e);
-      h += `<div class="enchrow"><span class="rune big" style="--rc:${R.c}">${spr(R.ic)}</span><div class="mid"><b>${R.n} niv. ${e.l}</b><small>${runeTxt(e.r,e.l)}${mx?"":` → ${runeTxt(e.r,e.l+1)}`}</small>
+    if(e && e.id){ const mx=e.l>=RUNE_MAX, cost=DUST_UP[e.l]||0, ch=runeChance(e.l), rm=runeRemoveCost(e);
+      h += `<div class="enchrow">${runeChip2(e)}<div class="mid"><b style="color:${rrC(e.q)}">${runeName(e)}</b><small>${runeLines(e)}</small>
         <div class="enchbtns">${mx?`<span class="badge bup">Max</span>`:`<button class="btn sm violet" data-act="enchup:${i}" data-need="du:${cost}">+1 · ${spr("etincelles")} ${cost}<small>${ch<100?`réussite ${ch} %`:"réussite assurée"}</small></button>`}
+        ${e.subs.length?`<button class="btn sm" data-act="enchrf:${i}" data-need="du:${REFORGE_COST}">Reforger<small>${spr("etincelles")} ${REFORGE_COST} · sous-stats</small></button>`:""}
         <button class="btn sm" data-act="enchrm:${i}" data-need="sc:${rm}">Retirer<small>🔩 ${fmtP(rm)}</small></button></div></div></div>`;
     } else {
-      const own=runeStacks();
-      h += `<div class="enchrow empty"><span class="rune big empty">?</span><div class="mid"><b>Emplacement libre</b><small>${own.length?"Choisissez une rune de votre inventaire :":"Aucune rune : allez au Donjon des runes (onglet Défis)."}</small>
-        <div class="enchpick">${own.map(x=>`<button class="btn sm" data-act="ench:${i}:${x.r}:${x.l}" style="--rc:${RUNES[x.r].c}" title="${runeTxt(x.r,x.l)}">${runeChip(x.r,"niv."+x.l+" ×"+x.n)}</button>`).join("")}</div></div></div>`;
+      const own=runeList().filter(x=>x.r).sort((a,b)=>runeScore(b)-runeScore(a)).slice(0,12);
+      h += `<div class="enchrow empty"><span class="rune big empty">?</span><div class="mid"><b>Emplacement libre</b><small>${own.length?"Choisissez une rune (les meilleures d'abord) :":"Aucune rune : allez au Donjon des runes (onglet Défis)."}</small>
+        <div class="enchpick">${own.map(x=>`<button class="btn sm rpick" data-act="ench:${i}:${x.id}" style="--qc:${rrC(x.q)}">${runeChip2(x)}<span>${statTxt(x.r, runeMain(x))}</span></button>`).join("")}</div></div></div>`;
     } }
-  return h+`<div class="small" style="margin-top:4px">Améliorer une rune coûte de la Poussière runique (donjon « Puits runique »). Dès le niveau 4, l'amélioration peut échouer : la poussière est alors perdue, le niveau reste.</div></div>`;
+  return h+`<div class="small" style="margin-top:4px">Améliorer coûte de la Poussière runique (donjon « Puits runique »). Dès +4 l'amélioration peut échouer (la poussière est perdue). Une sous-stat se débloque à +4 et à +8.</div></div>`;
 }
 function enchantAct(it, act){
-  S.runes = S.runes || {}; it.ench = it.ench || [];
+  it.ench = it.ench || [];
   const p=act.split(":");
-  if(p[0]==="ench"){ const i=+p[1], r=p[2], l=+(p[3]||1); if(it.ench[i] || i>=runeSlots(it) || !RUNES[r] || !takeRune(r,l)) return; it.ench[i]={r, l}; Sfx.play("up"); toast(`✨ Rune de ${RUNES[r].n} niv. ${l} posée`); }
-  if(p[0]==="enchrm"){ const i=+p[1], e=it.ench[i]; if(!e) return; const c=runeRemoveCost(e); if(S.scraps<c) return; S.scraps-=c; giveRune(e.r, e.l); it.ench[i]=null; it.ench=it.ench.filter((x,j)=>x || j<runeSlots(it)); Sfx.play("ui"); toast(`✨ Rune de ${RUNES[e.r].n} niv. ${e.l} rangée dans l'inventaire`); }
+  if(p[0]==="ench"){ const i=+p[1], L=runeList(), j=L.findIndex(x=>x.id===p[2]); if(it.ench[i] || i>=runeSlots(it) || j<0) return; const ru=L.splice(j,1)[0]; it.ench[i]=ru; Sfx.play("up"); toast(`✨ ${runeName(ru)} +${ru.l} posée`); }
+  if(p[0]==="enchrm"){ const i=+p[1], e=it.ench[i]; if(!e) return; const c=runeRemoveCost(e); if(S.scraps<c) return; S.scraps-=c; runeList().push(e); it.ench[i]=null; Sfx.play("ui"); toast(`✨ ${runeName(e)} rangée dans l'inventaire`); }
+  if(p[0]==="enchrf"){ const i=+p[1], e=it.ench[i]; if(!e || !e.subs.length || (S.dust||0)<REFORGE_COST) return; S.dust-=REFORGE_COST; const n=e.subs.length; e.subs=[]; for(let k=0;k<n;k++) e.subs.push(rollSub(e)); Sfx.play("legend"); toast("🔁 Nouvelles sous-stats : "+e.subs.map(x=>statTxt(x.r,x.v)).join(" · ")); }
   if(p[0]==="enchup"){ const i=+p[1], e=it.ench[i]; if(!e || e.l>=RUNE_MAX) return; const c=DUST_UP[e.l]; if((S.dust||0)<c) return; S.dust-=c;
-    if(Math.random()*100 < runeChance(e.l)){ e.l++; Sfx.play("legend"); toast(`✨ Réussite ! ${RUNES[e.r].n} niv. ${e.l}`); }
-    else { Sfx.play("death"); toast(`💥 Échec… la poussière est perdue, la rune reste niv. ${e.l}`); } }
+    if(Math.random()*100 < runeChance(e.l)){ runeLevelUp(e); Sfx.play("legend"); toast(`✨ Réussite ! ${runeName(e)} +${e.l}${e.l===4||e.l===8?" · nouvelle sous-stat : "+statTxt(e.subs[e.subs.length-1].r, e.subs[e.subs.length-1].v):""}`); }
+    else { Sfx.play("death"); toast(`💥 Échec… la poussière est perdue, la rune reste +${e.l}`); } }
   vibe(10); calc(); dirty.equip=dirty.stats=dirty.loot=true; save();
 }
 function dungStart(d){
   chalReset(); if(MODE || deadT>0 || !unlocked("defis")) return;
   if((S.chal.dtries||0)<=0 || !dungOpen(d)) return; S.chal.dtries--;
-  MODE={kind:"dungeon", diff:d, rune:runeToday()};
+  MODE={kind:"dungeon", diff:d, rune:runeToday(), hold:true};
   S.hp=C.hp; for(const k in skCd) skCd[k]=0;
   showView("combat"); spawn(); dirty.enemy=true; Sfx.play("boss"); towerCountdown(MODE); save();
 }
 function rdStart(id, d){
   chalReset(); if(MODE || deadT>0 || !unlocked("defis") || !hasP(3)) return;
   const D=RDUNG.find(x=>x.id===id); if(!D || (S.chal.dtries||0)<=0 || !rdOpen(id,d)) return; S.chal.dtries--;
-  MODE={kind:"rdung", res:id, diff:d};
+  MODE={kind:"rdung", res:id, diff:d, hold:true};
   S.hp=C.hp; for(const k in skCd) skCd[k]=0;
   showView("combat"); spawn(); dirty.enemy=true; Sfx.play("boss"); towerCountdown(MODE); save();
 }
@@ -6141,26 +6179,27 @@ function renderResDung(box, sub){
   </div>`;
 }
 function renderRuneInv(box, sub){
-  const st=runeStacks(), worn=[]; for(const k of SLOTKEYS){ const it=S.equip[k]; (it&&it.ench||[]).forEach(e=>{ if(e&&RUNES[e.r]) worn.push({e, it}); }); }
-  const row = (r,l,extra) => `<div class="rinvrow"><span class="rune big" style="--rc:${RUNES[r].c}">${spr(RUNES[r].ic)}</span><div class="mid"><b>Rune de ${RUNES[r].n} · niv. ${l}</b><small>${runeTxt(r,l)}</small></div>${extra}</div>`;
+  const L=runeList().slice().sort((a,b)=>runeScore(b)-runeScore(a)), worn=[]; for(const k of SLOTKEYS){ const it=S.equip[k]; (it&&it.ench||[]).forEach(e=>{ if(e&&e.id) worn.push({e, it}); }); }
+  const row = (ru, extra) => `<div class="rinvrow">${runeChip2(ru)}<div class="mid"><b style="color:${rrC(ru.q)}">${runeName(ru)} +${ru.l}</b><small>${runeLines(ru)}</small></div>${extra}</div>`;
+  const nCom=L.filter(x=>x.q===0).length;
   box.innerHTML = sub + `<div class="card"><div class="chead"><h2>Matériaux</h2></div>
       <div class="matrow"><span data-res="dust" role="button">${spr("etincelles")} <b>${S.dust||0}</b> Poussière runique</span><span data-res="grim" role="button">${spr("parchemin")} <b>${S.grim||0}</b> Grimoires</span></div></div>
     <div class="card"><div class="chead"><h2>Runes posées</h2><span class="small">${worn.length}</span></div>
-      ${worn.length ? worn.map(w=>row(w.e.r, w.e.l, `<span class="small">${SLOTS[w.it.slot]?SLOTS[w.it.slot].n:""}</span>`)).join("") : `<div class="small">Aucune. Touchez un objet Légendaire ou Mythique porté (onglet Équipement) pour l'enchanter.</div>`}</div>
-    <div class="card"><div class="chead"><h2>Runes en réserve</h2><span class="small">${st.reduce((a,x)=>a+x.n,0)}</span></div>
-      ${st.length ? st.map(x=>row(x.r, x.l, `<b class="rinvn">×${x.n}</b>`)).join("") : `<div class="small">Aucune rune en réserve : gagnez-en au Donjon des runes.</div>`}
-      <div class="small" style="margin-top:6px">Une rune retirée d'un objet (contre des scraps) revient ici avec son niveau, prête à être reposée ailleurs.</div></div>`;
+      ${worn.length ? worn.map(w=>row(w.e, `<span class="small">${SLOTS[w.it.slot]?SLOTS[w.it.slot].n:""}</span>`)).join("") : `<div class="small">Aucune. Touchez un objet Légendaire ou Mythique porté (onglet Équipement) pour l'enchanter.</div>`}</div>
+    <div class="card"><div class="chead"><h2>Runes en réserve</h2><span class="small">${L.length}/${RUNE_INV_MAX}</span>${nCom?`<button class="btn sm" id="runeDismCom">Démonter les Communes (${nCom})</button>`:""}</div>
+      ${L.length ? L.map(x=>row(x, `<button class="btn sm" data-rdism="${x.id}">Démonter<small>+${runeDustValue(x)} ${spr("etincelles")}</small></button>`)).join("") : `<div class="small">Aucune rune en réserve : gagnez-en au Donjon des runes.</div>`}
+      <div class="small" style="margin-top:6px">Une rune retirée d'un objet (contre des scraps) revient ici avec son niveau et ses sous-stats. Démonter une rune rend de la Poussière runique.</div></div>`;
 }
 function renderRuneDung(box, sub){
   const r=runeToday(), R=RUNES[r], t=S.chal.dtries||0;
   const diffs = DUNG_DIFF.map((d,i)=>{ const op=dungOpen(i);
-    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" ${op?`data-dung="${i}"`:`data-dlock="${i}"`} ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${MODE?"disabled":""}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${d.st} · +${d.r} ${spr(R.ic)}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
+    return `<button class="btn ${d.c} dbtn ${op?"":"locked"} ${op&&t<=0&&!MODE?"lack":""}" ${op?`data-dung="${i}"`:`data-dlock="${i}"`} ${op&&t<=0&&!MODE?'data-lack="dtry"':""} ${MODE?"disabled":""}><b>${op?"":spr("cadenas")+" "}${d.n}</b><small>${op?`Étape ${d.st} · ${RUNE_DROP[i].n} ${spr(R.ic)}${RUNE_DROP[i].w[4]?` · ${RUNE_DROP[i].w[4]} % Myth.`:RUNE_DROP[i].w[3]?` · ${RUNE_DROP[i].w[3]} % Lég.`:""}`:`Battez ${DUNG_DIFF[i-1].n}`}</small></button>`; }).join("");
   const week = RUNE_DAY.map((x,i)=>({x,i})).slice(1).concat([{x:RUNE_DAY[0],i:0}]).map(({x,i})=>`<div class="dday ${x===r?"on":""}"><small>${JOURS[i].slice(0,3)}</small>${runeChip(x,runeCount(x))}</div>`).join("");
-  box.innerHTML = sub + `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · enchantement : ${runeTxt(r,1)} par niveau</small></div></div>
+  box.innerHTML = sub + `<div class="card dunghero" style="--rc:${R.c}"><div class="dic">${spr(R.ic)}</div><div><b>Donjon des runes : ${R.n}</b><small>${JOURS[new Date().getDay()]} · ${statTxt(r, RUNES[r].mx*0.04)} à ${statTxt(r, RUNES[r].mx)} selon la rareté</small></div></div>
     <div class="card"><div class="chead"><h2>Affronter le gardien</h2><span class="small reslink" data-res="dtry" role="button">${spr("cle")} Clés : <b>${t}</b>/${dungTries()}</span></div>
       <div class="dbtns">${diffs}</div><div class="small" style="margin-top:6px">Une clé de donjon par combat, même en cas de défaite. 10 clés par jour, communes à tous les donjons.</div></div>
     <div class="card"><div class="chead"><h2>Vos runes</h2></div><div class="dweek" data-res="runes" role="button">${week}</div>
-      <div class="small" style="margin-top:8px">Les runes enchantent vos objets <b style="color:${RAR[4].c}">Légendaires</b> (1 emplacement) et <b style="color:${RAR[5].c}">Mythiques</b> (2). Touchez un objet porté pour l'enchanter. Détail de vos runes : onglet « Inventaire ».</div></div>`;
+      <div class="small" style="margin-top:8px">Les runes enchantent vos objets <b style="color:${RAR[4].c}">Légendaires</b> (1 emplacement) et <b style="color:${RAR[5].c}">Mythiques</b> (2). Chaque rune a une rareté et des stats aléatoires : plus la difficulté est haute, plus les Légendaires et Mythiques tombent. Détail : onglet « Inventaire ».</div></div>`;
 }
 /* ================= PARTICULES ================= */
 /* Deux toiles : une dans l'arène (coups, morts, aura des boss, ambiance de zone), une plein écran (récompenses, achats). */
@@ -6332,9 +6371,9 @@ function loadMax(){
   S.skl.eq=[...SKILLS].sort((a,b)=>b.r-a.r).slice(0,sklMax()).map(k=>k.id);
   // équipement : ensemble du Souverain au niveau max, runes niveau max
   const RK=Object.keys(RUNES);
-  for(const k of SLOTKEYS){ const it=sovItem(k, false, ST); it.ench=[{r:"ombre",l:RUNE_MAX},{r:k==="talisman"?"foudre":"givre",l:RUNE_MAX}]; S.equip[k]=it; }
+  for(const k of SLOTKEYS){ const it=sovItem(k, false, ST); it.ench=[makeRune("ombre",4,RUNE_MAX), makeRune(k==="talisman"?"foudre":"givre",4,RUNE_MAX)]; S.equip[k]=it; }
   S.inv=[]; for(const k of SLOTKEYS) for(const set of ["loup","berserk"]){ const it=makeItem(ST,5,k,set); S.inv.push(it); }
-  S.runes={}; for(const r of RK) S.runes[r]=500; S.dust=5000; S.grim=1000; for(const k in S.skl.owned) S.skl.owned[k].lv=SKL_LMAX;
+  S.runes={}; S.runeV2=true; S.rinv=[]; for(const r of RK) for(let q=0;q<5;q++) S.rinv.push(makeRune(r, q, 1+q*2)); S.dust=5000; S.grim=1000; for(const k in S.skl.owned) S.skl.owned[k].lv=SKL_LMAX;
   // défis, passe, boutique
   S.chal=Object.assign(S.chal||{}, {floor:200, keys:3, dmax:DUNG_DIFF.length-1, wtries:3, dtries:dungTries(), wbest:0, wclaim:{}});
   S.bp.season=bpSeason(); S.bp.tier="r"; S.bp.xp=bpCum(BP_TIERS);
@@ -6676,6 +6715,7 @@ function load(o){
   if(o){
     S = Object.assign(base, o);
     S.forge = Object.assign(base.forge, o.forge||{});
+    if(!o.runeV2){ S.runeV2=false; try{ runeMigrate(); }catch(e){ S.runeV2=true; S.rinv=S.rinv||[]; } }   // runes v2 (uniques, raretés)
     if(!o.forgeV2){   // ancienne forge (×1,1 par niveau, +4 % de vitesse) : on convertit les niveaux pour garder la même puissance
       for(const k of ["atk","hp","def"]) S.forge[k] = Math.round((S.forge[k]||0)*Math.log(1.1)/Math.log(1.01));
       S.forge.spd = (S.forge.spd||0)*4;
