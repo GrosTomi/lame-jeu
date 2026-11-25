@@ -1056,6 +1056,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 .rpick{display:flex!important;flex-direction:row!important;align-items:center;gap:6px;padding:3px 8px 3px 3px!important;border:2px solid var(--qc)!important;font-size:11px;text-align:left}.rpick .rune2{width:30px;height:30px}.rpick .rune2 .sp{width:16px;height:16px}
 .enchpick{flex-direction:column;align-items:stretch}
 .villagewrap .vsvg{overflow:visible}
+.seg5 button small{font-size:clamp(8.5px,2.5vw,10.5px)}
 </style>
 </head>
 <body>
@@ -1071,7 +1072,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261125-0931";
+var BUILD_ID = "20261125-1358";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -1834,7 +1835,7 @@ const RES_INFO = {
   scraps: {ic:"🔩", n:"Scraps", have:()=>fmt(S.scraps), use:"Renforcer l'équipement et payer les fusions.",
            get:["Tous les monstres, bien plus sur les boss","Démonter les objets dont vous ne voulez plus","Tour, quêtes, coffres, absence","Marché du jour : Caisse de scraps et Ferraille au poids"], shop:"bonus"},
   treats: {ic:"🍖", n:"Friandises", have:()=>fmt(S.treats), use:"Monter le niveau de vos familiers (+10 % de dégâts par niveau, jusqu'au niveau 50).",
-           get:["Chaque boss : 3 friandises","Parfois sur les monstres normaux","Chaque étage de la Tour : 2","Quêtes de la semaine, coffres de série, Passe, absence"], shop:"bp", shopT:"⚔️ Voir le Passe"},
+           get:["Chaque boss : 3 friandises","Parfois sur les monstres normaux","Chaque étage de la Tour : 2","Quêtes de la semaine, coffres de série, Passe, absence","Donjon « Garde-manger » (Défis → Donjon → Ressources)","Boutique : en cristaux ou en euros"], shop:"tr"},
   dust:   {ic:"§etincelles§", n:"Poussière runique", have:()=>fmt(S.dust||0), use:"Améliorer les runes posées sur vos objets (coût fixe par niveau ; dès le niveau 4, l'amélioration peut échouer).",
            get:["Donjon de ressources « Puits runique » (onglet Défis → Donjon → Ressources)","5 à 38 par victoire selon la difficulté"], go:{t:"⛏️ Aller aux donjons", f:()=>{ defTab="rune"; dungSub="res"; showView("defis"); }}},
   grim:   {ic:"§parchemin§", n:"Grimoires", have:()=>fmt(S.grim||0), use:"Monter le niveau de vos compétences (1 → 10, +10 % d'effet par niveau), en plus des étoiles.",
@@ -4450,6 +4451,10 @@ const PRODUCTS = [
   {id:"orb_m",    ic:"§boule§", n:"Sac d'orbes",       d:"55 🔮 (+10 % offerts)", price:"4,99 €", orbs:55},
   {id:"orb_l",    ic:"§boule§", n:"Coffre d'orbes",    d:"125 🔮 (+25 % offerts)", price:"9,99 €", orbs:125, tag:"Populaire"},
   {id:"orb_xl",   ic:"§boule§", n:"Malle d'orbes",     d:"300 🔮 (+50 % offerts)", price:"19,99 €", orbs:300},
+  {id:"tr_s",     ic:"§friandise§", n:"Gamelle",            d:"200 🍖", price:"0,99 €", treats:200},
+  {id:"tr_m",     ic:"§friandise§", n:"Panier garni",       d:"1 100 🍖 (+10 % offerts)", price:"4,99 €", treats:1100},
+  {id:"tr_l",     ic:"§friandise§", n:"Festin",             d:"2 500 🍖 (+25 % offerts)", price:"9,99 €", treats:2500, tag:"Populaire"},
+  {id:"tr_xl",    ic:"§friandise§", n:"Banquet royal",      d:"6 000 🍖 (+50 % offerts)", price:"19,99 €", treats:6000},
   {id:"speed",    ic:"⚡", n:"Vitesse ×3",          d:"Vitesse ×3 (et ×2) débloquée pour toujours", price:"3,99 €", perm:true},
   {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier et la vitesse ×2 pour cette saison", price:"4,99 €", bp:true},
   {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), vitesse ×2, 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
@@ -4555,6 +4560,7 @@ function grantProduct(id){ evLog("buy", {id});
     case "gems_xxl": S.crystals+=10000; break;
     case "gems_max": S.crystals+=22000; break;
     case "orb_s": case "orb_m": case "orb_l": case "orb_xl": S.orbs += PRODUCTS.find(x=>x.id===id).orbs; dirty.fams=true; break;
+    case "tr_s": case "tr_m": case "tr_l": case "tr_xl": S.treats += PRODUCTS.find(x=>x.id===id).treats; dirty.fams=true; break;
     case "gold_s": case "gold_m": case "gold_l": S.gold += goldPack(PRODUCTS.find(x=>x.id===id).gold); break;
     case "speed": S.iap.speed=true; break;
     case "noads": S.iap.noads=true; break;
@@ -4746,6 +4752,10 @@ const PREMIUM = [
   {id:"orb10",  cat:"orb", ic:"§boule§", n:"10 orbes",  d:()=>"", cost:100,  max:999, give:()=>{ S.orbs+=10;  dirty.fams=true; }},
   {id:"orb50",  cat:"orb", ic:"§boule§", n:"50 orbes",  d:()=>"−10 %", cost:450,  max:999, give:()=>{ S.orbs+=50;  dirty.fams=true; }},
   {id:"orb100", cat:"orb", ic:"§boule§", n:"100 orbes", d:()=>"−20 %", cost:800, max:999, give:()=>{ S.orbs+=100; dirty.fams=true; }},
+  {id:"tr50",   cat:"tr", ic:"§friandise§", n:"50 friandises",   d:()=>"", cost:25,   max:999, give:()=>{ S.treats+=50;   dirty.fams=true; }},
+  {id:"tr250",  cat:"tr", ic:"§friandise§", n:"250 friandises",  d:()=>"−12 %", cost:110,  max:999, give:()=>{ S.treats+=250;  dirty.fams=true; }},
+  {id:"tr1000", cat:"tr", ic:"§friandise§", n:"1 000 friandises", d:()=>"−20 %", cost:400,  max:999, give:()=>{ S.treats+=1000; dirty.fams=true; }},
+  {id:"tr5000", cat:"tr", ic:"§friandise§", n:"5 000 friandises", d:()=>"−30 %", cost:1750, max:999, give:()=>{ S.treats+=5000; dirty.fams=true; }},
   {id:"orb500", cat:"orb", ic:"§boule§", n:"500 orbes", d:()=>"−35 %", cost:3250, max:999, give:()=>{ S.orbs+=500; dirty.fams=true; }},
   {id:"ing50", cat:"ing",   ic:"§lingot§", n:"Sac de 50 lingots",       d:()=>"", cost:250,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+50;   dirty.loot=true; }},
   {id:"ing100", cat:"ing",  ic:"§lingot§", n:"Caisse de 100 lingots",   d:()=>"−10 %", cost:450,  max:999, ok:()=>unlocked("loot"), give:()=>{ S.ingots=(S.ingots||0)+100;  dirty.loot=true; }},
@@ -4799,7 +4809,7 @@ function renderShop(){
   if(shopTab==="real") shopTab="gems"; if(shopTab==="mkt") shopTab="bonus";
   const bpN = bpClaimable();
   const T = (k,t) => `<button data-shoptab="${k}" class="${shopTab===k?"on":""}">${t}</button>`;
-  const seg = `<div class="seg seg5">${T("gems","💎<small>Cristaux</small>")}${T("gold","🪙<small>Or</small>")}${T("orb","🔮<small>Orbes</small>")}${unlocked("loot")?T("ing","§lingot§<small>Lingots</small>"):""}${T("bp",`⚔️<small>Passe</small>${bpN?`<span class="tdot">${bpN}</span>`:""}`)}${T("bonus","✨<small>Bonus</small>")}</div>`;
+  const seg = `<div class="seg seg5">${T("gems","💎<small>Cristaux</small>")}${T("gold","🪙<small>Or</small>")}${T("orb","🔮<small>Orbes</small>")}${unlocked("fams")?T("tr","🍖<small>Friandises</small>"):""}${unlocked("loot")?T("ing","§lingot§<small>Lingots</small>"):""}${T("bp",`⚔️<small>Passe</small>${bpN?`<span class="tdot">${bpN}</span>`:""}`)}${T("bonus","✨<small>Bonus</small>")}</div>`;
   if(shopTab==="bp"){ el.innerHTML = seg + bpHTML(); bpScrollInit(); guideQueue("pass"); return; }
   // tuile achetée en argent réel
   const rtile = p => { const owned=(p.perm||p.once) && S.iap[p.id], d = p.gold ? `+${fmt(goldPack(p.gold))} or` : p.d, rib = p.best ? "Meilleure offre" : p.tag||"";
@@ -4819,6 +4829,8 @@ function renderShop(){
     tiles = PRODUCTS.filter(p=>p.gold).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="gold").map(ctile).join("");
   } else if(shopTab==="orb"){
     tiles = PRODUCTS.filter(p=>p.orbs).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="orb").map(ctile).join("");
+  } else if(shopTab==="tr"){
+    tiles = PRODUCTS.filter(p=>p.treats).map(rtile).join("") + PREMIUM.filter(m=>m.cat==="tr").map(ctile).join("");
   } else if(shopTab==="ing"){
     tiles = `<div class="ptile free"><span class="pic">§lingot§</span><b>Vos lingots</b><small>${S.ingots||0} · ×10 pour 9, ×100 pour 85</small><button class="btn blue sm" data-ingshop="1">À l'Atelier</button></div>`
       + PREMIUM.filter(m=>m.cat==="ing").map(ctile).join("");
