@@ -1099,7 +1099,7 @@ header .pill,header .pill.g,header .pill.c,header .pill.s{width:100%}
 <script>
 /* Mise à jour automatique (version en ligne) : si une version plus récente est publiée, on la charge
    en contournant le cache du téléphone. */
-var BUILD_ID = "20261126-1049";
+var BUILD_ID = "20261126-1056";
 (function(){
   if(!/^https?:$/.test(location.protocol)) return;
   function check(){
@@ -2450,8 +2450,8 @@ function knightSVG(pal, eq){
 function artInner(slot, set, ri){ return artSVG(slot, set, ri).replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,"").replace(/<circle cx="32" cy="32" r="30"[^>]*\/>/,""); }
 const artPal = it => it ? (it.set && ART_PAL[it.set] ? ART_PAL[it.set] : RAR_PAL[Math.min(5,it.ri)]) : null;
 function knightGear(sk){
-  const E=S.equip, ar=artPal(E.armure), bo=artPal(E.bottes), skin = sk && sk.id!=="classique" ? sk.pal : null;
-  const P = skin || (ar ? {arm:ar[0], trim:ar[1], cape:ar[2]} : {arm:"#c5ccd6", trim:"#5b6b80", cape:"#c92a2a"});
+  const E=S.equip, ar=artPal(E.armure), bo=artPal(E.bottes);   // plus d'apparences : l'équipement porté fait le style
+  const P = (ar ? {arm:ar[0], trim:ar[1], cape:ar[2]} : {arm:"#c5ccd6", trim:"#5b6b80", cape:"#c92a2a"});
   const legs = bo ? bo[0] : P.trim, shoes = bo ? bo[1] : "#3b2a1a";
   const piece = (it, x, y, w, h) => it ? `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 64 64" overflow="visible">${artInner(it.slot, it.set, it.ri)}</svg>` : "";
   const sword = E.arme ? piece(E.arme, 24, -2, 46, 46)
@@ -2466,8 +2466,8 @@ function knightGear(sk){
 let knightSig = "";
 function renderKnight(force){
   const el=$("#knight"); if(!el) return;
-  const sk = SKINS.find(k=>k.id===(S.skins&&S.skins.hero)) || SKINS[0];
-  const sig = sk.id+"|"+SLOTKEYS.map(k=>{ const it=S.equip[k]; return it ? it.ri+(it.set||"") : "-"; }).join(",");
+  const sk = null;
+  const sig = "|"+SLOTKEYS.map(k=>{ const it=S.equip[k]; return it ? it.ri+(it.set||"") : "-"; }).join(",");
   if(sig!==knightSig || force){ knightSig=sig; el.innerHTML = knightGear(sk); }
 }
 let famSig = "", famIdx = 0, famAnimT = 0;
@@ -4505,8 +4505,8 @@ const PRODUCTS = [
   {id:"tr_xl",    ic:"§friandise§", n:"Banquet royal",      d:"6 000 🍖 (+50 % offerts)", price:"19,99 €", treats:6000},
   {id:"speed",    ic:"⚡", n:"Vitesse ×3",          d:"Vitesse ×3 (et ×2) débloquée pour toujours", price:"3,99 €", perm:true},
   {id:"pass_c",   ic:"⚔️", n:"Passe du Chevalier",  d:"Débloque la piste Chevalier et la vitesse ×2 pour cette saison", price:"4,99 €", bp:true},
-  {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), vitesse ×2, 10 paliers d'avance et l'Armure royale", price:"9,99 €", bp:true},
-  {id:"pass_up",  ic:"⬆️", n:"Passer au Passe Royal", d:"Ajoute la piste Royale, 10 paliers d'avance et l'Armure royale", price:"4,99 €", bp:true},
+  {id:"pass_r",   ic:"👑", n:"Passe Royal",         d:"Pistes Chevalier + Royale (avec l'ensemble Mythique du Souverain), vitesse ×2 et 10 paliers d'avance", price:"9,99 €", bp:true},
+  {id:"pass_up",  ic:"⬆️", n:"Passer au Passe Royal", d:"Ajoute la piste Royale et 10 paliers d'avance", price:"4,99 €", bp:true},
   {id:"noads",    ic:"🚫", n:"Sans publicités",     d:"Toutes les récompenses « pub » sont données sans pub", price:"4,99 €", perm:true},
 ];
 const AD_LIMITS = {gems:5, boost:4};          // pubs par jour
@@ -4613,7 +4613,7 @@ function grantProduct(id){ evLog("buy", {id});
     case "speed": S.iap.speed=true; break;
     case "noads": S.iap.noads=true; break;
     case "pass_c": bpCheck(); S.bp.tier="c"; break;
-    case "pass_r": case "pass_up": bpCheck(); S.bp.tier="r"; { const l0=bpLevel(); S.bp.xp=Math.max(S.bp.xp + (bpCum(Math.min(BP_TIERS,l0+10))-bpCum(l0)), bpCum(Math.min(BP_TIERS,l0+10))); } S.skins.owned.royal=1; break;
+    case "pass_r": case "pass_up": bpCheck(); S.bp.tier="r"; { const l0=bpLevel(); S.bp.xp=Math.max(S.bp.xp + (bpCum(Math.min(BP_TIERS,l0+10))-bpCum(l0)), bpCum(Math.min(BP_TIERS,l0+10))); } break;
   }
   dirty.fams=dirty.loot=dirty.res=dirty.enemy=true; save();
 }
@@ -4684,7 +4684,7 @@ function bpBuyLv(n){
 }
 function bpReward(track, i){
   if(track==="f") return i%10===0 ? {crystals:15, orbs:5} : i%5===0 ? {crystals:8} : i%3===0 ? {orbs:3} : i%2===0 ? {gold:0.6} : {treats:5};
-  if(track==="c") return i===30 ? {skin:"champion", crystals:100} : i===20 ? {fav:"skl"} : i===10 ? {fav:"pet"} : i%5===0 ? {crystals:60} : i%2===0 ? {orbs:6} : {treats:12, scraps:1};
+  if(track==="c") return i===30 ? {crystals:100, orbs:20} : i===20 ? {fav:"skl"} : i===10 ? {fav:"pet"} : i%5===0 ? {crystals:60} : i%2===0 ? {orbs:6} : {treats:12, scraps:1};
   const SOV=["arme","casque","armure","bottes","bouclier","talisman"];
   if(i%5===0) return Object.assign({item:SOV[i/5-1]}, i%10===0 ? {crystals:200} : {});
   return i%2===0 ? {crystals:25} : {orbs:5};
@@ -4830,8 +4830,7 @@ function premiumHTML(){
     return `<button class="skintile ${on?"on":""}" data-skin="${k.id}" ${!own && (k.bp || S.crystals<k.cost)?"disabled":""}><span class="skprev">${knightSVG(k.pal)}</span><b>${k.n}</b><small>${on?"Portée":own?"Porter":k.bp?"Passe":"💎 "+k.cost}</small></button>`; };
   const aura = S.skins.owned.aura ? `<button class="btn ${S.skins.aura?"gold":""} sm" data-aura="1">${S.skins.aura?"Activée":"Activer"}</button>` : `<button class="btn violet sm" data-aura="1" ${S.crystals<150?"disabled":""}>💎 150</button>`;
   return `<div class="card"><h2>💎 Avantages premium</h2><div class="small" style="margin-bottom:6px">Les cristaux sont votre monnaie la plus précieuse : gardez-les pour ce qui compte.</div>${PREMIUM.map(row).join("")}</div>
-    <div class="card"><h2>🎨 Apparences</h2><div class="skingrid">${SKINS.map(skin).join("")}</div>
-      <div class="row shoprow" style="margin-top:8px"><div class="ic">✨</div><div class="mid"><div class="t">Aura dorée des familiers</div><div class="d">Vos familiers brillent en combat</div></div>${aura}</div></div>`;
+    <div class="card"><div class="row shoprow"><div class="ic">✨</div><div class="mid"><div class="t">Aura dorée des familiers</div><div class="d">Vos familiers brillent en combat</div></div>${aura}</div></div>`;
 }
 const MARKET = [
   {id:"key",    ic:"🔑", n:"Clé de la tour",          d:()=>"Une tentative de plus à la Tour des épreuves", cur:"cr", cost:()=>30, max:3, ok:()=>unlocked("defis"), give:()=>{ S.chal.keys++; }},
@@ -4899,7 +4898,6 @@ function renderShop(){
   const aura = S.skins.owned.aura ? `<button class="btn ${S.skins.aura?"gold":""} sm" data-aura="1">${S.skins.aura?"Activée":"Activer"}</button>` : `<button class="btn violet sm" data-aura="1" ${S.crystals<150?"disabled":""}>💎 150</button>`;
   const items = `<div class="mgrp">✨ Avantages</div>` + PREMIUM.filter(m=>!m.cat).map(prow).join("")
     + `<div class="mgrp">🛒 Marché du jour</div>` + MARKET.filter(m=>!m.id.startsWith("orb")).map(mrow).join("")
-    + `<div class="mgrp">🎨 Apparences</div><div class="skingrid">${SKINS.map(skin).join("")}</div>`
     + `<div class="row shoprow"><div class="ic">✨</div><div class="mid"><div class="t">Aura dorée des familiers</div><div class="d">Vos familiers brillent en combat</div></div>${aura}</div>`;
   el.innerHTML = seg + `<div class="card grow"><div class="pager" data-pg="mkt"><div class="pgsrc list">${items}</div></div></div>`;
 }
@@ -5156,7 +5154,7 @@ const GUIDES = {
   shop: {ic:"🛒", t:"La Boutique", s:"La Boutique", l:[
     ["💎","La Boutique est rangée par onglets : Cristaux, Or, Orbes, Lingots, Passe et Bonus. Les cristaux sont votre monnaie la plus précieuse."],
     ["🪙","Les onglets Or, Orbes et Lingots regroupent les packs de chaque monnaie, en cristaux ou en euros."],
-    ["✨","L'onglet Bonus contient les avantages (boosts ×2, faveurs, places, classe), le marché du jour (clés, essais, scraps) et les apparences."],
+    ["✨","L'onglet Bonus contient les avantages (boosts ×2, faveurs, places, classe), le marché du jour (clés, essais, scraps) et l'aura dorée des familiers."],
     ["⚔️","Le Passe de combat : une saison de 30 jours avec 30 paliers de récompenses. Tout le monde a la piste gratuite."]]},
   rune: {ic:"✨", t:"Le Donjon des runes", s:"Le Donjon des runes", l:[
     ["✨","Chaque jour, le Donjon garde une rune différente : Feu le lundi, Givre le mardi, Foudre le mercredi, Vie le jeudi, Ombre le vendredi, Sang le samedi, Or le dimanche."],
@@ -5169,7 +5167,7 @@ const GUIDES = {
     ["⭐","Gagnez de l'expérience de passe en jouant : connexion du jour, quêtes du jour et de la semaine, boss et étages de la Tour."],
     ["🎁","Chaque palier débloque une récompense gratuite. Touchez-la pour la récupérer."],
     ["⚔️","Le Passe du Chevalier (4,99 €) ajoute une 2e récompense à chaque palier : orbes, cristaux, faveurs légendaires et l'Armure du champion au palier 30."],
-    ["👑","Le Passe Royal (9,99 €) ajoute une 3e piste : cristaux et les 6 pièces Mythiques de l'ensemble exclusif du Souverain (une tous les 5 paliers), plus 10 paliers d'avance et l'Armure royale tout de suite."],
+    ["👑","Le Passe Royal (9,99 €) ajoute une 3e piste : cristaux et les 6 pièces Mythiques de l'ensemble exclusif du Souverain (une tous les 5 paliers), plus 10 paliers d'avance tout de suite."],
     ["📅","Une nouvelle saison commence tous les 30 jours : récupérez vos récompenses avant la fin, le passe repart de zéro."]]},
   defis: {ic:"⚔️", t:"Les Défis sont débloqués", s:"Les Défis", go:"defis", go_t:"Voir les Défis", l:[
     ["🗼","La Tour des épreuves : chaque étage cache un gardien à battre en 30 secondes. Chaque étage conquis rapporte des cristaux, des scraps, des orbes et des lingots, avec un bonus tous les 5 étages et un grand palier tous les 25."],
@@ -6447,7 +6445,7 @@ function loadMax(){
   S.chal=Object.assign(S.chal||{}, {floor:200, keys:3, dmax:DUNG_DIFF.length-1, wtries:3, dtries:dungTries(), wbest:0, wclaim:{}});
   S.bp.season=bpSeason(); S.bp.tier="r"; S.bp.xp=bpCum(BP_TIERS);
   S.iap.speed=true;
-  S.skins.owned.champion=1; S.skins.owned.royal=1;
+
   // fief : tout au max
   createCity(); const c=S.city;
   for(const b of BLD) c.lv[b.id]=40; c.roy={}; for(const b of ROY) c.roy[b.id]=ROY_MAX;
@@ -6833,6 +6831,10 @@ function load(o){
     S.treats = o.treats ?? 0; S.extraSlot = o.extraSlot || 0;
     S.boosts = Object.assign({gold:0, scraps:0}, o.boosts||{});
     S.skins = Object.assign({owned:{classique:1}, hero:"classique", aura:false}, o.skins||{});
+    if(!S.skins.gone){ S.skins.gone=true; let cr=0, ob=0;   // apparences retirées : remboursement
+      for(const k of SKINS) if(S.skins.owned[k.id] && k.id!=="classique"){ if(k.cost) cr+=k.cost; else if(k.id==="champion") ob+=20; }
+      if(cr||ob){ S.crystals+=cr; S.orbs+=ob; setTimeout(()=>toast(`🎨 Apparences retirées : ${cr?`+${cr} 💎 remboursés`:""}${cr&&ob?" · ":""}${ob?`+${ob} 🔮`:""}`), 2500); }
+      S.skins.hero="classique"; }
     S.streak = Object.assign({n:0, last:""}, o.streak||{});
     S.wq = Object.assign({wk:"", list:[], bonus:false}, o.wq||{});
     S.talents = o.talents || {};
